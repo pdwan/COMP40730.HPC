@@ -1,0 +1,22 @@
+# Program running : A1-Bijk-1Dmatrix.c				
+# File name is:   sample-A1-Bijk.dat				
+#				
+# Computation of Blocked IJK using square bxb block for matrices  				
+# |A| & |B| storing results in |C|				
+#			
+# using made-up values only for demo purposes				
+
+#Matrix Size	Block Size	Time/manual	Time/manual	Time/dgenn
+#		Simple	Complex	
+50	2	1	2	4
+50	5	2	3	5
+50	10	2	3	5
+100	5	3	4	6
+100	10	4	5	7
+100	20	5	6	8
+500	10	5	6	8
+500	20	6	7	9
+500	50	10	11	13
+1000	10	11	12	14
+1000	50	12	13	15
+1000	100	13	14	16

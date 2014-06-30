@@ -1,0 +1,218 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<!-- Copyright 1997 The Open Group, All Rights Reserved -->
+<title>&lt;pthread.h&gt;</title>
+</head><body bgcolor=white>
+<center>
+<font size=2>
+The Single UNIX &reg; Specification, Version 2<br>
+Copyright &copy; 1997 The Open Group
+
+</font></center><hr size=2 noshade>
+<h4><a name = "tag_000_007_1021">&nbsp;</a>NAME</h4><blockquote>
+pthread.h - threads
+</blockquote><h4><a name = "tag_000_007_1022">&nbsp;</a>SYNOPSIS</h4><blockquote>
+<pre><code>
+
+#include &lt;pthread.h&gt;
+</code>
+</pre>
+</blockquote><h4><a name = "tag_000_007_1023">&nbsp;</a>DESCRIPTION</h4><blockquote>
+The
+<i>&lt;pthread.h&gt;</i>
+header defines the following symbols:
+<pre>
+<code>
+PTHREAD_CANCEL_ASYNCHRONOUS
+PTHREAD_CANCEL_ENABLE
+PTHREAD_CANCEL_DEFERRED
+PTHREAD_CANCEL_DISABLE
+PTHREAD_CANCELED
+PTHREAD_COND_INITIALIZER
+PTHREAD_CREATE_DETACHED
+PTHREAD_CREATE_JOINABLE
+PTHREAD_EXPLICIT_SCHED
+PTHREAD_INHERIT_SCHED
+PTHREAD_MUTEX_DEFAULT
+PTHREAD_MUTEX_ERRORCHECK
+PTHREAD_MUTEX_NORMAL
+PTHREAD_MUTEX_INITIALIZER
+PTHREAD_MUTEX_RECURSIVE
+PTHREAD_ONCE_INIT
+PTHREAD_PRIO_INHERIT
+PTHREAD_PRIO_NONE
+PTHREAD_PRIO_PROTECT
+PTHREAD_PROCESS_SHARED
+PTHREAD_PROCESS_PRIVATE
+PTHREAD_RWLOCK_INITIALIZER
+PTHREAD_SCOPE_PROCESS
+PTHREAD_SCOPE_SYSTEM
+</code>
+</pre>
+<p>
+The
+<b>pthread_attr_t</b>,
+<b>pthread_cond_t</b>,
+<b>pthread_condattr_t</b>,
+<b>pthread_key_t</b>,
+<b>pthread_mutex_t</b>,
+<b>pthread_mutexattr_t</b>,
+<b>pthread_once_t</b>,
+<b>pthread_rwlock_t</b>,
+<b>pthread_rwlockattr_t</b>
+and
+<b>pthread_t</b>
+types are defined as described in
+<i><a href="systypes.h.html">&lt;sys/types.h&gt;</a></i>.
+<p>
+The following are declared as functions and may also be declared as
+macros.
+Function prototypes must be provided for use with an ISO C
+compiler.
+<pre>
+<code>
+int   <a href="pthread_attr_destroy.html">pthread_attr_destroy</a>(pthread_attr_t *);
+int   <a href="pthread_attr_getdetachstate.html">pthread_attr_getdetachstate</a>(const pthread_attr_t *, int *);
+int   <a href="pthread_attr_getguardsize.html">pthread_attr_getguardsize</a>(const pthread_attr_t *, size_t *);
+int   <a href="pthread_attr_getinheritsched.html">pthread_attr_getinheritsched</a>(const pthread_attr_t *, int *);
+int   <a href="pthread_attr_getschedparam.html">pthread_attr_getschedparam</a>(const pthread_attr_t *,
+          struct sched_param *);
+int   <a href="pthread_attr_getschedpolicy.html">pthread_attr_getschedpolicy</a>(const pthread_attr_t *, int *);
+int   <a href="pthread_attr_getscope.html">pthread_attr_getscope</a>(const pthread_attr_t *, int *);
+int   <a href="pthread_attr_getstackaddr.html">pthread_attr_getstackaddr</a>(const pthread_attr_t *, void **);
+int   <a href="pthread_attr_getstacksize.html">pthread_attr_getstacksize</a>(const pthread_attr_t *, size_t *);
+int   <a href="pthread_attr_init.html">pthread_attr_init</a>(pthread_attr_t *);
+int   <a href="pthread_attr_setdetachstate.html">pthread_attr_setdetachstate</a>(pthread_attr_t *, int);
+int   <a href="pthread_attr_setguardsize.html">pthread_attr_setguardsize</a>(pthread_attr_t *, size_t);
+int   <a href="pthread_attr_setinheritsched.html">pthread_attr_setinheritsched</a>(pthread_attr_t *, int);
+int   <a href="pthread_attr_setschedparam.html">pthread_attr_setschedparam</a>(pthread_attr_t *,
+          const struct sched_param *);
+int   <a href="pthread_attr_setschedpolicy.html">pthread_attr_setschedpolicy</a>(pthread_attr_t *, int);
+int   <a href="pthread_attr_setscope.html">pthread_attr_setscope</a>(pthread_attr_t *, int);
+int   <a href="pthread_attr_setstackaddr.html">pthread_attr_setstackaddr</a>(pthread_attr_t *, void *);
+int   <a href="pthread_attr_setstacksize.html">pthread_attr_setstacksize</a>(pthread_attr_t *, size_t);
+int   <a href="pthread_cancel.html">pthread_cancel</a>(pthread_t);
+void  <a href="pthread_cleanup_push.html">pthread_cleanup_push</a>(void*), void *);
+void  <a href="pthread_cleanup_pop.html">pthread_cleanup_pop</a>(int);
+int   <a href="pthread_cond_broadcast.html">pthread_cond_broadcast</a>(pthread_cond_t *);
+int   <a href="pthread_cond_destroy.html">pthread_cond_destroy</a>(pthread_cond_t *);
+int   <a href="pthread_cond_init.html">pthread_cond_init</a>(pthread_cond_t *, const pthread_condattr_t *);
+int   <a href="pthread_cond_signal.html">pthread_cond_signal</a>(pthread_cond_t *);
+int   <a href="pthread_cond_timedwait.html">pthread_cond_timedwait</a>(pthread_cond_t *, 
+          pthread_mutex_t *, const struct timespec *);
+int   <a href="pthread_cond_wait.html">pthread_cond_wait</a>(pthread_cond_t *, pthread_mutex_t *);
+int   <a href="pthread_condattr_destroy.html">pthread_condattr_destroy</a>(pthread_condattr_t *);
+int   <a href="pthread_condattr_getpshared.html">pthread_condattr_getpshared</a>(const pthread_condattr_t *, int *);
+int   <a href="pthread_condattr_init.html">pthread_condattr_init</a>(pthread_condattr_t *);
+int   <a href="pthread_condattr_setpshared.html">pthread_condattr_setpshared</a>(pthread_condattr_t *, int);
+int   <a href="pthread_create.html">pthread_create</a>(pthread_t *, const pthread_attr_t *,
+          void *(*)(void *), void *);
+int   <a href="pthread_detach.html">pthread_detach</a>(pthread_t);
+int   <a href="pthread_equal.html">pthread_equal</a>(pthread_t, pthread_t);
+void  <a href="pthread_exit.html">pthread_exit</a>(void *);
+int   <a href="pthread_getconcurrency.html">pthread_getconcurrency</a>(void);
+int   <a href="pthread_getschedparam.html">pthread_getschedparam</a>(pthread_t, int *, struct sched_param *);
+void *<a href="pthread_getspecific.html">pthread_getspecific</a>(pthread_key_t);
+int   <a href="pthread_join.html">pthread_join</a>(pthread_t, void **);
+int   <a href="pthread_key_create.html">pthread_key_create</a>(pthread_key_t *, void (*)(void *));
+int   <a href="pthread_key_delete.html">pthread_key_delete</a>(pthread_key_t);
+int   <a href="pthread_mutex_destroy.html">pthread_mutex_destroy</a>(pthread_mutex_t *);
+int   <a href="pthread_mutex_getprioceiling.html">pthread_mutex_getprioceiling</a>(const pthread_mutex_t *, int *);
+int   <a href="pthread_mutex_init.html">pthread_mutex_init</a>(pthread_mutex_t *, const pthread_mutexattr_t *);
+int   <a href="pthread_mutex_lock.html">pthread_mutex_lock</a>(pthread_mutex_t *);
+int   <a href="pthread_mutex_setprioceiling.html">pthread_mutex_setprioceiling</a>(pthread_mutex_t *, int, int *);
+int   <a href="pthread_mutex_trylock.html">pthread_mutex_trylock</a>(pthread_mutex_t *);
+int   <a href="pthread_mutex_unlock.html">pthread_mutex_unlock</a>(pthread_mutex_t *);
+int   <a href="pthread_mutexattr_destroy.html">pthread_mutexattr_destroy</a>(pthread_mutexattr_t *);
+int   <a href="pthread_mutexattr_getprioceiling.html">pthread_mutexattr_getprioceiling</a>(const pthread_mutexattr_t *,
+          int *);
+int   <a href="pthread_mutexattr_getprotocol.html">pthread_mutexattr_getprotocol</a>(const pthread_mutexattr_t *, int *);
+int   <a href="pthread_mutexattr_getpshared.html">pthread_mutexattr_getpshared</a>(const pthread_mutexattr_t *, int *);
+int   <a href="pthread_mutexattr_gettype.html">pthread_mutexattr_gettype</a>(const pthread_mutexattr_t *, int *);
+int   <a href="pthread_mutexattr_init.html">pthread_mutexattr_init</a>(pthread_mutexattr_t *);
+int   <a href="pthread_mutexattr_setprioceiling.html">pthread_mutexattr_setprioceiling</a>(pthread_mutexattr_t *, int);
+int   <a href="pthread_mutexattr_setprotocol.html">pthread_mutexattr_setprotocol</a>(pthread_mutexattr_t *, int);
+int   <a href="pthread_mutexattr_setpshared.html">pthread_mutexattr_setpshared</a>(pthread_mutexattr_t *, int);
+int   <a href="pthread_mutexattr_settype.html">pthread_mutexattr_settype</a>(pthread_mutexattr_t *, int);
+int   <a href="pthread_once.html">pthread_once</a>(pthread_once_t *, void (*)(void));
+int   <a href="pthread_rwlock_destroy.html">pthread_rwlock_destroy</a>(pthread_rwlock_t *);
+int   <a href="pthread_rwlock_init.html">pthread_rwlock_init</a>(pthread_rwlock_t *,
+          const pthread_rwlockattr_t *);
+int   <a href="pthread_rwlock_rdlock.html">pthread_rwlock_rdlock</a>(pthread_rwlock_t *);
+int   <a href="pthread_rwlock_tryrdlock.html">pthread_rwlock_tryrdlock</a>(pthread_rwlock_t *);
+int   <a href="pthread_rwlock_trywrlock.html">pthread_rwlock_trywrlock</a>(pthread_rwlock_t *);
+int   <a href="pthread_rwlock_unlock.html">pthread_rwlock_unlock</a>(pthread_rwlock_t *);
+int   <a href="pthread_rwlock_wrlock.html">pthread_rwlock_wrlock</a>(pthread_rwlock_t *);
+int   <a href="pthread_rwlockattr_destroy.html">pthread_rwlockattr_destroy</a>(pthread_rwlockattr_t *);
+int   <a href="pthread_rwlockattr_getpshared.html">pthread_rwlockattr_getpshared</a>(const pthread_rwlockattr_t *,
+          int *);
+int   <a href="pthread_rwlockattr_init.html">pthread_rwlockattr_init</a>(pthread_rwlockattr_t *);
+int   <a href="pthread_rwlockattr_setpshared.html">pthread_rwlockattr_setpshared</a>(pthread_rwlockattr_t *, int);
+pthread_t
+      <a href="pthread_self.html">pthread_self</a>(void);
+int   <a href="pthread_setcancelstate.html">pthread_setcancelstate</a>(int, int *);
+int   <a href="pthread_setcanceltype.html">pthread_setcanceltype</a>(int, int *);
+int   <a href="pthread_setconcurrency.html">pthread_setconcurrency</a>(int);
+int   <a href="pthread_setschedparam.html">pthread_setschedparam</a>(pthread_t, int ,
+          const struct sched_param *);
+int   <a href="pthread_setspecific.html">pthread_setspecific</a>(pthread_key_t, const void *);
+void  <a href="pthread_testcancel.html">pthread_testcancel</a>(void);
+</code>
+</pre>
+<p>
+Inclusion of the
+<i>&lt;pthread.h&gt;</i>
+header will make visible symbols defined in the headers
+<i><a href="sched.h.html">&lt;sched.h&gt;</a></i>
+and
+<i><a href="time.h.html">&lt;time.h&gt;</a></i>.
+</blockquote><h4><a name = "tag_000_007_1024">&nbsp;</a>APPLICATION USAGE</h4><blockquote>
+An interpretation request has been filed with IEEE PASC concerning
+requirements for visibility of symbols in this header.
+</blockquote><h4><a name = "tag_000_007_1025">&nbsp;</a>FUTURE DIRECTIONS</h4><blockquote>
+None.
+</blockquote><h4><a name = "tag_000_007_1026">&nbsp;</a>SEE ALSO</h4><blockquote>
+<i><a href="pthread_attr_init.html">pthread_attr_init()</a></i>,
+<i><a href="pthread_attr_getguardsize.html">pthread_attr_getguardsize()</a></i>,
+<i><a href="pthread_attr_setscope.html">pthread_attr_setscope()</a></i>,
+<i><a href="pthread_cancel.html">pthread_cancel()</a></i>,
+<i><a href="pthread_cleanup_push.html">pthread_cleanup_push()</a></i>,
+<i><a href="pthread_cond_init.html">pthread_cond_init()</a></i>,
+<i><a href="pthread_cond_signal.html">pthread_cond_signal()</a></i>,
+<i><a href="pthread_cond_wait.html">pthread_cond_wait()</a></i>,
+<i><a href="pthread_condattr_init.html">pthread_condattr_init()</a></i>,
+<i><a href="pthread_create.html">pthread_create()</a></i>,
+<i><a href="pthread_detach.html">pthread_detach()</a></i>,
+<i><a href="pthread_equal.html">pthread_equal()</a></i>,
+<i><a href="pthread_exit.html">pthread_exit()</a></i>,
+<i><a href="pthread_getconcurrency.html">pthread_getconcurrency()</a></i>,
+<i><a href="pthread_getschedparam.html">pthread_getschedparam()</a></i>,
+<i><a href="pthread_join.html">pthread_join()</a></i>,
+<i><a href="pthread_key_create.html">pthread_key_create()</a></i>,
+<i><a href="pthread_key_delete.html">pthread_key_delete()</a></i>,
+<i><a href="pthread_mutex_init.html">pthread_mutex_init()</a></i>,
+<i><a href="pthread_mutex_lock.html">pthread_mutex_lock()</a></i>,
+<i><a href="pthread_mutex_setprioceiling.html">pthread_mutex_setprioceiling()</a></i>,
+<i><a href="pthread_mutexattr_init.html">pthread_mutexattr_init()</a></i>,
+<i><a href="pthread_mutexattr_gettype.html">pthread_mutexattr_gettype()</a></i>,
+<i><a href="pthread_mutexattr_setprotocol.html">pthread_mutexattr_setprotocol()</a></i>,
+<i><a href="pthread_once.html">pthread_once()</a></i>,
+<i><a href="pthread_self.html">pthread_self()</a></i>,
+<i><a href="pthread_setcancelstate.html">pthread_setcancelstate()</a></i>,
+<i><a href="pthread_setspecific.html">pthread_setspecific()</a></i>,
+<i><a href="pthread_rwlock_init.html">pthread_rwlock_init()</a></i>,
+<i><a href="pthread_rwlock_rdlock.html">pthread_rwlock_rdlock()</a></i>,
+<i><a href="pthread_rwlock_unlock.html">pthread_rwlock_unlock()</a></i>,
+<i><a href="pthread_rwlock_wrlock.html">pthread_rwlock_wrlock()</a></i>,
+<i><a href="pthread_rwlockattr_init.html">pthread_rwlockattr_init()</a></i>,
+<i><a href="sched.h.html">&lt;sched.h&gt;</a></i>,
+<i><a href="time.h.html">&lt;time.h&gt;</a></i>.
+</blockquote><hr size=2 noshade>
+<center><font size=2>
+UNIX &reg; is a registered Trademark of The Open Group.<br>
+Copyright &copy; 1997 The Open Group
+<br> [ <a href="../index.html">Main Index</a> | <a href="../xshix.html">XSH</a> | <a href="../xcuix.html">XCU</a> | <a href="../xbdix.html">XBD</a> | <a href="../cursesix.html">XCURSES</a> | <a href="../xnsix.html">XNS</a> ]
+
+</font></center><hr size=2 noshade>
+</body></html>

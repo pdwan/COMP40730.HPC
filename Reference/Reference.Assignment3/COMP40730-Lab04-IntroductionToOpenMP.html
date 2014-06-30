@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html id="yui_3_9_1_2_1398902228020_313" class="yui3-js-enabled" dir="ltr" xml:lang="en" lang="en"><div class="" id="yui3-css-stamp" style="position: absolute !important; visibility: hidden !important"></div><head>
+    <title>COMP40730: Lab 4: Introduction to OpenMP</title>
+    <link rel="shortcut icon" href="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/theme/1393237964/favicon">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="keywords" content="moodle, COMP40730: Lab 4: Introduction to OpenMP">
+<script type="text/javascript">
+//<![CDATA[
+var M = {}; M.yui = {};
+M.pageloadstarttime = new Date();
+M.cfg = {"wwwroot":"https:\/\/csimoodle.ucd.ie\/moodle","sesskey":"tfTxRKzZ0x","loadingicon":"https:\/\/csimoodle.ucd.ie\/moodle\/theme\/image.php\/nimble\/core\/1393237964\/i\/loading_small","themerev":"1393237964","slasharguments":1,"theme":"nimble","jsrev":-1,"svgicons":true};var yui1ConfigFn = function(me) {if(/-skin|reset|fonts|grids|base/.test(me.name)){me.type='css';me.path=me.path.replace(/\.js/,'.css');me.path=me.path.replace(/\/yui2-skin/,'/assets/skins/sam/yui2-skin');}};
+var yui2ConfigFn = function(me) {var p = me.path, b = me.name.replace(/^moodle-/,'').split('-', 3), n = b.pop();if (/(skin|core)/.test(n)) {n = b.pop();me.type = 'css';};me.path = b.join('-')+'/'+n+'/'+n;if(me.type !== 'css'){me.path=me.path+'-min';};me.path=me.path+'.'+me.type;};
+YUI_config = {"debug":false,"base":"https:\/\/csimoodle.ucd.ie\/moodle\/lib\/yuilib\/3.9.1\/build\/","comboBase":"https:\/\/csimoodle.ucd.ie\/moodle\/theme\/yui_combo.php?","combine":true,"filter":null,"insertBefore":"firstthemesheet","groups":{"yui2":{"base":"https:\/\/csimoodle.ucd.ie\/moodle\/lib\/yuilib\/2in3\/2.9.0\/build\/","comboBase":"https:\/\/csimoodle.ucd.ie\/moodle\/theme\/yui_combo.php?","combine":true,"ext":false,"root":"2in3\/2.9.0\/build\/","patterns":{"yui2-":{"group":"yui2","configFn":yui1ConfigFn}}},"moodle":{"name":"moodle","base":"https:\/\/csimoodle.ucd.ie\/moodle\/theme\/yui_combo.php?moodle\/-1\/","combine":true,"comboBase":"https:\/\/csimoodle.ucd.ie\/moodle\/theme\/yui_combo.php?","ext":false,"root":"moodle\/-1\/","patterns":{"moodle-":{"group":"moodle","configFn":yui2ConfigFn}},"modules":{"moodle-core-formchangechecker":{"requires":["base","event-focus"]},"moodle-core-popuphelp":{"requires":["moodle-core-tooltip"]},"moodle-core-blocks":{"requires":["base","node","io","dom","dd","dd-scroll","moodle-core-dragdrop","moodle-core-notification"]},"moodle-core-chooserdialogue":{"requires":["base","panel","moodle-core-notification"]},"moodle-core-formautosubmit":{"requires":["base","event-key"]},"moodle-core-notification":{"requires":["base","node","panel","event-key","dd-plugin"]},"moodle-core-tooltip":{"requires":["base","node","io-base","moodle-core-notification","json-parse","widget-position","widget-position-align","event-outside","cache"]},"moodle-calendar-eventmanager":{"requires":["base","node","event-mouseenter","overlay","moodle-calendar-eventmanager-skin"]},"moodle-course-categoryexpander":{"requires":["node","event-key"]},"moodle-mod_quiz-autosave":{"requires":["base","node","event","event-valuechange","node-event-delegate","io-form"]},"moodle-block_navigation-navigation":{"requires":["base","core_dock","io-base","node","dom","event-custom","event-delegate","json-parse"]},"moodle-filter_glossary-autolinker":{"requires":["base","node","io-base","json-parse","event-delegate","overlay","moodle-core-notification"]},"moodle-editor_tinymce-collapse":{"requires":["base","node","dom"]},"moodle-report_overviewstats-charts":{"requires":["base","node","charts","charts-legend"]},"moodle-theme_bootstrapbase-bootstrap":{"requires":["node","selector-css3"]}}}},"modules":{"core_filepicker":{"name":"core_filepicker","fullpath":"https:\/\/csimoodle.ucd.ie\/moodle\/repository\/filepicker.js","requires":["base","node","node-event-simulate","json","async-queue","io-base","io-upload-iframe","io-form","yui2-treeview","panel","cookie","datatable","datatable-sort","resize-plugin","dd-plugin","escape","moodle-core_filepicker"]},"core_dock":{"name":"core_dock","fullpath":"https:\/\/csimoodle.ucd.ie\/moodle\/blocks\/dock.js","requires":["base","node","event-custom","event-mouseenter","event-resize","escape"]}}};
+M.yui.loader = {modules: {}};
+
+//]]>
+</script>
+<link rel="stylesheet" type="text/css" href="COMP40730-Lab04-IntroductionToOpenMP_files/yui_combo.css"><script type="text/javascript" src="COMP40730-Lab04-IntroductionToOpenMP_files/yui_combo_003.js"></script><script async="" src="COMP40730-Lab04-IntroductionToOpenMP_files/dock.js" id="yui_3_9_1_2_1398902228020_5" charset="utf-8"></script><script async="" src="COMP40730-Lab04-IntroductionToOpenMP_files/yui_combo_005.js" id="yui_3_9_1_2_1398902228020_6" charset="utf-8"></script><link href="COMP40730-Lab04-IntroductionToOpenMP_files/yui_combo_002.css" id="yui_3_9_1_2_1398902228020_202" rel="stylesheet" charset="utf-8"><script async="" src="COMP40730-Lab04-IntroductionToOpenMP_files/yui_combo_002.js" id="yui_3_9_1_2_1398902228020_203" charset="utf-8"></script><link href="COMP40730-Lab04-IntroductionToOpenMP_files/yui_combo_003.css" id="yui_3_9_1_2_1398902228020_261" rel="stylesheet" charset="utf-8"><script async="" src="COMP40730-Lab04-IntroductionToOpenMP_files/yui_combo_004.js" id="yui_3_9_1_2_1398902228020_262" charset="utf-8"></script><script async="" src="COMP40730-Lab04-IntroductionToOpenMP_files/yui_combo.js" id="yui_3_9_1_2_1398902228020_263" charset="utf-8"></script><script id="firstthemesheet" type="text/css">/** Required in order to fix style inclusion problems in IE with YUI **/</script><link rel="stylesheet" type="text/css" href="COMP40730-Lab04-IntroductionToOpenMP_files/all.css">
+<script type="text/javascript" src="COMP40730-Lab04-IntroductionToOpenMP_files/javascript-static.js"></script>
+</head>
+
+<body id="page-mod-page-view" class="format-topics  path-mod path-mod-page gecko dir-ltr lang-en yui-skin-sam yui3-skin-sam csimoodle-ucd-ie--moodle pagelayout-incourse course-375 context-42607 cmid-24824 category-7 side-post-only has_custom_menu jsenabled">
+<div class="skiplinks"><a class="skip" href="#maincontent">Skip to main content</a></div>
+<script type="text/javascript">
+//<![CDATA[
+document.body.className += ' jsenabled';
+//]]>
+</script>
+
+
+<div id="page">
+
+	
+	<div id="page-wrap1">
+		<div id="page-wrap2">
+
+   			<div id="wrapper" class="clearfix">
+
+<!-- START OF HEADER -->
+
+		    	<div id="page-header" class="inside">
+					<div id="page-header-wrapper" class="wrapper clearfix">
+
+			        					    	    <div id="headermenus" class="shrinkwrapper clearfix">
+		    				    									<div id="custommenu"><div role="menu" id="custom_menu_1" class="yui3-menu yui3-menu-horizontal custom-menu"><div id="yui_3_9_1_2_1398902228020_312" role="presentation" class="yui3-menu-content"><ul id="yui_3_9_1_2_1398902228020_311" class="first-of-type" role="presentation"><li id="yui_3_9_1_2_1398902228020_310" role="presentation" class="yui3-menuitem"><a id="yui_3_9_1_2_1398902228020_240" tabindex="0" role="menuitem" class="yui3-menuitem-content" title="UCD" href="http://www.ucd.ie/">UCD</a></li><li role="presentation" class="yui3-menuitem"><a id="yui_3_9_1_2_1398902228020_242" tabindex="-1" role="menuitem" class="yui3-menuitem-content" title="CSI" href="https://www.csi.ucd.ie/">CSI</a></li><li id="yui_3_9_1_2_1398902228020_325" role="presentation" class="yui3-menuitem"><a id="yui_3_9_1_2_1398902228020_244" tabindex="-1" role="menuitem" class="yui3-menuitem-content" title="My Courses" href="https://csimoodle.ucd.ie/moodle/my">My Courses</a></li></ul></div></div></div>
+								
+								<div class="headermenu">
+				        			<div class="logininfo">You are logged in as <a href="https://csimoodle.ucd.ie/moodle/user/profile.php?id=9485" title="View profile">Dwan Paula</a> (<a href="https://csimoodle.ucd.ie/moodle/login/logout.php?sesskey=tfTxRKzZ0x">Logout</a>)</div>					        	</div>
+				            </div>
+		    		    
+			    	</div>
+				</div>
+
+<!-- END OF HEADER -->
+
+	
+
+<!-- START OF CONTENT -->
+
+		<div id="page-content-wrapper" class="shrinkwrapper clearfix">
+		    <div id="page-content">
+    		    <div id="region-main-box">
+        		    <div id="region-post-box">
+
+	            	    <div id="region-main-wrap">
+    	            	    <div id="region-main">
+        	            	    <div class="region-content">
+
+									<div id="region-header" class="inside clearfix">
+							    	    <h1 class="headermain">COMP40730 High Performance Computing 2014</h1>
+							    	</div>
+
+                                    
+						    	    						        	    <div class="navbar">
+						            		<div class="wrapper clearfix">
+							            	    <div class="breadcrumb">
+							            	    	<span class="accesshide">Page path</span><ul role="navigation"><li><a href="https://csimoodle.ucd.ie/moodle/">Home</a></li><li> <span class="accesshide "><span class="arrow_text">/</span>&nbsp;</span><span class="arrow sep">⟩</span> <a href="https://csimoodle.ucd.ie/moodle/my/">My courses</a></li><li> <span class="accesshide "><span class="arrow_text">/</span>&nbsp;</span><span class="arrow sep">⟩</span> <a href="https://csimoodle.ucd.ie/moodle/course/index.php?categoryid=7">LEVEL 4</a></li><li> <span class="accesshide "><span class="arrow_text">/</span>&nbsp;</span><span class="arrow sep">⟩</span> <a title="COMP40730 High Performance Computing 2014" href="https://csimoodle.ucd.ie/moodle/course/view.php?id=375">COMP40730</a></li><li> <span class="accesshide "><span class="arrow_text">/</span>&nbsp;</span><span class="arrow sep">⟩</span> <span tabindex="0">Introduction to OpenMP</span></li><li> <span class="accesshide "><span class="arrow_text">/</span>&nbsp;</span><span class="arrow sep">⟩</span> <a title="Page" href="https://csimoodle.ucd.ie/moodle/mod/page/view.php?id=24824">Lab 4: Introduction to OpenMP</a></li></ul>							            	    </div>
+							    	            <div class="navbutton">
+							    	            								    	            </div>
+								    	    </div>
+							    	    </div>
+						        	                                                	            	    <div role="main"><span id="maincontent"></span><h2 id="pageheading" class="main">Lab 4: Introduction to OpenMP</h2><div class="box generalbox center clearfix"><div class="no-overflow"><h1 align="CENTER">Tutorial</h1>
+<hr>
+<p align="CENTER"><b>OpenMP</b></p>
+<p class="p2">OpenMP (Open Multi-Processing) is an API that supports 
+multi-platform shared-memory parallel programming in C/C++ and Fortran 
+on all architectures, including Unix platforms and Windows NT platforms.
+ Jointly defined by a group of major computer hardware and software 
+vendors, OpenMP is a portable, scalable model that gives shared-memory 
+parallel programmers a simple and flexible interface for developing 
+parallel applications for platforms ranging from the desktop to the 
+supercomputer.</p>
+<p class="p4"></p>
+<p class="p4"></p>
+<p class="p1"><b>OpenMP Programming Model:</b></p>
+<p class="p2">* OpenMP is based upon the existence of multiple <b>threads</b> in the shared memory programming paradigm. A shared memory process consists of multiple threads.</p>
+<p class="p2">* OpenMP is an <b>explicit</b> (not automatic) <b>programming</b> <b>model</b>, offering the programmer full control over parallelization.</p>
+<p class="p2">* OpenMP uses the <b>fork-join model</b> of parallel execution</p>
+<p class="p3"></p>
+<p class="p2">The master "thread" (a series of instructions executed 
+consecutively) "forks" a specified number of slave "threads" and a task 
+is divided among them. The threads then run concurrently, with the 
+runtime environment allocating threads to different processors.</p>
+<p class="p3"></p>
+<p class="p4">The section of code that is meant to run in parallel is marked accordingly, with a <b>preprocessor directive</b>
+ that will cause the threads to form before the section is executed. 
+Each thread has an "id" attached to it which can be obtained using the 
+function omp_get_thread_num() in C/C++. The thread id is an integer, and
+ the master thread has an id of "0". After the execution of the 
+parallelized code, the threads "join" back into the master thread, which
+ continues onward to the end of the program.</p>
+<p class="p4">To set the number of threads to use the subsequent 
+parallel sections the function omp_set_num_threads() can be used. 
+Alternatively, the environment variable OMP_NUM_THREADS is a very 
+convenient way to set the number of threads without recompiling your 
+program.</p>
+<p class="p4">Other OMP functions can be found here: <a href="http://gcc.gnu.org/onlinedocs/libgomp/">libgomp</a></p>
+<p class="p5"><b>OpenMP specification</b></p>
+<p class="p2">A compiler directive in C/C++ is called a <i>pragma</i> (pragmatic information). Compiler directives specific to OpenMP in C/C++ are written in codes as follows:</p>
+<p class="p6"></p>
+<div></div>
+<p class="p7">#pragma omp &lt;rest of pragma&gt;</p>
+<div></div>
+<p class="p8"></p>
+<div></div>
+<p class="p8"></p>
+<div></div>
+<p class="p7">------------------------------------------------------</p>
+<div></div>
+<p class="p7"><b>#include &lt;omp.h&gt;</b></p>
+<div></div>
+<p class="p8"></p>
+<div></div>
+<p class="p7">main () {</p>
+<div></div>
+<p class="p8"></p>
+<div></div>
+<p class="p7">int var1, var2, var3;</p>
+<div></div>
+<p class="p8"></p>
+<div></div>
+<p class="p7"><i>Serial code </i></p>
+<div></div>
+<p class="p7">.</p>
+<div></div>
+<p class="p7">.</p>
+<div></div>
+<p class="p7">.</p>
+<div></div>
+<p class="p8"></p>
+<div></div>
+<p class="p7"><i>Beginning of parallel section. Fork a team of threads.</i></p>
+<div></div>
+<p class="p7"><i>Specify variable scoping </i></p>
+<div></div>
+<p class="p8"></p>
+<div></div>
+<p class="p9">#pragma omp parallel private(var1, var2) shared(var3)</p>
+<div></div>
+<p class="p9">{</p>
+<div></div>
+<p class="p10"></p>
+<div></div>
+<p class="p9"><i>Parallel section executed by all threads </i></p>
+<div></div>
+<p class="p9">.</p>
+<div></div>
+<p class="p9">.</p>
+<div></div>
+<p class="p9">.</p>
+<div></div>
+<p class="p10"></p>
+<div></div>
+<p class="p9"><i>All threads join master thread and disband </i></p>
+<div></div>
+<p class="p10"></p>
+<div></div>
+<p class="p9">}</p>
+<div></div>
+<p class="p8"></p>
+<div></div>
+<p class="p7"><i>Resume serial code </i></p>
+<div></div>
+<p class="p7">.</p>
+<div></div>
+<p class="p7">.</p>
+<div></div>
+<p class="p7">.</p>
+<div></div>
+<p class="p8"></p>
+<div></div>
+<p class="p7">}</p>
+<div></div>
+<p class="p7">------------------------------------------------------</p>
+<p class="p3"></p>
+<p class="p11"><b>** OpenMP Directives</b></p>
+<p class="p12"></p>
+<p class="p11">OpenMP parallelism is specified through the use of compiler directives in C/C++ or Fortran source code</p>
+<p class="p13"></p>
+<h2>C / C++ Directives Format:</h2>
+<p class="p15">#pragma omp directive-name <i>[clause ...] newline </i></p>
+<p class="p3"></p>
+<p class="p2">directive-name examples: parallel, do, for, sections...</p>
+<p class="p3"></p>
+<p class="p2">[clause, …] --&gt; clauses are optional</p>
+<p class="p3"></p>
+<p class="p16"><b>parallel</b></p>
+<p class="p17"></p>
+<p class="p2">A parallel region is a block of code that will be executed
+ by multiple threads. This is the fundamental OpenMP parallel construct.</p>
+<p class="p17"></p>
+<p class="p15">#pragma omp parallel <i>[clause ...] newline </i></p>
+<p class="p15">if <i>(scalar_expression) </i></p>
+<p class="p15">private <i>(list) </i></p>
+<p class="p15">shared <i>(list) </i></p>
+<p class="p15">default (shared | none)</p>
+<p class="p15">firstprivate <i>(list) </i></p>
+<p class="p15">reduction <i>(operator: list) </i></p>
+<p class="p15">copyin <i>(list) </i></p>
+<p class="p15">num_threads <i>(integer-expression)</i></p>
+<p class="p18"></p>
+<p class="p18"></p>
+<p class="p15"><i>structured_block</i></p>
+<p class="p19"></p>
+<p class="p3"></p>
+<p class="p16"><b>do/for </b></p>
+<p class="p3"></p>
+<p class="p2">The <b>do/for </b>directive specifies that the iterations 
+of the loop immediately following it must be executed in parallel by the
+ team. This assumes a parallel region has already been initiated, 
+otherwise it executes in serial on a single processor.</p>
+<p class="p3"></p>
+<p class="p15">#pragma omp for <i>[clause ...] newline </i></p>
+<p class="p15">schedule <i>(type [,chunk]) </i></p>
+<p class="p15">ordered</p>
+<p class="p15">private <i>(list) </i></p>
+<p class="p15">firstprivate <i>(list) </i></p>
+<p class="p15">lastprivate <i>(list) </i></p>
+<p class="p15">shared <i>(list) </i></p>
+<p class="p15">reduction <i>(operator: list) </i></p>
+<p class="p15">collapse <i>(n) </i></p>
+<p class="p15">nowait</p>
+<p class="p18"></p>
+<p class="p15"><i>for_loop</i></p>
+<p class="p20"></p>
+<p class="p11"><b>NOTE: </b>we can have <b>Combined Constructs</b></p>
+<p class="p3"></p>
+<p class="p2">example:</p>
+<p class="p17"></p>
+<p class="p16"><b>parallel do/ parallel for</b></p>
+<p class="p17"></p>
+<p class="p17"></p>
+<p class="p3"></p>
+<p class="p2">Example: Adding 2 vectors</p>
+<p class="p3"></p>
+<p class="p21">#pragma omp parallel shared(a,b,c,chunk) private(i)</p>
+<p class="p15">{</p>
+<p class="p18"></p>
+<p class="p21">#pragma omp for schedule(dynamic,chunk) nowait</p>
+<p class="p15">for (i=0; i &lt; N; i++)</p>
+<p class="p15">c[i] = a[i] + b[i];</p>
+<p class="p18"></p>
+<p class="p15">} /* end of parallel section */</p>
+<p class="p18"></p>
+<p class="p22"><b>Tip</b>! Multiplying two matrices</p>
+<p class="p23"></p>
+<p class="p11">To parallelize a matrix multiplication you need to place 
+the #pragma omp parallel for pragma before the first loop. Using the 
+pragmas at the highest loop, gives the most performance gain.</p>
+<p class="p17"></p>
+<p class="p17"></p>
+<p class="p22"><b>* </b><b>Data Scope Attribute Clauses</b></p>
+<p class="p17"></p>
+<p class="p2">Because OpenMP is based upon the shared memory programming model, most variables are shared by default<b>.</b></p>
+<p class="p3"></p>
+<p class="p2">The OpenMP Data Scope Attribute Clauses are used to explicitly define how variables should be scoped. They include:</p>
+<ul class="ul1">
+<li class="li2">PRIVATE</li>
+<li class="li2">FIRSTPRIVATE</li>
+<li class="li2">LASTPRIVATE</li>
+<li class="li2">SHARED</li>
+<li class="li2">DEFAULT</li>
+<li class="li2">REDUCTION</li>
+<li class="li2">COPYIN</li>
+</ul>
+<p class="p17"></p>
+<p class="p2">These constructs provide the ability to control the data environment during execution of parallel constructs.</p>
+<ul class="ul1">
+<li class="li2">They define how and which data variables in the serial 
+section of the program are transferred to the parallel sections of the 
+program (and back)</li>
+<li class="li2">They define which variables will be visible to all 
+threads in the parallel sections and which variables will be privately 
+allocated to all threads.</li>
+</ul>
+<p class="p3"></p>
+<h2><b>PRIVATE</b></h2>
+<p class="p2">The PRIVATE clause declares variables in its list to be 
+private to each thread. Variables declared PRIVATE should be assumed to 
+be uninitialized for each thread.</p>
+<p class="p3"></p>
+<p class="p11"><b>SHARED</b></p>
+<p class="p3"></p>
+<p class="p2">The SHARED clause declares variables in its list to be shared among all threads in the team.</p>
+<p class="p3"></p>
+<p class="p11"><b>FIRSTPRIVATE </b></p>
+<p class="p13"></p>
+<p class="p11">The FIRSTPRIVATE clause combines the behavior of the PRIVATE clause with automatic initialization of the variables in its list</p>
+<p class="p3"></p>
+<p class="p2"><b>REDUCTION </b></p>
+<p class="p3"></p>
+<p class="p2">The REDUCTION clause performs a reduction on the variables that appear in its list.</p>
+<p class="p2">A private copy for each list variable is created for each 
+thread. At the end of the reduction, the reduction variable is applied 
+to all private copies of the shared variable, and the final result is 
+written to the global shared variable.</p>
+<p class="p3"></p>
+<p class="p4">Example: <b>Vector Dot Product</b></p>
+<p class="p15">------------------------------------------------------</p>
+<p class="p15">main () {</p>
+<p class="p18"></p>
+<p class="p15">....</p>
+<p class="p18"></p>
+<p class="p24"># pragma omp parallel for reduction(+:result)</p>
+<p class="p18"></p>
+<p class="p15">for (i=0; i &lt; n; i++)</p>
+<p class="p15">result = result + (a[i] * b[i]);</p>
+<p class="p18"></p>
+<p class="p15">printf("Final result= %f\n",result);</p>
+<p class="p18"></p>
+<p class="p15">....</p>
+<p class="p18"></p>
+<p class="p15">}</p>
+<p class="p7">------------------------------------------------------</p>
+<p class="p3"></p>
+<p class="p2">reduction(+:result) --&gt; At the end of the parallel loop
+ construct, all threads will add their values of "result" to update the 
+master thread's global copy.</p>
+<p class="p3"></p>
+<p class="p3"></p>
+<p class="p2">The table below(*) summarizes which clauses are accepted by which OpenMP directives.</p>
+<table class="t1" cellpadding="0" cellspacing="0">
+<tbody>
+<tr>
+<td rowspan="2" class="td1" valign="middle">
+<p class="p25"><b>Clause</b></p>
+</td>
+<td colspan="6" class="td2" valign="middle">
+<p class="p25"><b>Directive</b></p>
+</td>
+</tr>
+<tr>
+<td class="td3" valign="top">
+<p class="p25"><b>PARALLEL</b></p>
+</td>
+<td class="td4" valign="top">
+<p class="p25"><b>DO/for</b></p>
+</td>
+<td class="td5" valign="top">
+<p class="p25"><b>SECTIONS</b></p>
+</td>
+<td class="td6" valign="top">
+<p class="p25"><b>SINGLE</b></p>
+</td>
+<td class="td7" valign="top">
+<p class="p25"><b>PARALLEL </b></p>
+<p class="p25"><b>DO/for</b></p>
+</td>
+<td class="td7" valign="top">
+<p class="p25"><b>PARALLEL </b></p>
+<p class="p25"><b>SECTIONS</b></p>
+</td>
+</tr>
+<tr>
+<td class="td1" valign="middle">
+<p class="p26"><b>IF</b></p>
+</td>
+<td class="td3" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td4" valign="middle">
+<p class="p25"></p>
+</td>
+<td class="td5" valign="middle">
+<p class="p25"></p>
+</td>
+<td class="td6" valign="middle">
+<p class="p25"></p>
+</td>
+<td class="td7" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td7" valign="middle">
+<p class="p25">X</p>
+</td>
+</tr>
+<tr>
+<td class="td1" valign="middle">
+<p class="p26"><b>PRIVATE</b></p>
+</td>
+<td class="td3" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td4" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td5" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td6" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td7" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td7" valign="middle">
+<p class="p25">X</p>
+</td>
+</tr>
+<tr>
+<td class="td1" valign="middle">
+<p class="p26"><b>SHARED</b></p>
+</td>
+<td class="td3" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td4" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td5" valign="middle">
+<p class="p25"></p>
+</td>
+<td class="td6" valign="middle">
+<p class="p25"></p>
+</td>
+<td class="td7" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td7" valign="middle">
+<p class="p25">X</p>
+</td>
+</tr>
+<tr>
+<td class="td1" valign="middle">
+<p class="p26"><b>DEFAULT</b></p>
+</td>
+<td class="td3" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td4" valign="middle">
+<p class="p25"></p>
+</td>
+<td class="td5" valign="middle">
+<p class="p25"></p>
+</td>
+<td class="td6" valign="middle">
+<p class="p25"></p>
+</td>
+<td class="td7" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td7" valign="middle">
+<p class="p25">X</p>
+</td>
+</tr>
+<tr>
+<td class="td1" valign="middle">
+<p class="p26"><b>FIRSTPRIVATE</b></p>
+</td>
+<td class="td3" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td4" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td5" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td6" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td7" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td7" valign="middle">
+<p class="p25">X</p>
+</td>
+</tr>
+<tr>
+<td class="td1" valign="middle">
+<p class="p26"><b>LASTPRIVATE</b></p>
+</td>
+<td class="td3" valign="middle">
+<p class="p25"></p>
+</td>
+<td class="td4" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td5" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td6" valign="middle">
+<p class="p25"></p>
+</td>
+<td class="td7" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td7" valign="middle">
+<p class="p25">X</p>
+</td>
+</tr>
+<tr>
+<td class="td1" valign="middle">
+<p class="p26"><b>REDUCTION</b></p>
+</td>
+<td class="td3" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td4" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td5" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td6" valign="middle">
+<p class="p25"></p>
+</td>
+<td class="td7" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td7" valign="middle">
+<p class="p25">X</p>
+</td>
+</tr>
+<tr>
+<td class="td1" valign="middle">
+<p class="p26"><b>COPYIN</b></p>
+</td>
+<td class="td3" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td4" valign="middle">
+<p class="p25"></p>
+</td>
+<td class="td5" valign="middle">
+<p class="p25"></p>
+</td>
+<td class="td6" valign="middle">
+<p class="p25"></p>
+</td>
+<td class="td7" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td7" valign="middle">
+<p class="p25">X</p>
+</td>
+</tr>
+<tr>
+<td class="td1" valign="middle">
+<p class="p26"><b>COPYPRIVATE</b></p>
+</td>
+<td class="td3" valign="middle">
+<p class="p25"></p>
+</td>
+<td class="td4" valign="middle">
+<p class="p25"></p>
+</td>
+<td class="td5" valign="middle">
+<p class="p25"></p>
+</td>
+<td class="td6" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td7" valign="middle">
+<p class="p25"></p>
+</td>
+<td class="td7" valign="middle">
+<p class="p25"></p>
+</td>
+</tr>
+<tr>
+<td class="td1" valign="middle">
+<p class="p26"><b>SCHEDULE</b></p>
+</td>
+<td class="td3" valign="middle">
+<p class="p25"></p>
+</td>
+<td class="td4" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td5" valign="middle">
+<p class="p25"></p>
+</td>
+<td class="td6" valign="middle">
+<p class="p25"></p>
+</td>
+<td class="td7" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td7" valign="middle">
+<p class="p25"></p>
+</td>
+</tr>
+<tr>
+<td class="td1" valign="middle">
+<p class="p26"><b>ORDERED</b></p>
+</td>
+<td class="td3" valign="middle">
+<p class="p25"></p>
+</td>
+<td class="td4" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td5" valign="middle">
+<p class="p25"></p>
+</td>
+<td class="td6" valign="middle">
+<p class="p25"></p>
+</td>
+<td class="td7" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td7" valign="middle">
+<p class="p25"></p>
+</td>
+</tr>
+<tr>
+<td class="td1" valign="middle">
+<p class="p26"><b>NOWAIT</b></p>
+</td>
+<td class="td3" valign="middle">
+<p class="p25"></p>
+</td>
+<td class="td4" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td5" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td6" valign="middle">
+<p class="p25">X</p>
+</td>
+<td class="td7" valign="middle">
+<p class="p25"></p>
+</td>
+<td class="td7" valign="middle">
+<p class="p25"></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="p2">*- ref. https://computing.llnl.gov/tutorials/openMP</p>
+<p class="p3"></p>
+<p class="p3"></p>
+<p class="p22"><b>** More INFO on OpenMP</b></p>
+<p class="p3"></p>
+<p class="p4">For the full OpenMP specification, you can get it from the OpenMP official web site: <a href="http://www.openmp.org/">http://www.openmp.org/</a></p>
+<p class="p4"></p>
+<p class="p4"><b>Compiling OpenMP programs with the GCC compiler</b></p>
+<p class="p4"><br>gcc -fopenmp -o &lt;executable&gt; &lt;source&gt;<br><a href="http://www.openmp.org/"></a></p>
+<p class="p4"><a href="http://www.openmp.org/">&nbsp;</a></p>
+<hr>
+<p>1. Compile the example calculating the vector <a class="autolink" title="Dot product with OpenMP" href="https://csimoodle.ucd.ie/moodle/mod/resource/view.php?id=24829">dot product with OpenMP</a>
+ both on csserver and yeats. Add information which outputs the number of
+ threads used, and compare the number of threads used on these machines.</p>
+<hr>
+<p>2. Set the number of threads of your program to a different number 
+from the number of cores of the runtime environment. As in the previous 
+example, verify that the number of threads you specified is used.</p>
+<hr></div></div><div class="modified">Last modified: Thursday, 10 April 2014, 4:53 PM</div></div>                                    	                	        </div>
+    	                	</div>
+	    	            </div>
+
+		                    		            <div id="region-post" class="block-region">
+        	    	    	<div id="region-post-wrap-1">
+        	    	    		<div id="region-post-wrap-2">
+		        		            <div class="region-content">
+    		        		            <a href="#sb-1" class="skip-block">Skip Navigation</a><div id="inst5361" class="block_navigation  block" role="navigation" aria-labelledby="instance-5361-header"><div class="header"><div id="yui_3_9_1_2_1398902228020_277" class="title"><div class="block_action"><img src="COMP40730-Lab04-IntroductionToOpenMP_files/switch_minus.svg" class="block-hider-hide" tabindex="0" alt="Hide Navigation block" title="Hide Navigation block"><img src="COMP40730-Lab04-IntroductionToOpenMP_files/switch_plus.svg" class="block-hider-show" tabindex="0" alt="Show Navigation block" title="Show Navigation block"><input src="COMP40730-Lab04-IntroductionToOpenMP_files/block_to_dock.svg" title="Dock Navigation block" alt="Move this to the dock" class="moveto customcommand requiresjs" type="image"></div><h2 id="instance-5361-header">Navigation</h2><div class="commands"></div></div></div><div class="content"><ul class="block_tree list"><li class="type_unknown depth_1 contains_branch" aria-expanded="true"><p class="tree_item branch canexpand navigation_node"><a href="https://csimoodle.ucd.ie/moodle/">Home</a></p><ul><li class="type_setting depth_2 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/my/"><img alt="" class="smallicon navicon" title="" src="COMP40730-Lab04-IntroductionToOpenMP_files/navigationitem.svg">My home</a></p></li>
+<li class="type_course depth_2 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch"><span title="CSIMOODLE.UCD.IE" tabindex="0">Site pages</span></p><ul><li class="type_custom depth_3 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/badges/view.php?type=1"><img alt="" class="smallicon navicon" title="" src="COMP40730-Lab04-IntroductionToOpenMP_files/navigationitem.svg">Site badges</a></p></li>
+<li class="type_custom depth_3 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/tag/search.php"><img alt="" class="smallicon navicon" title="" src="COMP40730-Lab04-IntroductionToOpenMP_files/navigationitem.svg">Tags</a></p></li>
+<li class="type_custom depth_3 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/calendar/view.php?view=month"><img alt="" class="smallicon navicon" title="" src="COMP40730-Lab04-IntroductionToOpenMP_files/navigationitem.svg">Calendar</a></p></li>
+<li class="type_activity depth_3 item_with_icon"><p class="tree_item leaf hasicon"><a title="Forum" href="https://csimoodle.ucd.ie/moodle/mod/forum/view.php?id=1738"><img alt="Forum" class="smallicon navicon" title="Forum" src="COMP40730-Lab04-IntroductionToOpenMP_files/icon_002.svg">CSIMoodle News</a></p></li></ul></li>
+<li class="type_user depth_2 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch"><span tabindex="0">My profile</span></p><ul><li class="type_custom depth_3 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/user/profile.php?id=9485"><img alt="" class="smallicon navicon" title="" src="COMP40730-Lab04-IntroductionToOpenMP_files/navigationitem.svg">View profile</a></p></li>
+<li class="type_custom depth_3 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch"><span tabindex="0">Forum posts</span></p><ul><li class="type_custom depth_4 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/mod/forum/user.php?id=9485"><img alt="" class="smallicon navicon" title="" src="COMP40730-Lab04-IntroductionToOpenMP_files/navigationitem.svg">Posts</a></p></li>
+<li class="type_custom depth_4 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/mod/forum/user.php?id=9485&amp;mode=discussions"><img alt="" class="smallicon navicon" title="" src="COMP40730-Lab04-IntroductionToOpenMP_files/navigationitem.svg">Discussions</a></p></li></ul></li>
+<li class="type_setting depth_3 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/message/index.php"><img alt="" class="smallicon navicon" title="" src="COMP40730-Lab04-IntroductionToOpenMP_files/navigationitem.svg">Messages</a></p></li>
+<li class="type_setting depth_3 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/user/files.php"><img alt="" class="smallicon navicon" title="" src="COMP40730-Lab04-IntroductionToOpenMP_files/navigationitem.svg">My private files</a></p></li>
+<li class="type_setting depth_3 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/badges/mybadges.php"><img alt="" class="smallicon navicon" title="" src="COMP40730-Lab04-IntroductionToOpenMP_files/navigationitem.svg">My badges</a></p></li></ul></li>
+<li class="type_system depth_2 contains_branch" aria-expanded="true"><p class="tree_item branch"><span tabindex="0">Current course</span></p><ul><li class="type_course depth_3 contains_branch" aria-expanded="true"><p class="tree_item branch canexpand"><a title="COMP40730 High Performance Computing 2014" href="https://csimoodle.ucd.ie/moodle/course/view.php?id=375">COMP40730</a></p><ul><li class="type_unknown depth_4 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch"><a href="https://csimoodle.ucd.ie/moodle/user/index.php?id=375">Participants</a></p><ul><li class="type_user depth_5 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch"><a href="https://csimoodle.ucd.ie/moodle/user/view.php?id=9485&amp;course=375">Dwan Paula</a></p><ul><li class="type_custom depth_6 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/user/view.php?id=9485&amp;course=375"><img alt="" class="smallicon navicon" title="" src="COMP40730-Lab04-IntroductionToOpenMP_files/navigationitem.svg">View profile</a></p></li>
+<li class="type_custom depth_6 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch"><span tabindex="0">Forum posts</span></p><ul><li class="type_custom depth_7 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/mod/forum/user.php?id=9485&amp;course=375"><img alt="" class="smallicon navicon" title="" src="COMP40730-Lab04-IntroductionToOpenMP_files/navigationitem.svg">Posts</a></p></li>
+<li class="type_custom depth_7 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/mod/forum/user.php?id=9485&amp;course=375&amp;mode=discussions"><img alt="" class="smallicon navicon" title="" src="COMP40730-Lab04-IntroductionToOpenMP_files/navigationitem.svg">Discussions</a></p></li></ul></li>
+<li class="type_setting depth_6 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/message/index.php"><img alt="" class="smallicon navicon" title="" src="COMP40730-Lab04-IntroductionToOpenMP_files/navigationitem.svg">Messages</a></p></li>
+<li class="type_setting depth_6 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/user/files.php"><img alt="" class="smallicon navicon" title="" src="COMP40730-Lab04-IntroductionToOpenMP_files/navigationitem.svg">My private files</a></p></li>
+<li class="type_setting depth_6 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/badges/mybadges.php"><img alt="" class="smallicon navicon" title="" src="COMP40730-Lab04-IntroductionToOpenMP_files/navigationitem.svg">My badges</a></p></li></ul></li></ul></li>
+<li class="type_unknown depth_4 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch"><span tabindex="0">Badges</span></p><ul><li class="type_setting depth_5 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/badges/view.php?type=2&amp;id=375"><img alt="Course badges" class="smallicon navicon" title="Course badges" src="COMP40730-Lab04-IntroductionToOpenMP_files/badge.svg">Course badges</a></p></li></ul></li>
+<li class="type_structure depth_4 collapsed contains_branch" aria-expanded="false"><p data-loaded="0" data-expandable="1" class="tree_item branch" id="expandable_branch_30_5443"><span tabindex="0">General</span></p></li>
+<li class="type_structure depth_4 collapsed contains_branch" aria-expanded="false"><p data-loaded="0" data-expandable="1" class="tree_item branch" id="expandable_branch_30_5444"><span tabindex="0">Introduction. Vector and superscalar processors</span></p></li>
+<li class="type_structure depth_4 collapsed contains_branch" aria-expanded="false"><p data-loaded="0" data-expandable="1" class="tree_item branch" id="expandable_branch_30_5449"><span tabindex="0">Optimizing compilers</span></p></li>
+<li class="type_structure depth_4 collapsed contains_branch" aria-expanded="false"><p data-loaded="0" data-expandable="1" class="tree_item branch" id="expandable_branch_30_5445"><span tabindex="0">... Parallel languages (Fortran 90). Memory hierarchy</span></p></li>
+<li class="type_structure depth_4 collapsed contains_branch" aria-expanded="false"><p data-loaded="0" data-expandable="1" class="tree_item branch" id="expandable_branch_30_5450"><span tabindex="0">Shared-memory multiprocessors</span></p></li>
+<li class="type_structure depth_4 collapsed contains_branch" aria-expanded="false"><p data-loaded="0" data-expandable="1" class="tree_item branch" id="expandable_branch_30_5446"><span tabindex="0">Pthreads</span></p></li>
+<li class="type_structure depth_4 contains_branch" aria-expanded="true"><p class="tree_item branch"><span tabindex="0">Introduction to OpenMP</span></p><ul><li class="type_activity depth_5 item_with_icon current_branch"><p class="tree_item leaf hasicon active_tree_node"><a title="Page" href="https://csimoodle.ucd.ie/moodle/mod/page/view.php?id=24824"><img alt="Page" class="smallicon navicon" title="Page" src="COMP40730-Lab04-IntroductionToOpenMP_files/icon.svg">Lab 4: Introduction to OpenMP</a></p></li>
+<li class="type_activity depth_5 item_with_icon"><p class="tree_item leaf hasicon"><a title="File" href="https://csimoodle.ucd.ie/moodle/mod/resource/view.php?id=24829"><img alt="File" class="smallicon navicon" title="File" src="COMP40730-Lab04-IntroductionToOpenMP_files/pdf-24.png">Dot product with OpenMP</a></p></li>
+<li class="type_activity depth_5 item_with_icon"><p class="tree_item leaf hasicon"><a title="File" href="https://csimoodle.ucd.ie/moodle/mod/resource/view.php?id=24990"><img alt="File" class="smallicon navicon" title="File" src="COMP40730-Lab04-IntroductionToOpenMP_files/pdf-24.png">Assignment 3</a></p></li></ul></li>
+<li class="type_structure depth_4 collapsed contains_branch" aria-expanded="false"><p data-loaded="0" data-expandable="1" class="tree_item branch" id="expandable_branch_30_5451"><span tabindex="0">Distributed-memory multiprocessors</span></p></li>
+<li class="type_structure depth_4 collapsed contains_branch" aria-expanded="false"><p data-loaded="0" data-expandable="1" class="tree_item branch" id="expandable_branch_30_5448"><span tabindex="0">Introduction to MPI</span></p></li></ul></li></ul></li>
+<li class="type_system depth_2 collapsed contains_branch" aria-expanded="false"><p data-loaded="0" data-expandable="1" class="tree_item branch" id="expandable_branch_0_mycourses"><a href="https://csimoodle.ucd.ie/moodle/my/">My courses</a></p></li></ul></li></ul></div></div><span id="sb-1" class="skip-block-to"></span><a href="#sb-2" class="skip-block">Skip Administration</a><div id="inst5362" class="block_settings  block" role="navigation" aria-labelledby="instance-5362-header"><div class="header"><div id="yui_3_9_1_2_1398902228020_295" class="title"><div class="block_action"><img src="COMP40730-Lab04-IntroductionToOpenMP_files/switch_minus.svg" class="block-hider-hide" tabindex="0" alt="Hide Administration block" title="Hide Administration block"><img src="COMP40730-Lab04-IntroductionToOpenMP_files/switch_plus.svg" class="block-hider-show" tabindex="0" alt="Show Administration block" title="Show Administration block"><input src="COMP40730-Lab04-IntroductionToOpenMP_files/block_to_dock.svg" title="Dock Administration block" alt="Move this to the dock" class="moveto customcommand requiresjs" type="image"></div><h2 id="instance-5362-header">Administration</h2><div class="commands"></div></div></div><div class="content"><div id="settingsnav" class="box block_tree_box"><ul class="block_tree list"><li class="type_course collapsed contains_branch" aria-expanded="false"><p class="tree_item branch root_node"><span tabindex="0">Course administration</span></p><ul><li class="type_setting collapsed item_with_icon"><p class="tree_item leaf"><a href="https://csimoodle.ucd.ie/moodle/enrol/self/unenrolself.php?enrolid=1239"><img alt="" class="smallicon navicon" title="" src="COMP40730-Lab04-IntroductionToOpenMP_files/user.svg">Unenrol me from COMP40730</a></p></li>
+<li class="type_setting collapsed item_with_icon"><p class="tree_item leaf"><a href="https://csimoodle.ucd.ie/moodle/grade/report/index.php?id=375"><img alt="" class="smallicon navicon" title="" src="COMP40730-Lab04-IntroductionToOpenMP_files/grades.svg">Grades</a></p></li></ul></li>
+<li class="type_unknown collapsed contains_branch" aria-expanded="false"><hr><p class="tree_item branch root_node" id="usersettings"><span tabindex="0">My profile settings</span></p><ul><li class="type_setting collapsed item_with_icon"><p class="tree_item leaf"><a href="https://csimoodle.ucd.ie/moodle/user/edit.php?id=9485&amp;course=375"><img alt="" class="smallicon navicon" title="" src="COMP40730-Lab04-IntroductionToOpenMP_files/navigationitem.svg">Edit profile</a></p></li>
+<li class="type_setting collapsed item_with_icon"><p class="tree_item leaf"><a href="https://csimoodle.ucd.ie/moodle/user/managetoken.php?sesskey=tfTxRKzZ0x"><img alt="" class="smallicon navicon" title="" src="COMP40730-Lab04-IntroductionToOpenMP_files/navigationitem.svg">Security keys</a></p></li>
+<li class="type_setting collapsed item_with_icon"><p class="tree_item leaf"><a href="https://csimoodle.ucd.ie/moodle/message/edit.php?id=9485"><img alt="" class="smallicon navicon" title="" src="COMP40730-Lab04-IntroductionToOpenMP_files/navigationitem.svg">Messaging</a></p></li>
+<li class="type_unknown collapsed contains_branch" aria-expanded="false"><p class="tree_item branch"><span tabindex="0">Badges</span></p><ul><li class="type_setting collapsed item_with_icon"><p class="tree_item leaf"><a href="https://csimoodle.ucd.ie/moodle/badges/preferences.php"><img alt="" class="smallicon navicon" title="" src="COMP40730-Lab04-IntroductionToOpenMP_files/navigationitem.svg">Preferences</a></p></li>
+<li class="type_setting collapsed item_with_icon"><p class="tree_item leaf"><a href="https://csimoodle.ucd.ie/moodle/badges/mybackpack.php"><img alt="" class="smallicon navicon" title="" src="COMP40730-Lab04-IntroductionToOpenMP_files/navigationitem.svg">Backpack settings</a></p></li></ul></li></ul></li></ul></div></div></div><span id="sb-2" class="skip-block-to"></span>        		        		    </div>
+        		        		</div>
+        		       		</div>
+	                	</div>
+	    	            
+    	    	    </div>
+	    	    </div>
+	    	</div>
+    	</div>
+
+<!-- END OF CONTENT -->
+
+			</div>
+
+		</div>
+	</div>
+
+
+	
+<!-- START OF FOOTER -->
+        
+
+    			    <div id="page-footer" class="wrapper">
+		    	 <!-- There was no custom footnote set -->        		<p class="helplink"></p>
+		        <div class="logininfo">You are logged in as <a href="https://csimoodle.ucd.ie/moodle/user/profile.php?id=9485" title="View profile">Dwan Paula</a> (<a href="https://csimoodle.ucd.ie/moodle/login/logout.php?sesskey=tfTxRKzZ0x">Logout</a>)</div><div class="homelink"><a href="https://csimoodle.ucd.ie/moodle/course/view.php?id=375">COMP40730</a></div>		    </div>
+	    
+</div>
+<script type="text/javascript">
+//<![CDATA[
+M.str = {"moodle":{"lastmodified":"Last modified","name":"Name","error":"Error","info":"Information","viewallcourses":"View all courses","morehelp":"More help","loadinghelp":"Loading...","cancel":"Cancel","yes":"Yes"},"repository":{"type":"Type","size":"Size","invalidjson":"Invalid JSON string","nofilesattached":"No files attached","filepicker":"File picker","logout":"Logout","nofilesavailable":"No files available","norepositoriesavailable":"Sorry, none of your current repositories can return files in the required format.","fileexistsdialogheader":"File exists","fileexistsdialog_editor":"A file with that name has already been attached to the text you are editing.","fileexistsdialog_filemanager":"A file with that name has already been attached","renameto":"Rename to \"{$a}\"","referencesexist":"There are {$a} alias\/shortcut files that use this file as their source","select":"Select"},"block":{"addtodock":"Move this to the dock","undockitem":"Undock this item","dockblock":"Dock {$a} block","undockblock":"Undock {$a} block","undockall":"Undock all","hidedockpanel":"Hide the dock panel","hidepanel":"Hide panel"},"langconfig":{"thisdirectionvertical":"btt"},"admin":{"confirmation":"Confirmation"}};
+//]]>
+</script>
+<script type="text/javascript">
+//<![CDATA[
+var navtreeexpansions5361 = [{"id":"expandable_branch_30_5443","key":"5443","type":30},{"id":"expandable_branch_30_5444","key":"5444","type":30},{"id":"expandable_branch_30_5449","key":"5449","type":30},{"id":"expandable_branch_30_5445","key":"5445","type":30},{"id":"expandable_branch_30_5450","key":"5450","type":30},{"id":"expandable_branch_30_5446","key":"5446","type":30},{"id":"expandable_branch_30_5451","key":"5451","type":30},{"id":"expandable_branch_30_5448","key":"5448","type":30},{"id":"expandable_branch_0_mycourses","key":"mycourses","type":0}];
+//]]>
+</script>
+<script type="text/javascript">
+//<![CDATA[
+YUI().use('node', function(Y) {
+M.util.load_flowplayer();
+setTimeout("fix_column_widths()", 20);
+M.yui.galleryversion="2010.04.08-12-35";Y.use("core_dock","moodle-block_navigation-navigation",function() {M.block_navigation.init_add_tree({"id":"5361","instance":"5361","candock":true,"courselimit":"20","expansionlimit":0});
+});
+M.yui.galleryversion="2010.04.08-12-35";Y.use("core_dock","moodle-block_navigation-navigation",function() {M.block_navigation.init_add_tree({"id":"5362","instance":"5362","candock":true});
+});
+M.yui.galleryversion="2010.04.08-12-35";Y.use("node-menunav",function() {(function(){M.core_custom_menu.init(Y, "custom_menu_1");
+})();
+});
+M.util.help_popups.setup(Y);
+M.yui.galleryversion="2010.04.08-12-35";Y.use("moodle-core-popuphelp",function() {M.core.init_popuphelp();
+});
+M.util.init_block_hider(Y, {"id":"inst5361","title":"Navigation","preference":"block5361hidden","tooltipVisible":"Hide Navigation block","tooltipHidden":"Show Navigation block"});
+M.util.init_block_hider(Y, {"id":"inst5362","title":"Administration","preference":"block5362hidden","tooltipVisible":"Hide Administration block","tooltipHidden":"Show Administration block"});
+
+});
+//]]>
+</script>
+
+<div id="dock" role="menubar" class="dock dock_left_vertical nothingdocked"><div id="yui_3_9_1_2_1398902228020_27" class="buttons_container"><div class="dockeditem_container"></div><div class="controls"><img src="COMP40730-Lab04-IntroductionToOpenMP_files/dock_to_block.svg" alt="Undock all" title="Undock all" tabindex="0"></div></div></div><div style="display: none;"></div></body></html>

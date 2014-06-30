@@ -1,0 +1,125 @@
+<html>
+<head>
+<title>Gnuplot Tutorial</title>
+<link rel=stylesheet href="../../style.css" type="text/css">
+</head>
+
+<body>
+
+<div id="navbar">
+<ul id="navlist">
+    <li><a href="../../index.html">About Me</a></li>
+    <li><a href="../../research.html">Research</a></li>
+    <li><a href="../../programming/index.html">Programming</a></li>
+    <li><a href="../../files.html">Files</a></li>
+    <li><a href="../../photography/index.html">Photography</a></li>
+</ul>
+</div>
+
+<div class="center">
+
+<h1>Gnuplot Tutorial</h1>
+
+<h3>Introduction</h3>
+
+<p>I originally created this tutorial for a course I was TAing.  It primarily goes over the basics of how to plot and fit simple things with Gnuplot.  Most of the things here should work well with any reasonably recent version of Gnuplot, but no promises.
+
+<p>This tutorial supposes the existance of a (sparse) data file with a rough decaying exponential.  The one I used can be found <A href="exp.dat">here</A>.  If you'd like to see the plots, click on any of the plot or replot commands.
+
+<h3>Tutorial</h3>
+
+<p class="code"><a class="code" href="1.png">plot 'exp.dat'</a>
+
+<p>By default, when plotting a file, Gnuplot assumes the first column is your x value, and your second column is your y value.  In other words, it assumes you mean this:
+
+<p class="code"><a class="code" href="1.png">plot 'exp.dat' using 1:2</a>
+
+<p>If you'd like to use any other columns for anything (like different data columns or errors), then you need to specify that.  It is also useful to note that instead of using a particular column, you can perform mathematical functions on columns.
+
+<p class="code"><a class="code" href="2.png">plot 'exp.dat' using 1:2:(sqrt($2)) with yerrorbars</a>
+
+<p>Most gnuplot syntax can be abbreviated, which I do often.  I will, however, spell out the entire syntax the first time I use something, but I won't comment on this again.  For example, the above line can be shortened to:
+
+<p class="code"><a class="code" href="2.png">plot 'exp.dat' u 1:2:(sqrt($2)) w yerr</a>
+
+<p>To fit data, you need to define the function to which you will be fitting the data, and provide a starting guess for any variables.
+
+<p class="code">
+f(x) = A0*exp(-x/tau)<br>
+A0=1000;tau=1<br>
+<a class="code" href="3.png">plot 'exp.dat' u 1:2:(sqrt($2)) w yerr, f(x)</a>
+
+<p>Now you should be able to see the raw data, and the guess fit.  It's nice to improve the presentation though with some axis labels and maybe a title for the figure.
+
+<p class="code">
+set title 'Gnuplot Example'<br>
+set ylabel 'Counts'<br>
+set xlabel 'Times (ms)'<br>
+<a class="code" href="4.png">replot</a>
+
+<p>Now, to fit the data:
+
+<p class="code">
+fit f(x) 'exp.dat' u 1:2 via A0, tau<br>
+<a class="code" href="5.png">plot 'exp.dat' u 1:2:(sqrt($2)) w yerr, f(x)</a>
+
+<p>That's a reasonable fit of the data, but the fit isn't taking into account the errors.  Adding that into the fit is done just the same was as adding it to the plot, whether you use the square root function like here or if you have that in a third data column.
+
+<p class="code">
+A0 = 1000; tau = 1<br>
+fit f(x) 'exp.dat' using 1:2:(sqrt($2)) via A0, tau<br>
+<a class="code" href="6.png">plot 'exp.dat' u 1:2:(sqrt($2)) w yerr, f(x)</a>
+
+<p>We can also customize the plot in a few ways:
+
+<p class="code">
+set key top right<br>
+set ytics 400<br>
+set mytics 4<br>
+set mxtics 5<br>
+<a class="code" href="7.png">replot</a>
+
+<p>If you do other things and forgot the values and don't want to scroll up, you can just type:
+
+<p class="code">
+show variables
+
+<p>Now if you want to plot the residuals, there is actually another yaxis you can use: y2.
+
+<p class="code">
+set y2label 'Residuals'<br>
+set yrange[-600:1200]<br>
+set y2range[-100:500]<br>
+set y2tics border
+
+<p class="code">
+<a class="code" href="8.png">plot \<br>
+'exp.dat' u 1:2:(sqrt($2)) title 'Experimental Data' w yerr, \<br>
+f(x) title 'Fit', \<br>
+'exp.dat' u 1:(f($1)-$2):(sqrt($2)) axes x1y2 title 'Residuals' w yerr</a>
+
+<p>There's a lot of information there, but we can make it easier to read by adding some lines at y=0 and by really customizing the y-axis tics.
+
+<p class="code">
+set xzeroaxis lt -1<br>
+set x2zeroaxis lt -1<br>
+set ytics (0,200,400,600,800,1000,1200)<br>
+set y2tics (-100,0,100)<br>
+set mxtics 1<br>
+<a class="code" href="9.png">replot</a>
+
+<p>Finally, you may want to save your figure.  There are many different filetypes that can be used.  I find EPS works well for including in LaTeX.
+
+<p class="code">
+set terminal postscript color portrait dashed enhanced 'Times-Roman'<br>
+set output 'file.eps'<br>
+set size 1,0.5<br>
+<a class="code" href="final.pdf">replot</a>
+
+
+<h2><a href="../index.html">back to programming</a></h2>
+
+</div>
+
+</body>
+</html>

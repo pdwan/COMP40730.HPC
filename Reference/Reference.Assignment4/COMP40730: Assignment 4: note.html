@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html  dir="ltr" lang="en" xml:lang="en">
+<head>
+    <title>COMP40730: Assignment 4: note</title>
+    <link rel="shortcut icon" href="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/theme/1393237964/favicon" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="keywords" content="moodle, COMP40730: Assignment 4: note" />
+<script type="text/javascript">
+//<![CDATA[
+var M = {}; M.yui = {};
+M.pageloadstarttime = new Date();
+M.cfg = {"wwwroot":"https:\/\/csimoodle.ucd.ie\/moodle","sesskey":"vvf1JmATmd","loadingicon":"https:\/\/csimoodle.ucd.ie\/moodle\/theme\/image.php\/nimble\/core\/1393237964\/i\/loading_small","themerev":"1393237964","slasharguments":1,"theme":"nimble","jsrev":-1,"svgicons":true};var yui1ConfigFn = function(me) {if(/-skin|reset|fonts|grids|base/.test(me.name)){me.type='css';me.path=me.path.replace(/\.js/,'.css');me.path=me.path.replace(/\/yui2-skin/,'/assets/skins/sam/yui2-skin');}};
+var yui2ConfigFn = function(me) {var p = me.path, b = me.name.replace(/^moodle-/,'').split('-', 3), n = b.pop();if (/(skin|core)/.test(n)) {n = b.pop();me.type = 'css';};me.path = b.join('-')+'/'+n+'/'+n;if(me.type !== 'css'){me.path=me.path+'-min';};me.path=me.path+'.'+me.type;};
+YUI_config = {"debug":false,"base":"https:\/\/csimoodle.ucd.ie\/moodle\/lib\/yuilib\/3.9.1\/build\/","comboBase":"https:\/\/csimoodle.ucd.ie\/moodle\/theme\/yui_combo.php?","combine":true,"filter":null,"insertBefore":"firstthemesheet","groups":{"yui2":{"base":"https:\/\/csimoodle.ucd.ie\/moodle\/lib\/yuilib\/2in3\/2.9.0\/build\/","comboBase":"https:\/\/csimoodle.ucd.ie\/moodle\/theme\/yui_combo.php?","combine":true,"ext":false,"root":"2in3\/2.9.0\/build\/","patterns":{"yui2-":{"group":"yui2","configFn":yui1ConfigFn}}},"moodle":{"name":"moodle","base":"https:\/\/csimoodle.ucd.ie\/moodle\/theme\/yui_combo.php?moodle\/-1\/","combine":true,"comboBase":"https:\/\/csimoodle.ucd.ie\/moodle\/theme\/yui_combo.php?","ext":false,"root":"moodle\/-1\/","patterns":{"moodle-":{"group":"moodle","configFn":yui2ConfigFn}},"modules":{"moodle-core-formchangechecker":{"requires":["base","event-focus"]},"moodle-core-popuphelp":{"requires":["moodle-core-tooltip"]},"moodle-core-blocks":{"requires":["base","node","io","dom","dd","dd-scroll","moodle-core-dragdrop","moodle-core-notification"]},"moodle-core-chooserdialogue":{"requires":["base","panel","moodle-core-notification"]},"moodle-core-formautosubmit":{"requires":["base","event-key"]},"moodle-core-notification":{"requires":["base","node","panel","event-key","dd-plugin"]},"moodle-core-tooltip":{"requires":["base","node","io-base","moodle-core-notification","json-parse","widget-position","widget-position-align","event-outside","cache"]},"moodle-calendar-eventmanager":{"requires":["base","node","event-mouseenter","overlay","moodle-calendar-eventmanager-skin"]},"moodle-course-categoryexpander":{"requires":["node","event-key"]},"moodle-mod_quiz-autosave":{"requires":["base","node","event","event-valuechange","node-event-delegate","io-form"]},"moodle-block_navigation-navigation":{"requires":["base","core_dock","io-base","node","dom","event-custom","event-delegate","json-parse"]},"moodle-filter_glossary-autolinker":{"requires":["base","node","io-base","json-parse","event-delegate","overlay","moodle-core-notification"]},"moodle-editor_tinymce-collapse":{"requires":["base","node","dom"]},"moodle-report_overviewstats-charts":{"requires":["base","node","charts","charts-legend"]},"moodle-theme_bootstrapbase-bootstrap":{"requires":["node","selector-css3"]}}}},"modules":{"core_filepicker":{"name":"core_filepicker","fullpath":"https:\/\/csimoodle.ucd.ie\/moodle\/repository\/filepicker.js","requires":["base","node","node-event-simulate","json","async-queue","io-base","io-upload-iframe","io-form","yui2-treeview","panel","cookie","datatable","datatable-sort","resize-plugin","dd-plugin","escape","moodle-core_filepicker"]},"core_dock":{"name":"core_dock","fullpath":"https:\/\/csimoodle.ucd.ie\/moodle\/blocks\/dock.js","requires":["base","node","event-custom","event-mouseenter","event-resize","escape"]}}};
+M.yui.loader = {modules: {}};
+
+//]]>
+</script>
+<link rel="stylesheet" type="text/css" href="https://csimoodle.ucd.ie/moodle/theme/yui_combo.php?3.9.1/build/cssreset/cssreset-min.css&amp;3.9.1/build/cssfonts/cssfonts-min.css&amp;3.9.1/build/cssgrids/cssgrids-min.css&amp;3.9.1/build/cssbase/cssbase-min.css" /><script type="text/javascript" src="https://csimoodle.ucd.ie/moodle/theme/yui_combo.php?3.9.1/build/simpleyui/simpleyui-min.js&amp;3.9.1/build/loader/loader-min.js"></script><script id="firstthemesheet" type="text/css">/** Required in order to fix style inclusion problems in IE with YUI **/</script><link rel="stylesheet" type="text/css" href="https://csimoodle.ucd.ie/moodle/theme/styles.php/nimble/1393237964/all" />
+<script type="text/javascript" src="https://csimoodle.ucd.ie/moodle/lib/javascript-static.js"></script>
+</head>
+
+<body id="page-mod-page-view" class="format-topics  path-mod path-mod-page gecko dir-ltr lang-en yui-skin-sam yui3-skin-sam csimoodle-ucd-ie--moodle pagelayout-incourse course-375 context-42818 cmid-25012 category-7 side-post-only has_custom_menu">
+<div class="skiplinks"><a class="skip" href="#maincontent">Skip to main content</a></div>
+<script type="text/javascript">
+//<![CDATA[
+document.body.className += ' jsenabled';
+//]]>
+</script>
+
+
+<div id="page">
+
+	
+	<div id="page-wrap1">
+		<div id="page-wrap2">
+
+   			<div id="wrapper" class="clearfix">
+
+<!-- START OF HEADER -->
+
+		    	<div id="page-header" class="inside">
+					<div id="page-header-wrapper" class="wrapper clearfix">
+
+			        					    	    <div id="headermenus" class="shrinkwrapper clearfix">
+		    				    									<div id="custommenu"><div id="custom_menu_1" class="yui3-menu yui3-menu-horizontal javascript-disabled custom-menu"><div class="yui3-menu-content"><ul><li class="yui3-menuitem"><a class="yui3-menuitem-content" title="UCD" href="http://www.ucd.ie">UCD</a></li><li class="yui3-menuitem"><a class="yui3-menuitem-content" title="CSI" href="https://www.csi.ucd.ie">CSI</a></li><li class="yui3-menuitem"><a class="yui3-menuitem-content" title="My Courses" href="https://csimoodle.ucd.ie/moodle/my">My Courses</a></li></ul></div></div></div>
+								
+								<div class="headermenu">
+				        			<div class="logininfo">You are logged in as <a href="https://csimoodle.ucd.ie/moodle/user/profile.php?id=9485" title="View profile">Dwan Paula</a> (<a href="https://csimoodle.ucd.ie/moodle/login/logout.php?sesskey=vvf1JmATmd">Logout</a>)</div>					        	</div>
+				            </div>
+		    		    
+			    	</div>
+				</div>
+
+<!-- END OF HEADER -->
+
+	
+
+<!-- START OF CONTENT -->
+
+		<div id="page-content-wrapper" class="shrinkwrapper clearfix">
+		    <div id="page-content">
+    		    <div id="region-main-box">
+        		    <div id="region-post-box">
+
+	            	    <div id="region-main-wrap">
+    	            	    <div id="region-main">
+        	            	    <div class="region-content">
+
+									<div id="region-header" class="inside clearfix">
+							    	    <h1 class="headermain">COMP40730 High Performance Computing 2014</h1>
+							    	</div>
+
+                                    
+						    	    						        	    <div class="navbar">
+						            		<div class="wrapper clearfix">
+							            	    <div class="breadcrumb">
+							            	    	<span class="accesshide">Page path</span><ul role="navigation"><li><a href="https://csimoodle.ucd.ie/moodle/">Home</a></li><li> <span class="accesshide " ><span class="arrow_text">/</span>&nbsp;</span><span class="arrow sep">&rang;</span> <a href="https://csimoodle.ucd.ie/moodle/my/">My courses</a></li><li> <span class="accesshide " ><span class="arrow_text">/</span>&nbsp;</span><span class="arrow sep">&rang;</span> <a href="https://csimoodle.ucd.ie/moodle/course/index.php?categoryid=7">LEVEL 4</a></li><li> <span class="accesshide " ><span class="arrow_text">/</span>&nbsp;</span><span class="arrow sep">&rang;</span> <a title="COMP40730 High Performance Computing 2014" href="https://csimoodle.ucd.ie/moodle/course/view.php?id=375">COMP40730</a></li><li> <span class="accesshide " ><span class="arrow_text">/</span>&nbsp;</span><span class="arrow sep">&rang;</span> <span tabindex="0">Introduction to MPI</span></li><li> <span class="accesshide " ><span class="arrow_text">/</span>&nbsp;</span><span class="arrow sep">&rang;</span> <a title="Page" href="https://csimoodle.ucd.ie/moodle/mod/page/view.php?id=25012">Assignment 4: note</a></li></ul>							            	    </div>
+							    	            <div class="navbutton">
+							    	            								    	            </div>
+								    	    </div>
+							    	    </div>
+						        	                                                	            	    <div role="main"><span id="maincontent"></span><h2 id="pageheading" class="main">Assignment 4: note</h2><div class="box generalbox center clearfix"><div class="no-overflow"><ul>
+<li>Title of the PDF is wrong (should be "<a class="autolink" title="Assignment 4" href="https://csimoodle.ucd.ie/moodle/mod/resource/view.php?id=25011">Assignment 4</a>")</li>
+<li>Calculate the norm as well, like in <a class="autolink" title="Assignment 2" href="https://csimoodle.ucd.ie/moodle/mod/resource/view.php?id=24989">Assignment 2</a> and 3</li>
+<li>Use the same variants as for <a class="autolink" title="Assignment 2" href="https://csimoodle.ucd.ie/moodle/mod/resource/view.php?id=24989">Assignment 2</a> and 3</li>
+<li>Compile and run on cscluster with GSL CBLAS from /home/cs/bobr.<br />To your source code add this:<br />#include &lt;gsl/gsl_cblas.h&gt;<br />Compile with:<br />$ mpicc -I/home/cs/bobr/include -L/home/cs/bobr/lib -lgslcblas ...</li>
+</ul>
+<p>MxM application:</p>
+<ol>
+<li>Allocate and initialize full matrices on root (0)</li>
+<li>Distribute matrices with collective communication operations</li>
+<li>Compute in parallel</li>
+<li>Gather result on root</li>
+</ol>
+<p>Norm:</p>
+<ol>
+<li>Finding max at each process</li>
+<li>Reduce MAX to root</li>
+</ol>
+<p>Column-based matrix partitioning only (2-b):</p>
+<ul>
+<li><a href="http://static.msi.umn.edu/tutorial/scicomp/general/MPI/content6.html">Tutorial on MPI derived data types</a></li>
+<li>Example:</li>
+</ul>
+<p>      MPI_Datatype col_type;<br />      MPI_Type_vector(myrows, b, pivcol_ld, MPI_DOUBLE, &amp;col_type);<br />      MPI_Type_commit(&amp;col_type);<br />      MPI_Isend(pivcol, 1, col_type, (col_rank + 1) % params-&gt;npcols, 0, comm_row, &amp;reqs[count]);<br />      MPI_Type_free(&amp;col_type);</p></div></div><div class="modified">Last modified: Friday, 2 May 2014, 2:41 PM</div></div>                                    	                	        </div>
+    	                	</div>
+	    	            </div>
+
+		                    		            <div id="region-post" class="block-region">
+        	    	    	<div id="region-post-wrap-1">
+        	    	    		<div id="region-post-wrap-2">
+		        		            <div class="region-content">
+    		        		            <a href="#sb-1" class="skip-block">Skip Navigation</a><div id="inst5361" class="block_navigation  block" role="navigation" aria-labelledby="instance-5361-header"><div class="header"><div class="title"><div class="block_action"></div><h2 id="instance-5361-header">Navigation</h2></div></div><div class="content"><ul class="block_tree list"><li class="type_unknown depth_1 contains_branch" aria-expanded="true"><p class="tree_item branch canexpand navigation_node"><a href="https://csimoodle.ucd.ie/moodle/">Home</a></p><ul><li class="type_setting depth_2 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/my/"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />My home</a></p></li>
+<li class="type_course depth_2 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch"><span title="CSIMOODLE.UCD.IE" tabindex="0">Site pages</span></p><ul><li class="type_custom depth_3 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/badges/view.php?type=1"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />Site badges</a></p></li>
+<li class="type_custom depth_3 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/tag/search.php"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />Tags</a></p></li>
+<li class="type_custom depth_3 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/calendar/view.php?view=month"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />Calendar</a></p></li>
+<li class="type_activity depth_3 item_with_icon"><p class="tree_item leaf hasicon"><a title="Forum" href="https://csimoodle.ucd.ie/moodle/mod/forum/view.php?id=1738"><img alt="Forum" class="smallicon navicon" title="Forum" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/forum/1393237964/icon" />CSIMoodle News</a></p></li></ul></li>
+<li class="type_user depth_2 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch"><span tabindex="0">My profile</span></p><ul><li class="type_custom depth_3 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/user/profile.php?id=9485"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />View profile</a></p></li>
+<li class="type_custom depth_3 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch"><span tabindex="0">Forum posts</span></p><ul><li class="type_custom depth_4 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/mod/forum/user.php?id=9485"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />Posts</a></p></li>
+<li class="type_custom depth_4 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/mod/forum/user.php?id=9485&amp;mode=discussions"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />Discussions</a></p></li></ul></li>
+<li class="type_setting depth_3 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/message/index.php"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />Messages</a></p></li>
+<li class="type_setting depth_3 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/user/files.php"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />My private files</a></p></li>
+<li class="type_setting depth_3 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/badges/mybadges.php"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />My badges</a></p></li></ul></li>
+<li class="type_system depth_2 contains_branch" aria-expanded="true"><p class="tree_item branch"><span tabindex="0">Current course</span></p><ul><li class="type_course depth_3 contains_branch" aria-expanded="true"><p class="tree_item branch canexpand"><a title="COMP40730 High Performance Computing 2014" href="https://csimoodle.ucd.ie/moodle/course/view.php?id=375">COMP40730</a></p><ul><li class="type_unknown depth_4 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch"><a href="https://csimoodle.ucd.ie/moodle/user/index.php?id=375">Participants</a></p><ul><li class="type_user depth_5 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch"><a href="https://csimoodle.ucd.ie/moodle/user/view.php?id=9485&amp;course=375">Dwan Paula</a></p><ul><li class="type_custom depth_6 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/user/view.php?id=9485&amp;course=375"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />View profile</a></p></li>
+<li class="type_custom depth_6 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch"><span tabindex="0">Forum posts</span></p><ul><li class="type_custom depth_7 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/mod/forum/user.php?id=9485&amp;course=375"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />Posts</a></p></li>
+<li class="type_custom depth_7 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/mod/forum/user.php?id=9485&amp;course=375&amp;mode=discussions"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />Discussions</a></p></li></ul></li>
+<li class="type_setting depth_6 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/message/index.php"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />Messages</a></p></li>
+<li class="type_setting depth_6 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/user/files.php"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />My private files</a></p></li>
+<li class="type_setting depth_6 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/badges/mybadges.php"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />My badges</a></p></li></ul></li></ul></li>
+<li class="type_unknown depth_4 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch"><span tabindex="0">Badges</span></p><ul><li class="type_setting depth_5 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/badges/view.php?type=2&amp;id=375"><img alt="Course badges" class="smallicon navicon" title="Course badges" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/badge" />Course badges</a></p></li></ul></li>
+<li class="type_structure depth_4 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch" id="expandable_branch_30_5443"><span tabindex="0">General</span></p></li>
+<li class="type_structure depth_4 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch" id="expandable_branch_30_5444"><span tabindex="0">Introduction. Vector and superscalar processors</span></p></li>
+<li class="type_structure depth_4 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch" id="expandable_branch_30_5449"><span tabindex="0">Optimizing compilers</span></p></li>
+<li class="type_structure depth_4 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch" id="expandable_branch_30_5445"><span tabindex="0">... Parallel languages (Fortran 90). Memory hierarchy</span></p></li>
+<li class="type_structure depth_4 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch" id="expandable_branch_30_5450"><span tabindex="0">Shared-memory multiprocessors</span></p></li>
+<li class="type_structure depth_4 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch" id="expandable_branch_30_5446"><span tabindex="0">Pthreads</span></p></li>
+<li class="type_structure depth_4 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch" id="expandable_branch_30_5447"><span tabindex="0">Introduction to OpenMP</span></p></li>
+<li class="type_structure depth_4 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch" id="expandable_branch_30_5451"><span tabindex="0">Distributed-memory multiprocessors</span></p></li>
+<li class="type_structure depth_4 contains_branch" aria-expanded="true"><p class="tree_item branch"><span tabindex="0">Introduction to MPI</span></p><ul><li class="type_activity depth_5 item_with_icon"><p class="tree_item leaf hasicon"><a title="Page" href="https://csimoodle.ucd.ie/moodle/mod/page/view.php?id=24825"><img alt="Page" class="smallicon navicon" title="Page" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/page/1393237964/icon" />Lab 5: Intro to MPI</a></p></li>
+<li class="type_activity depth_5 item_with_icon"><p class="tree_item leaf hasicon"><a title="File" href="https://csimoodle.ucd.ie/moodle/mod/resource/view.php?id=24826"><img alt="File" class="smallicon navicon" title="File" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/f/pdf-24" />MPI program example in Fortran</a></p></li>
+<li class="type_activity depth_5 item_with_icon"><p class="tree_item leaf hasicon"><a title="File" href="https://csimoodle.ucd.ie/moodle/mod/resource/view.php?id=24827"><img alt="File" class="smallicon navicon" title="File" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/f/pdf-24" />MPI program example in C</a></p></li>
+<li class="type_activity depth_5 item_with_icon"><p class="tree_item leaf hasicon"><a title="File" href="https://csimoodle.ucd.ie/moodle/mod/resource/view.php?id=25011"><img alt="File" class="smallicon navicon" title="File" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/f/pdf-24" />Assignment 4</a></p></li>
+<li class="type_activity depth_5 item_with_icon current_branch"><p class="tree_item leaf hasicon active_tree_node"><a title="Page" href="https://csimoodle.ucd.ie/moodle/mod/page/view.php?id=25012"><img alt="Page" class="smallicon navicon" title="Page" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/page/1393237964/icon" />Assignment 4: note</a></p></li>
+<li class="type_activity depth_5 item_with_icon"><p class="tree_item leaf hasicon"><a title="Assignment" href="https://csimoodle.ucd.ie/moodle/mod/assign/view.php?id=25017"><img alt="Assignment" class="smallicon navicon" title="Assignment" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/assign/1393237964/icon" />Assignment 4: submission</a></p></li></ul></li></ul></li></ul></li>
+<li class="type_system depth_2 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch" id="expandable_branch_0_mycourses"><a href="https://csimoodle.ucd.ie/moodle/my/">My courses</a></p></li></ul></li></ul></div></div><span id="sb-1" class="skip-block-to"></span><a href="#sb-2" class="skip-block">Skip Administration</a><div id="inst5362" class="block_settings  block" role="navigation" aria-labelledby="instance-5362-header"><div class="header"><div class="title"><div class="block_action"></div><h2 id="instance-5362-header">Administration</h2></div></div><div class="content"><div id="settingsnav" class="box block_tree_box"><ul class="block_tree list"><li class="type_course collapsed contains_branch" aria-expanded="false"><p class="tree_item branch root_node"><span tabindex="0">Course administration</span></p><ul><li class="type_setting collapsed item_with_icon"><p class="tree_item leaf"><a href="https://csimoodle.ucd.ie/moodle/enrol/self/unenrolself.php?enrolid=1239"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/user" />Unenrol me from COMP40730</a></p></li>
+<li class="type_setting collapsed item_with_icon"><p class="tree_item leaf"><a href="https://csimoodle.ucd.ie/moodle/grade/report/index.php?id=375"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/grades" />Grades</a></p></li></ul></li>
+<li class="type_unknown collapsed contains_branch" aria-expanded="false"><hr /><p class="tree_item branch root_node" id="usersettings"><span tabindex="0">My profile settings</span></p><ul><li class="type_setting collapsed item_with_icon"><p class="tree_item leaf"><a href="https://csimoodle.ucd.ie/moodle/user/edit.php?id=9485&amp;course=375"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />Edit profile</a></p></li>
+<li class="type_setting collapsed item_with_icon"><p class="tree_item leaf"><a href="https://csimoodle.ucd.ie/moodle/user/managetoken.php?sesskey=vvf1JmATmd"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />Security keys</a></p></li>
+<li class="type_setting collapsed item_with_icon"><p class="tree_item leaf"><a href="https://csimoodle.ucd.ie/moodle/message/edit.php?id=9485"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />Messaging</a></p></li>
+<li class="type_unknown collapsed contains_branch" aria-expanded="false"><p class="tree_item branch"><span tabindex="0">Badges</span></p><ul><li class="type_setting collapsed item_with_icon"><p class="tree_item leaf"><a href="https://csimoodle.ucd.ie/moodle/badges/preferences.php"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />Preferences</a></p></li>
+<li class="type_setting collapsed item_with_icon"><p class="tree_item leaf"><a href="https://csimoodle.ucd.ie/moodle/badges/mybackpack.php"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />Backpack settings</a></p></li></ul></li></ul></li></ul></div></div></div><span id="sb-2" class="skip-block-to"></span>        		        		    </div>
+        		        		</div>
+        		       		</div>
+	                	</div>
+	    	            
+    	    	    </div>
+	    	    </div>
+	    	</div>
+    	</div>
+
+<!-- END OF CONTENT -->
+
+			</div>
+
+		</div>
+	</div>
+
+
+	
+<!-- START OF FOOTER -->
+        
+
+    			    <div id="page-footer" class="wrapper">
+		    	 <!-- There was no custom footnote set -->        		<p class="helplink"></p>
+		        <div class="logininfo">You are logged in as <a href="https://csimoodle.ucd.ie/moodle/user/profile.php?id=9485" title="View profile">Dwan Paula</a> (<a href="https://csimoodle.ucd.ie/moodle/login/logout.php?sesskey=vvf1JmATmd">Logout</a>)</div><div class="homelink"><a href="https://csimoodle.ucd.ie/moodle/course/view.php?id=375">COMP40730</a></div>		    </div>
+	    
+</div>
+<script type="text/javascript">
+//<![CDATA[
+M.str = {"moodle":{"lastmodified":"Last modified","name":"Name","error":"Error","info":"Information","viewallcourses":"View all courses","morehelp":"More help","loadinghelp":"Loading...","cancel":"Cancel","yes":"Yes"},"repository":{"type":"Type","size":"Size","invalidjson":"Invalid JSON string","nofilesattached":"No files attached","filepicker":"File picker","logout":"Logout","nofilesavailable":"No files available","norepositoriesavailable":"Sorry, none of your current repositories can return files in the required format.","fileexistsdialogheader":"File exists","fileexistsdialog_editor":"A file with that name has already been attached to the text you are editing.","fileexistsdialog_filemanager":"A file with that name has already been attached","renameto":"Rename to \"{$a}\"","referencesexist":"There are {$a} alias\/shortcut files that use this file as their source","select":"Select"},"block":{"addtodock":"Move this to the dock","undockitem":"Undock this item","dockblock":"Dock {$a} block","undockblock":"Undock {$a} block","undockall":"Undock all","hidedockpanel":"Hide the dock panel","hidepanel":"Hide panel"},"langconfig":{"thisdirectionvertical":"btt"},"admin":{"confirmation":"Confirmation"}};
+//]]>
+</script>
+<script type="text/javascript">
+//<![CDATA[
+var navtreeexpansions5361 = [{"id":"expandable_branch_30_5443","key":"5443","type":30},{"id":"expandable_branch_30_5444","key":"5444","type":30},{"id":"expandable_branch_30_5449","key":"5449","type":30},{"id":"expandable_branch_30_5445","key":"5445","type":30},{"id":"expandable_branch_30_5450","key":"5450","type":30},{"id":"expandable_branch_30_5446","key":"5446","type":30},{"id":"expandable_branch_30_5447","key":"5447","type":30},{"id":"expandable_branch_30_5451","key":"5451","type":30},{"id":"expandable_branch_0_mycourses","key":"mycourses","type":0}];
+//]]>
+</script>
+<script type="text/javascript">
+//<![CDATA[
+YUI().use('node', function(Y) {
+M.util.load_flowplayer();
+setTimeout("fix_column_widths()", 20);
+M.yui.galleryversion="2010.04.08-12-35";Y.use("core_dock","moodle-block_navigation-navigation",function() {M.block_navigation.init_add_tree({"id":"5361","instance":"5361","candock":true,"courselimit":"20","expansionlimit":0});
+});
+M.yui.galleryversion="2010.04.08-12-35";Y.use("core_dock","moodle-block_navigation-navigation",function() {M.block_navigation.init_add_tree({"id":"5362","instance":"5362","candock":true});
+});
+M.yui.galleryversion="2010.04.08-12-35";Y.use("node-menunav",function() {(function(){M.core_custom_menu.init(Y, "custom_menu_1");
+})();
+});
+M.util.help_popups.setup(Y);
+M.yui.galleryversion="2010.04.08-12-35";Y.use("moodle-core-popuphelp",function() {M.core.init_popuphelp();
+});
+M.util.init_block_hider(Y, {"id":"inst5361","title":"Navigation","preference":"block5361hidden","tooltipVisible":"Hide Navigation block","tooltipHidden":"Show Navigation block"});
+M.util.init_block_hider(Y, {"id":"inst5362","title":"Administration","preference":"block5362hidden","tooltipVisible":"Hide Administration block","tooltipHidden":"Show Administration block"});
+
+});
+//]]>
+</script>
+</body>
+</html>

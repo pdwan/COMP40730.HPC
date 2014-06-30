@@ -1,0 +1,9 @@
+set title "Demo data" 
+set xlabel "Message size"
+set ylabel "Time (sec)"
+#set legend position
+set key left box
+
+plot "datafile" using 1:2 title 'Title1' with lines, "datafile2.dat" using 1:2 title 'Title2' with lines
+#it will close immediately without pause
+pause -1

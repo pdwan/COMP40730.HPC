@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html  dir="ltr" lang="en" xml:lang="en">
+<head>
+    <title>COMP40730: Lab 1: Preliminary lab for practicals</title>
+    <link rel="shortcut icon" href="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/theme/1393237964/favicon" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="keywords" content="moodle, COMP40730: Lab 1: Preliminary lab for practicals" />
+<script type="text/javascript">
+//<![CDATA[
+var M = {}; M.yui = {};
+M.pageloadstarttime = new Date();
+M.cfg = {"wwwroot":"https:\/\/csimoodle.ucd.ie\/moodle","sesskey":"BvNgBAGNI5","loadingicon":"https:\/\/csimoodle.ucd.ie\/moodle\/theme\/image.php\/nimble\/core\/1393237964\/i\/loading_small","themerev":"1393237964","slasharguments":1,"theme":"nimble","jsrev":-1,"svgicons":true};var yui1ConfigFn = function(me) {if(/-skin|reset|fonts|grids|base/.test(me.name)){me.type='css';me.path=me.path.replace(/\.js/,'.css');me.path=me.path.replace(/\/yui2-skin/,'/assets/skins/sam/yui2-skin');}};
+var yui2ConfigFn = function(me) {var p = me.path, b = me.name.replace(/^moodle-/,'').split('-', 3), n = b.pop();if (/(skin|core)/.test(n)) {n = b.pop();me.type = 'css';};me.path = b.join('-')+'/'+n+'/'+n;if(me.type !== 'css'){me.path=me.path+'-min';};me.path=me.path+'.'+me.type;};
+YUI_config = {"debug":false,"base":"https:\/\/csimoodle.ucd.ie\/moodle\/lib\/yuilib\/3.9.1\/build\/","comboBase":"https:\/\/csimoodle.ucd.ie\/moodle\/theme\/yui_combo.php?","combine":true,"filter":null,"insertBefore":"firstthemesheet","groups":{"yui2":{"base":"https:\/\/csimoodle.ucd.ie\/moodle\/lib\/yuilib\/2in3\/2.9.0\/build\/","comboBase":"https:\/\/csimoodle.ucd.ie\/moodle\/theme\/yui_combo.php?","combine":true,"ext":false,"root":"2in3\/2.9.0\/build\/","patterns":{"yui2-":{"group":"yui2","configFn":yui1ConfigFn}}},"moodle":{"name":"moodle","base":"https:\/\/csimoodle.ucd.ie\/moodle\/theme\/yui_combo.php?moodle\/-1\/","combine":true,"comboBase":"https:\/\/csimoodle.ucd.ie\/moodle\/theme\/yui_combo.php?","ext":false,"root":"moodle\/-1\/","patterns":{"moodle-":{"group":"moodle","configFn":yui2ConfigFn}},"modules":{"moodle-core-formchangechecker":{"requires":["base","event-focus"]},"moodle-core-popuphelp":{"requires":["moodle-core-tooltip"]},"moodle-core-blocks":{"requires":["base","node","io","dom","dd","dd-scroll","moodle-core-dragdrop","moodle-core-notification"]},"moodle-core-chooserdialogue":{"requires":["base","panel","moodle-core-notification"]},"moodle-core-formautosubmit":{"requires":["base","event-key"]},"moodle-core-notification":{"requires":["base","node","panel","event-key","dd-plugin"]},"moodle-core-tooltip":{"requires":["base","node","io-base","moodle-core-notification","json-parse","widget-position","widget-position-align","event-outside","cache"]},"moodle-calendar-eventmanager":{"requires":["base","node","event-mouseenter","overlay","moodle-calendar-eventmanager-skin"]},"moodle-course-categoryexpander":{"requires":["node","event-key"]},"moodle-mod_quiz-autosave":{"requires":["base","node","event","event-valuechange","node-event-delegate","io-form"]},"moodle-block_navigation-navigation":{"requires":["base","core_dock","io-base","node","dom","event-custom","event-delegate","json-parse"]},"moodle-filter_glossary-autolinker":{"requires":["base","node","io-base","json-parse","event-delegate","overlay","moodle-core-notification"]},"moodle-editor_tinymce-collapse":{"requires":["base","node","dom"]},"moodle-report_overviewstats-charts":{"requires":["base","node","charts","charts-legend"]},"moodle-theme_bootstrapbase-bootstrap":{"requires":["node","selector-css3"]}}}},"modules":{"core_filepicker":{"name":"core_filepicker","fullpath":"https:\/\/csimoodle.ucd.ie\/moodle\/repository\/filepicker.js","requires":["base","node","node-event-simulate","json","async-queue","io-base","io-upload-iframe","io-form","yui2-treeview","panel","cookie","datatable","datatable-sort","resize-plugin","dd-plugin","escape","moodle-core_filepicker"]},"core_dock":{"name":"core_dock","fullpath":"https:\/\/csimoodle.ucd.ie\/moodle\/blocks\/dock.js","requires":["base","node","event-custom","event-mouseenter","event-resize","escape"]}}};
+M.yui.loader = {modules: {}};
+
+//]]>
+</script>
+<link rel="stylesheet" type="text/css" href="https://csimoodle.ucd.ie/moodle/theme/yui_combo.php?3.9.1/build/cssreset/cssreset-min.css&amp;3.9.1/build/cssfonts/cssfonts-min.css&amp;3.9.1/build/cssgrids/cssgrids-min.css&amp;3.9.1/build/cssbase/cssbase-min.css" /><script type="text/javascript" src="https://csimoodle.ucd.ie/moodle/theme/yui_combo.php?3.9.1/build/simpleyui/simpleyui-min.js&amp;3.9.1/build/loader/loader-min.js"></script><script id="firstthemesheet" type="text/css">/** Required in order to fix style inclusion problems in IE with YUI **/</script><link rel="stylesheet" type="text/css" href="https://csimoodle.ucd.ie/moodle/theme/styles.php/nimble/1393237964/all" />
+<script type="text/javascript" src="https://csimoodle.ucd.ie/moodle/lib/javascript-static.js"></script>
+</head>
+
+<body id="page-mod-page-view" class="format-topics  path-mod path-mod-page gecko dir-ltr lang-en yui-skin-sam yui3-skin-sam csimoodle-ucd-ie--moodle pagelayout-incourse course-375 context-42604 cmid-24821 category-7 side-post-only has_custom_menu">
+<div class="skiplinks"><a class="skip" href="#maincontent">Skip to main content</a></div>
+<script type="text/javascript">
+//<![CDATA[
+document.body.className += ' jsenabled';
+//]]>
+</script>
+
+
+<div id="page">
+
+	
+	<div id="page-wrap1">
+		<div id="page-wrap2">
+
+   			<div id="wrapper" class="clearfix">
+
+<!-- START OF HEADER -->
+
+		    	<div id="page-header" class="inside">
+					<div id="page-header-wrapper" class="wrapper clearfix">
+
+			        					    	    <div id="headermenus" class="shrinkwrapper clearfix">
+		    				    									<div id="custommenu"><div id="custom_menu_1" class="yui3-menu yui3-menu-horizontal javascript-disabled custom-menu"><div class="yui3-menu-content"><ul><li class="yui3-menuitem"><a class="yui3-menuitem-content" title="UCD" href="http://www.ucd.ie">UCD</a></li><li class="yui3-menuitem"><a class="yui3-menuitem-content" title="CSI" href="https://www.csi.ucd.ie">CSI</a></li><li class="yui3-menuitem"><a class="yui3-menuitem-content" title="My Courses" href="https://csimoodle.ucd.ie/moodle/my">My Courses</a></li></ul></div></div></div>
+								
+								<div class="headermenu">
+				        			<div class="logininfo">You are logged in as <a href="https://csimoodle.ucd.ie/moodle/user/profile.php?id=9485" title="View profile">Dwan Paula</a> (<a href="https://csimoodle.ucd.ie/moodle/login/logout.php?sesskey=BvNgBAGNI5">Logout</a>)</div>					        	</div>
+				            </div>
+		    		    
+			    	</div>
+				</div>
+
+<!-- END OF HEADER -->
+
+	
+
+<!-- START OF CONTENT -->
+
+		<div id="page-content-wrapper" class="shrinkwrapper clearfix">
+		    <div id="page-content">
+    		    <div id="region-main-box">
+        		    <div id="region-post-box">
+
+	            	    <div id="region-main-wrap">
+    	            	    <div id="region-main">
+        	            	    <div class="region-content">
+
+									<div id="region-header" class="inside clearfix">
+							    	    <h1 class="headermain">COMP40730 High Performance Computing 2014</h1>
+							    	</div>
+
+                                    
+						    	    						        	    <div class="navbar">
+						            		<div class="wrapper clearfix">
+							            	    <div class="breadcrumb">
+							            	    	<span class="accesshide">Page path</span><ul role="navigation"><li><a href="https://csimoodle.ucd.ie/moodle/">Home</a></li><li> <span class="accesshide " ><span class="arrow_text">/</span>&nbsp;</span><span class="arrow sep">&rang;</span> <a href="https://csimoodle.ucd.ie/moodle/my/">My courses</a></li><li> <span class="accesshide " ><span class="arrow_text">/</span>&nbsp;</span><span class="arrow sep">&rang;</span> <a href="https://csimoodle.ucd.ie/moodle/course/index.php?categoryid=7">LEVEL 4</a></li><li> <span class="accesshide " ><span class="arrow_text">/</span>&nbsp;</span><span class="arrow sep">&rang;</span> <a title="COMP40730 High Performance Computing 2014" href="https://csimoodle.ucd.ie/moodle/course/view.php?id=375">COMP40730</a></li><li> <span class="accesshide " ><span class="arrow_text">/</span>&nbsp;</span><span class="arrow sep">&rang;</span> <span tabindex="0">Introduction. Vector and superscalar processors</span></li><li> <span class="accesshide " ><span class="arrow_text">/</span>&nbsp;</span><span class="arrow sep">&rang;</span> <a title="Page" href="https://csimoodle.ucd.ie/moodle/mod/page/view.php?id=24821">Lab 1: Preliminary lab for practicals</a></li></ul>							            	    </div>
+							    	            <div class="navbutton">
+							    	            								    	            </div>
+								    	    </div>
+							    	    </div>
+						        	                                                	            	    <div role="main"><span id="maincontent"></span><h2 id="pageheading" class="main">Lab 1: Preliminary lab for practicals</h2><div class="box generalbox center clearfix"><div class="no-overflow"><p class="p8">UCD server and clusters to use and experiment:</p>
+<p class="p8">1) <em>csserver.ucd.ie</em>  - 2 cores machine, you will use it to understand cache blocking and matrix multiplication</p>
+<p class="p8">2) yeats.ucd.ie       - 16 cores machine, you will use it for Pthreads and OpenMP examples</p>
+<p class="p8">3) csicluster.ucd.ie - 6 node distributed memory cluster to use for MPI experiments</p>
+<p class="p8">You will use one username for all the machines.</p>
+<p class="p8">The first step is to check if you can SSH access to the servers<em>:</em></p>
+<p class="p8"><em>ssh &lt;username&gt;@csserver.ucd.ie</em></p>
+<p>Linux/Mac users should have SSH clients. For Windows, one possible SSH client is <a href="http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html">Putty</a>.</p>
+<p>On Max there may be some problem with ssh X11 forwarding. Please have a look to the link below: <a href="http://www.cyberciti.biz/faq/apple-osx-mountain-lion-mavericks-install-xquartz-server/">http://www.cyberciti.biz/faq/apple-osx-mountain-lion-mavericks-install-xquartz-server/</a></p>
+<p></p>
+<hr style="width: 100%; height: 2px;" />
+<h3 class="p8"><em>Setting up MPI environment <br /></em></h3>
+<p></p>
+<p>1. Log into the csicluster:<br /><span style="font-style: italic;">ssh &lt;username&gt;@csicluster.ucd.ie</span><br /><br />2. Create a machinefile in your preferred directory with the names of the nodes of csicluster:</p>
+<p>  csicluster01<br /> #csicluster02<br />  csicluster03<br />  csicluster04<br />  csicluster05<br />  csicluster06</p>
+<p>Here I commented out csicluster02 because it is not working at the moment.</p>
+<p>You can create this file yourself or copy to your home dir:</p>
+<p>cp /home/cs/khasanov/COMP40730/hostfile .<br /><br />3.There is a number of MPI installations on csicluster. To use the easiest one (Open MPI), do:<br /><span style="font-style: italic;">export PATH=/usr/bin:$PATH</span></p>
+<p>You can add the export statement in the .bashrc file in your home directory to make it permanent.</p>
+<p><br />4. Create a hello world MPI program in C or C++ (or in Fortran  :) ) to see if everything works properly:</p>
+<p>  #include &lt;stdio.h&gt;<br />  #include &lt;stdlib.h&gt;<br />  #include &lt;mpi.h&gt;<br /><br /> int main( int argc, char** argv )<br /> {<br />    int myId, numProc, len;<br />    char name[MPI_MAX_PROCESSOR_NAME];<br />    MPI_Init(&amp;argc, &amp;argv);<br />    MPI_Comm_rank(MPI_COMM_WORLD, &amp;myId);<br />    MPI_Comm_size(MPI_COMM_WORLD, &amp;numProc);<br />    MPI_Get_processor_name(name, &amp;len);<br />    printf("Id: %d, Name: %s, NumProcs: %d\n", myId, name, numProc);<br />    MPI_Finalize();<br />    return 0;<br /> }</p>
+<p>You can create this file yourself or copy it to your home as follows:</p>
+<p>cp /home/cs/khasanov/COMP40730/HelloWorldMPI.c .</p>
+<p><br /><span style="font-style: italic;"></span><br />5. Compile using:<br /><span style="font-style: italic;">mpicc -o &lt;binary&gt; &lt;C source&gt;</span><br />or<br /><span style="font-style: italic;">mpic++ -o &lt;binary&gt; &lt;C++ source&gt;<br /></span><br />6. MPI uses SSH to launch processes on different nodes. There is a script which will make your life much easier when setting up SSH. Create a shell script named fix-ssh.sh with the following content:<br /><span style="font-style: italic;"></span></p>
+<p><em><span style="font-style: italic;">ssh-keygen -N "" -f "$HOME/.ssh/id_rsa"<br />cat $HOME/.ssh/id_rsa.pub &gt;&gt; $HOME/.ssh/authorized_keys<br />ssh-keyscan csicluster01 &gt;&gt; $HOME/.ssh/known_hosts<br />#ssh-keyscan csicluster02 &gt;&gt; $HOME/.ssh/known_hosts<br />ssh-keyscan csicluster03 &gt;&gt; $HOME/.ssh/known_hosts<br />ssh-keyscan csicluster04 &gt;&gt; $HOME/.ssh/known_hosts<br />ssh-keyscan csicluster05 &gt;&gt; $HOME/.ssh/known_hosts<br />ssh-keyscan csicluster06 &gt;&gt; $HOME/.ssh/known_hosts</span></em></p>
+<p></p>
+<p>You can create this file yourself or copy to your home dir:</p>
+<p><em><span style="font-style: italic;">cp /home/cs/khasanov/COMP40730/fix-ssh.sh .<br /></span></em></p>
+<p><em><span style="font-style: italic;">Then source the created script as follows:</span></em></p>
+<p><em><span style="font-style: italic;"></span>source ./fix-ssh.sh<br /><span style="font-style: italic;"></span><br />7. Run the programs for example with 5 processes (1 process per node) using:<span style="font-style: italic;"><br />mpirun -np 6 --hostfile hostfile &lt;binary&gt;</span></em></p>
+<p class="p8"><em> <br /></em></p>
+<p class="p8"><strong>Plotting your experiments:</strong></p>
+<p style="padding-left: 30px;"><span style="text-decoration: underline;">For all the participants with only a Windows OS on their laptops:</span> You may be unable to remotely start any graphical tools on csserver from your Windows laptops. This includes editors or Gnuplot pictures. I see that this is uncomfortable for many of you, so here is how you can fix that. There are two ways:</p>
+<ul>
+<ul>
+<li>Install a Linux (Ubuntu is the most popular Linux distribution you can use) and use it for this course. This way, you can give up all Windows tools like putty/WinSCP/etc. and remotely start graphical editors and develop on csserver.</li>
+<li>You can keep using Windows and install Cygwin/X. The link is here: <a href="http://x.cygwin.com/">http://x.cygwin.com/</a> . This environment allows you to remotely start graphical editors and develop on csserver as well, and is easy to install.</li>
+</ul>
+</ul>
+<p class="p8"><strong>Simple Gnuplot example:</strong></p>
+<p class="p8"><strong></strong>A simple gnuplot example can be as follows:</p>
+<p class="p8">set title "Demo data"<br />set xlabel "Message size"<br />set ylabel "Time (sec)"<br />#set legend position<br />set key left box<br /><br />plot "datafile" using 1:2 title 'Title1' with lines, "datafile2.dat" using 1:2 title 'Title2' with lines<br />#it will close immediately without pause<br />pause -1</p>
+<p class="p8">Or you can copy this file and datafile and datafile2.dat as follows:</p>
+<p class="p8">cp /home/cs/khasanov/gnuplot_examples/* .</p>
+<p class="p8"></p>
+<p class="p8"></p>
+<p class="p8"></p>
+<p class="p8"></p>
+<p class="p8"><strong>If you can't get access to the server, ask for help. You can not complete the practical work without accessing the server.</strong></p>
+<hr />
+<p class="p1"></p>
+<p class="p1"></p>
+<p class="p2"><b>Simple Matrix Multiplication and Using Numerical Linear Algebra Libraries (BLAS, ATLAS)<br /></b></p>
+<p class="p6"></p>
+<p class="p7"><span class="Apple-converted-space"> </span>for(i=0; i&lt;n; i++)</p>
+<p class="p7"><span class="Apple-converted-space"> <span class="Apple-tab-span"> </span> </span>for(j=0; j&lt;n; j++)</p>
+<p class="p7"><span class="Apple-converted-space"> <span class="Apple-tab-span"> </span> </span>for(k=0; k&lt;n; k++)</p>
+<p class="p7"><span class="Apple-converted-space"> <span class="Apple-tab-span"> </span> </span>C[i][j] += A[i][k]*B[k][j];</p>
+<p class="p8"></p>
+<hr style="width: 100%; height: 2px;" />
+<p>(To be done on csserver)</p>
+<p>1. Compile and run the C program matrixmultip.c multiplying two matrices naively</p>
+<p><br /><span style="font-style: italic;">gcc -o matrixmultip /home/cs/khasanov/COMP40730/matrixmultip.c</span><br style="font-style: italic;" /><span style="font-style: italic;">./matrixmultip</span></p>
+<hr style="width: 100%; height: 2px;" />
+<p></p>
+<p></p>
+<p class="p5"><b>Cache Blocking</b></p>
+<p>Cache blocking attemps to decrease the cache-miss rates by enhancing the temporal locality and spatial locality concepts. Temporal locality implies that a data item used now is likely to be used again soon. Spatial locality implies that if a data item is referenced at a particular time, then it is likely that neighbouring locations will be referenced in the near future. A loop computation such as matrix multiplication, can lead to frequent cache misses if the array size exceeds the cache size. In cache blocking, the loops can be restructured so that the computation proceeds in contiguous blocks chosen to fit in the cache. If the block size is chosen properly, then the overall time needed for the computation can be decreased significantly. More information on cache blocking can be found <a href="https://csimoodle.ucd.ie/moodle/pluginfile.php/42604/mod_page/content/24/cacheblocking.pdf">here.</a><a href="https://csimoodle.ucd.ie/moodle/pluginfile.php/42604/mod_page/content/24/cacheblocking.pdf"><br /></a>It is recommended to have a look at least Section 3 in the article named "What Every Programmer Should Know About Memory "  on the link <a href="http://people.freebsd.org/~lstewart/articles/cpumemory.pdf">http://people.freebsd.org/~lstewart/articles/cpumemory.pdf</a> .</p>
+<p></p>
+<p class="p7"><span class="Apple-tab-span"> </span>for(bi=0; bi&lt;n; bi+=blockSize)</p>
+<p class="p7"><span class="Apple-tab-span"> </span><span class="Apple-converted-space"> </span>for(bj=0; bj&lt;n; bj+=blockSize)</p>
+<p class="p7"><span class="Apple-tab-span"> </span><span class="Apple-tab-span"> </span>for(bk=0; bk&lt;n; bk+=blockSize)</p>
+<p class="p7"><span class="Apple-tab-span"> </span><span class="Apple-tab-span"> </span><span class="Apple-tab-span"> </span>for(i=0; i&lt;blockSize; i++)</p>
+<p class="p7"><span class="Apple-tab-span"> </span><span class="Apple-tab-span"> </span><span class="Apple-tab-span"> </span><span class="Apple-converted-space"> </span>for(j=0; j&lt;blockSize; j++)</p>
+<p class="p7"><span class="Apple-tab-span"> </span><span class="Apple-tab-span"> </span><span class="Apple-tab-span"> </span><span class="Apple-tab-span"> </span>for(k=0; k&lt;BlockSize; k++)</p>
+<p class="p7"><span class="Apple-tab-span"> </span><span class="Apple-tab-span"> </span><span class="Apple-tab-span"> </span><span class="Apple-converted-space"> </span> C[bi+i][bj+j] += A[bi+i][bk+k]*B[bk+k][bj+j]</p>
+<p class="p6"></p>
+<p class="p5"><b>NOTE: </b>the block size must be a factor of the matrix size!</p>
+<p class="p5"><b>Matrix Multiplication with BLAS/ATLAS</b></p>
+<p class="p9"><span class="s1"><a href="http://www.netlib.org/blas/">BLAS</a></span><span class="s2"> </span>(Basic Linear Algebra Subprograms) are routines that provide standard building blocks for performing basic vector and matrix operations.<span class="Apple-converted-space"> </span></p>
+<p class="p9">- Because the BLAS are efficient, portable, and widely available, they are commonly used in the development of high quality linear algebra software, LAPACK for example.</p>
+<p class="p9">- These subroutines are very carefully thought out programs that exploit several techniques including Loop-Unrolling and Cache Blocking.</p>
+<p class="p10"></p>
+<p class="p9">There are three levels:<span class="Apple-converted-space"> </span></p>
+<p class="p9"><b>Level 1 BLAS</b> perform scalar, vector and vector-vector operations</p>
+<p class="p9"><b>Level 2 BLAS</b> perform matrix-vector operations</p>
+<p class="p9"><b>Level 3 BLAS </b>perform matrix-matrix operations.<span class="Apple-converted-space"> </span></p>
+<p class="p11"></p>
+<p class="p12"><b>CBLAS: </b>C interface for BLAS</p>
+<p class="p13"></p>
+<p class="p9"><b>BLAS subroutine DGEMM (Double precision GEneral Matrix Multiply)</b></p>
+<p class="p9">This function calculates C = x*A*B + y*C</p>
+<p class="p14">cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, N, N, N, 1.0, A, N, B, N, 0.0, C, N);</p>
+<p class="p9">The meanings of each argument are given in the table below**.</p>
+<p class="p9"></p>
+<table class="t1" style="width: 765px;" cellpadding="0" cellspacing="0">
+<tbody>
+<tr>
+<td colspan="3" class="td1" valign="middle">
+<p class="p15"><b>cblas_dgemm parameters</b></p>
+</td>
+</tr>
+<tr>
+<td class="td2" valign="middle">
+<p class="p16">Parameter</p>
+</td>
+<td class="td3" valign="middle">
+<p class="p16">Type</p>
+</td>
+<td class="td4" valign="middle">
+<p class="p16">Meaning</p>
+</td>
+</tr>
+<tr>
+<td class="td5" valign="middle">
+<p class="p16">1</p>
+</td>
+<td class="td6" valign="middle">
+<p class="p16">(constant)</p>
+</td>
+<td class="td7" valign="middle">
+<p class="p16">Storage order of matrix. Use the ML_BLAS_STORAGE macro to pass the correct value.</p>
+</td>
+</tr>
+<tr>
+<td class="td5" valign="middle">
+<p class="p16">2-3</p>
+</td>
+<td class="td6" valign="middle">
+<p class="p16">(constant)</p>
+</td>
+<td class="td7" valign="middle">
+<p class="p16">Whether or not the A and B (respectively) matrices should be transposed before multiplication. Pass CblasNoTrans to avoid transpose.</p>
+</td>
+</tr>
+<tr>
+<td class="td5" valign="middle">
+<p class="p16">4</p>
+</td>
+<td class="td6" valign="middle">
+<p class="p16">integer</p>
+</td>
+<td class="td7" valign="middle">
+<p class="p16">The number of rows in the A matrix.</p>
+</td>
+</tr>
+<tr>
+<td class="td5" valign="middle">
+<p class="p16">5</p>
+</td>
+<td class="td6" valign="middle">
+<p class="p16">integer</p>
+</td>
+<td class="td7" valign="middle">
+<p class="p16">The number of columns in the B matrix.</p>
+</td>
+</tr>
+<tr>
+<td class="td5" valign="middle">
+<p class="p16">6</p>
+</td>
+<td class="td6" valign="middle">
+<p class="p16">integer</p>
+</td>
+<td class="td7" valign="middle">
+<p class="p16">The number of columns in the A matrix.</p>
+</td>
+</tr>
+<tr>
+<td class="td5" valign="middle">
+<p class="p16">7</p>
+</td>
+<td class="td6" valign="middle">
+<p class="p16">double</p>
+</td>
+<td class="td7" valign="middle">
+<p class="p16">A scalar to multiply by during computation.</p>
+</td>
+</tr>
+<tr>
+<td class="td5" valign="middle">
+<p class="p16">8</p>
+</td>
+<td class="td6" valign="middle">
+<p class="p16">double *</p>
+</td>
+<td class="td7" valign="middle">
+<p class="p16">The data array for the A matrix.</p>
+</td>
+</tr>
+<tr>
+<td class="td5" valign="middle">
+<p class="p16">9</p>
+</td>
+<td class="td6" valign="middle">
+<p class="p16">integer</p>
+</td>
+<td class="td7" valign="middle">
+<p class="p16">The major stride for the A matrix.</p>
+</td>
+</tr>
+<tr>
+<td class="td5" valign="middle">
+<p class="p16">10</p>
+</td>
+<td class="td6" valign="middle">
+<p class="p16">double *</p>
+</td>
+<td class="td7" valign="middle">
+<p class="p16">The data array for the B matrix.</p>
+</td>
+</tr>
+<tr>
+<td class="td5" valign="middle">
+<p class="p16">11</p>
+</td>
+<td class="td6" valign="middle">
+<p class="p16">integer</p>
+</td>
+<td class="td7" valign="middle">
+<p class="p16">The major stride for the B matrix.</p>
+</td>
+</tr>
+<tr>
+<td class="td5" valign="middle">
+<p class="p16">12</p>
+</td>
+<td class="td6" valign="middle">
+<p class="p16">double</p>
+</td>
+<td class="td7" valign="middle">
+<p class="p16">A scalar to multiply C by during the computation.</p>
+</td>
+</tr>
+<tr>
+<td class="td5" valign="middle">
+<p class="p16">13</p>
+</td>
+<td class="td6" valign="middle">
+<p class="p16">double *</p>
+</td>
+<td class="td7" valign="middle">
+<p class="p16">The data array for the C matrix (output).</p>
+</td>
+</tr>
+<tr>
+<td class="td5" valign="middle">
+<p class="p16">14</p>
+</td>
+<td class="td6" valign="middle">
+<p class="p16">integer</p>
+</td>
+<td class="td7" valign="middle">
+<p class="p16">The major stride for the C matrix.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="p17"></p>
+<hr style="width: 100%; height: 2px;" />
+<p>(To be done on csserver)</p>
+<p>2. <span style="font-family: times new roman,times,serif;">We have to link the BLAS library files to the C program BLAS.c. To Achieve this, we compile the program on </span><i style="font-family: times new roman,times,serif;">csserver.ucd.ie</i><span style="font-family: times new roman,times,serif;"> like:</span><span class="Apple-converted-space"> </span></p>
+<p><span style="font-family: times new roman,times,serif;"><em id="yui_3_9_1_2_1382562411157_337"><span id="yui_3_9_1_2_1382562411157_336" style="font-family: times new roman,times,serif;">gcc   <span style="font-family: times new roman,times,serif;"><em id="yui_3_9_1_2_1382562411157_337"><span id="yui_3_9_1_2_1382562411157_336" style="font-family: times new roman,times,serif;">/home/cs/khasanov/COMP40730/BLAS.c   -o BLAS</span></em></span>    -I/home/cs/khasanov/libs/CBLAS/src   /home/cs/khasanov/libs/cblas_LINUX.a  /usr/lib/libblas.a -lgfortran</span></em></span></p>
+<p><span style="font-family: times new roman,times,serif;"><em><span style="font-family: times new roman,times,serif;">Or</span></em></span></p>
+<p><em><span style="font-family: times new roman,times,serif;">gfortran -O3 <span style="font-family: times new roman,times,serif;"><em id="yui_3_9_1_2_1382562411157_337"><span id="yui_3_9_1_2_1382562411157_336" style="font-family: times new roman,times,serif;"> -I/home/cs/khasanov/libs/CBLAS/src</span></em></span>   <span style="font-family: times new roman,times,serif;"><em id="yui_3_9_1_2_1382562411157_337"><span id="yui_3_9_1_2_1382562411157_336" style="font-family: times new roman,times,serif;">/home/cs/khasanov/BLAS.c</span></em></span>  -o BLAS  /home/cs/khasanov/libs/cblas_LINUX.a  /usr/lib/libblas.a</span></em></p>
+<p>Note that we use "libblas.a", a library containing BLAS information specific to the architecture and operating system of the machine.<span class="Apple-converted-space"> </span></p>
+<p class="p9"><b><i>NOTE:</i></b><i> The -I after "-O3" in the first line is a capitol "i".</i></p>
+<hr style="width: 100%; height: 2px;" />
+<p></p>
+<p class="p20"><b>ATLAS</b></p>
+<p class="p9"><span class="s4"><a href="http://math-atlas.sourceforge.net/">ATLAS </a></span>stands for <i>Automatically Tuned Linear Algebra Subprograms</i>. ATLAS is based on BLAS but when you install ATLAS, many tests are performed in order to determine the best pararmeters to use for your system. This can give better performance than BLAS because BLAS uses parameters that are designed to maximize portability, not performance on a particular architecture.</p>
+<p class="p9">Some commercial packages that use ATLAS are: MAPLE(v7 and higher), MATLAB(v6.0 and higher), Mathematica(forthcoming), and Octave.</p>
+<p class="p9">The program ATLAS.c performs the same function call as BLAS.c, but is faster. <b>The only difference</b> between the two programs is how they are compiled. ATLAS.c is linked to files that contain the parameters that ATLAS has determined to be optimal on the machine it is installed on. The compile commands for ATLAS.c is below.</p>
+<hr style="width: 100%; height: 2px;" />
+<p class="p21">(To be done on csserver)</p>
+<p class="p21">3. Compile and run:</p>
+<p style="font-style: italic;" class="p22">gcc -o ATLAS /home/cs/khasanov/COMP40730/ATLAS.c -I/home/cs/khasanov/libs/ATLAS/include/ -L/home/cs/khasanov/libs/ATLAS/lib/Linux_UNKNOWNSSE2_4/ -lcblas -latlas -lm -O3</p>
+<hr style="width: 100%; height: 2px;" />
+<p><b>Benchmarking your code</b><br /><span style="font-family: arial,helvetica,sans-serif;">You can measure the runtime of your code by:<br /></span></p>
+<ul>
+<li>adding a header <span style="font-style: italic;"></span></li>
+</ul>
+<p><span style="font-style: italic;">#include &lt;sys/time.h&gt;</span></p>
+<ul>
+<li>adding variables</li>
+</ul>
+<p><span style="font-style: italic;">struct timeval tv1, tv2;</span><br style="font-style: italic;" /><span style="font-style: italic;">struct timezone tz;</span></p>
+<ul>
+<li>measuring the runtime</li>
+</ul>
+<p><span style="font-style: italic;">gettimeofday(&amp;tv1, &amp;tz);</span><br style="font-style: italic;" /><span style="font-style: italic;">&lt;code to time&gt;</span><br style="font-style: italic;" /><span style="font-style: italic;">gettimeofday(&amp;tv2, &amp;tz);</span><br style="font-style: italic;" /><span style="font-style: italic;">double elapsed = (double) (tv2.tv_sec-tv1.tv_sec) + (double) (tv2.tv_usec-tv1.tv_usec) * 1.e-6;</span></p>
+<hr style="width: 100%; height: 2px;" />
+<p><span style="font-family: arial,helvetica,sans-serif;">(To be done on csserver)</span></p>
+<p><span style="font-family: arial,helvetica,sans-serif;">4. Extend all three programs to measure only the runtime of the matrix multiplication. Print the results using <span style="font-style: italic;">printf</span>. What timings did you observe for the different matrix multiplication routines?<br /></span></p>
+<hr style="width: 100%; height: 2px;" />
+<p><span style="font-family: arial,helvetica,sans-serif;"> </span></p></div></div><div class="modified">Last modified: Monday, 28 April 2014, 10:16 AM</div></div>                                    	                	        </div>
+    	                	</div>
+	    	            </div>
+
+		                    		            <div id="region-post" class="block-region">
+        	    	    	<div id="region-post-wrap-1">
+        	    	    		<div id="region-post-wrap-2">
+		        		            <div class="region-content">
+    		        		            <a href="#sb-1" class="skip-block">Skip Navigation</a><div id="inst5361" class="block_navigation  block" role="navigation" aria-labelledby="instance-5361-header"><div class="header"><div class="title"><div class="block_action"></div><h2 id="instance-5361-header">Navigation</h2></div></div><div class="content"><ul class="block_tree list"><li class="type_unknown depth_1 contains_branch" aria-expanded="true"><p class="tree_item branch canexpand navigation_node"><a href="https://csimoodle.ucd.ie/moodle/">Home</a></p><ul><li class="type_setting depth_2 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/my/"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />My home</a></p></li>
+<li class="type_course depth_2 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch"><span title="CSIMOODLE.UCD.IE" tabindex="0">Site pages</span></p><ul><li class="type_custom depth_3 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/badges/view.php?type=1"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />Site badges</a></p></li>
+<li class="type_custom depth_3 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/tag/search.php"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />Tags</a></p></li>
+<li class="type_custom depth_3 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/calendar/view.php?view=month"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />Calendar</a></p></li>
+<li class="type_activity depth_3 item_with_icon"><p class="tree_item leaf hasicon"><a title="Forum" href="https://csimoodle.ucd.ie/moodle/mod/forum/view.php?id=1738"><img alt="Forum" class="smallicon navicon" title="Forum" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/forum/1393237964/icon" />CSIMoodle News</a></p></li></ul></li>
+<li class="type_user depth_2 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch"><span tabindex="0">My profile</span></p><ul><li class="type_custom depth_3 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/user/profile.php?id=9485"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />View profile</a></p></li>
+<li class="type_custom depth_3 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch"><span tabindex="0">Forum posts</span></p><ul><li class="type_custom depth_4 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/mod/forum/user.php?id=9485"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />Posts</a></p></li>
+<li class="type_custom depth_4 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/mod/forum/user.php?id=9485&amp;mode=discussions"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />Discussions</a></p></li></ul></li>
+<li class="type_setting depth_3 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/message/index.php"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />Messages</a></p></li>
+<li class="type_setting depth_3 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/user/files.php"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />My private files</a></p></li>
+<li class="type_setting depth_3 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/badges/mybadges.php"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />My badges</a></p></li></ul></li>
+<li class="type_system depth_2 contains_branch" aria-expanded="true"><p class="tree_item branch"><span tabindex="0">Current course</span></p><ul><li class="type_course depth_3 contains_branch" aria-expanded="true"><p class="tree_item branch canexpand"><a title="COMP40730 High Performance Computing 2014" href="https://csimoodle.ucd.ie/moodle/course/view.php?id=375">COMP40730</a></p><ul><li class="type_unknown depth_4 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch"><a href="https://csimoodle.ucd.ie/moodle/user/index.php?id=375">Participants</a></p><ul><li class="type_user depth_5 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch"><a href="https://csimoodle.ucd.ie/moodle/user/view.php?id=9485&amp;course=375">Dwan Paula</a></p><ul><li class="type_custom depth_6 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/user/view.php?id=9485&amp;course=375"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />View profile</a></p></li>
+<li class="type_custom depth_6 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch"><span tabindex="0">Forum posts</span></p><ul><li class="type_custom depth_7 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/mod/forum/user.php?id=9485&amp;course=375"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />Posts</a></p></li>
+<li class="type_custom depth_7 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/mod/forum/user.php?id=9485&amp;course=375&amp;mode=discussions"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />Discussions</a></p></li></ul></li>
+<li class="type_setting depth_6 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/message/index.php"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />Messages</a></p></li>
+<li class="type_setting depth_6 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/user/files.php"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />My private files</a></p></li>
+<li class="type_setting depth_6 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/badges/mybadges.php"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />My badges</a></p></li></ul></li></ul></li>
+<li class="type_unknown depth_4 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch"><span tabindex="0">Badges</span></p><ul><li class="type_setting depth_5 item_with_icon"><p class="tree_item leaf hasicon"><a href="https://csimoodle.ucd.ie/moodle/badges/view.php?type=2&amp;id=375"><img alt="Course badges" class="smallicon navicon" title="Course badges" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/badge" />Course badges</a></p></li></ul></li>
+<li class="type_structure depth_4 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch" id="expandable_branch_30_5443"><span tabindex="0">General</span></p></li>
+<li class="type_structure depth_4 contains_branch" aria-expanded="true"><p class="tree_item branch"><span tabindex="0">Introduction. Vector and superscalar processors</span></p><ul><li class="type_activity depth_5 item_with_icon current_branch"><p class="tree_item leaf hasicon active_tree_node"><a title="Page" href="https://csimoodle.ucd.ie/moodle/mod/page/view.php?id=24821"><img alt="Page" class="smallicon navicon" title="Page" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/page/1393237964/icon" />Lab 1: Preliminary lab for practicals</a></p></li>
+<li class="type_activity depth_5 item_with_icon"><p class="tree_item leaf hasicon"><a title="File" href="https://csimoodle.ucd.ie/moodle/mod/resource/view.php?id=24889"><img alt="File" class="smallicon navicon" title="File" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/f/pdf-24" />Lecture slides 1</a></p></li></ul></li>
+<li class="type_structure depth_4 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch" id="expandable_branch_30_5449"><span tabindex="0">Optimizing compilers</span></p></li>
+<li class="type_structure depth_4 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch" id="expandable_branch_30_5445"><span tabindex="0">... Parallel languages (Fortran 90). Memory hierarchy</span></p></li>
+<li class="type_structure depth_4 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch" id="expandable_branch_30_5450"><span tabindex="0">Shared-memory multiprocessors</span></p></li>
+<li class="type_structure depth_4 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch" id="expandable_branch_30_5446"><span tabindex="0">Pthreads</span></p></li>
+<li class="type_structure depth_4 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch" id="expandable_branch_30_5447"><span tabindex="0">Introduction to OpenMP</span></p></li>
+<li class="type_structure depth_4 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch" id="expandable_branch_30_5451"><span tabindex="0">Distributed-memory multiprocessors</span></p></li>
+<li class="type_structure depth_4 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch" id="expandable_branch_30_5448"><span tabindex="0">Introduction to MPI</span></p></li></ul></li></ul></li>
+<li class="type_system depth_2 collapsed contains_branch" aria-expanded="false"><p class="tree_item branch" id="expandable_branch_0_mycourses"><a href="https://csimoodle.ucd.ie/moodle/my/">My courses</a></p></li></ul></li></ul></div></div><span id="sb-1" class="skip-block-to"></span><a href="#sb-2" class="skip-block">Skip Administration</a><div id="inst5362" class="block_settings  block" role="navigation" aria-labelledby="instance-5362-header"><div class="header"><div class="title"><div class="block_action"></div><h2 id="instance-5362-header">Administration</h2></div></div><div class="content"><div id="settingsnav" class="box block_tree_box"><ul class="block_tree list"><li class="type_course collapsed contains_branch" aria-expanded="false"><p class="tree_item branch root_node"><span tabindex="0">Course administration</span></p><ul><li class="type_setting collapsed item_with_icon"><p class="tree_item leaf"><a href="https://csimoodle.ucd.ie/moodle/enrol/self/unenrolself.php?enrolid=1239"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/user" />Unenrol me from COMP40730</a></p></li>
+<li class="type_setting collapsed item_with_icon"><p class="tree_item leaf"><a href="https://csimoodle.ucd.ie/moodle/grade/report/index.php?id=375"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/grades" />Grades</a></p></li></ul></li>
+<li class="type_unknown collapsed contains_branch" aria-expanded="false"><hr /><p class="tree_item branch root_node" id="usersettings"><span tabindex="0">My profile settings</span></p><ul><li class="type_setting collapsed item_with_icon"><p class="tree_item leaf"><a href="https://csimoodle.ucd.ie/moodle/user/edit.php?id=9485&amp;course=375"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />Edit profile</a></p></li>
+<li class="type_setting collapsed item_with_icon"><p class="tree_item leaf"><a href="https://csimoodle.ucd.ie/moodle/user/managetoken.php?sesskey=BvNgBAGNI5"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />Security keys</a></p></li>
+<li class="type_setting collapsed item_with_icon"><p class="tree_item leaf"><a href="https://csimoodle.ucd.ie/moodle/message/edit.php?id=9485"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />Messaging</a></p></li>
+<li class="type_unknown collapsed contains_branch" aria-expanded="false"><p class="tree_item branch"><span tabindex="0">Badges</span></p><ul><li class="type_setting collapsed item_with_icon"><p class="tree_item leaf"><a href="https://csimoodle.ucd.ie/moodle/badges/preferences.php"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />Preferences</a></p></li>
+<li class="type_setting collapsed item_with_icon"><p class="tree_item leaf"><a href="https://csimoodle.ucd.ie/moodle/badges/mybackpack.php"><img alt="" class="smallicon navicon" title="" src="https://csimoodle.ucd.ie/moodle/theme/image.php/nimble/core/1393237964/i/navigationitem" />Backpack settings</a></p></li></ul></li></ul></li></ul></div></div></div><span id="sb-2" class="skip-block-to"></span>        		        		    </div>
+        		        		</div>
+        		       		</div>
+	                	</div>
+	    	            
+    	    	    </div>
+	    	    </div>
+	    	</div>
+    	</div>
+
+<!-- END OF CONTENT -->
+
+			</div>
+
+		</div>
+	</div>
+
+
+	
+<!-- START OF FOOTER -->
+        
+
+    			    <div id="page-footer" class="wrapper">
+		    	 <!-- There was no custom footnote set -->        		<p class="helplink"></p>
+		        <div class="logininfo">You are logged in as <a href="https://csimoodle.ucd.ie/moodle/user/profile.php?id=9485" title="View profile">Dwan Paula</a> (<a href="https://csimoodle.ucd.ie/moodle/login/logout.php?sesskey=BvNgBAGNI5">Logout</a>)</div><div class="homelink"><a href="https://csimoodle.ucd.ie/moodle/course/view.php?id=375">COMP40730</a></div>		    </div>
+	    
+</div>
+<script type="text/javascript">
+//<![CDATA[
+M.str = {"moodle":{"lastmodified":"Last modified","name":"Name","error":"Error","info":"Information","viewallcourses":"View all courses","morehelp":"More help","loadinghelp":"Loading...","cancel":"Cancel","yes":"Yes"},"repository":{"type":"Type","size":"Size","invalidjson":"Invalid JSON string","nofilesattached":"No files attached","filepicker":"File picker","logout":"Logout","nofilesavailable":"No files available","norepositoriesavailable":"Sorry, none of your current repositories can return files in the required format.","fileexistsdialogheader":"File exists","fileexistsdialog_editor":"A file with that name has already been attached to the text you are editing.","fileexistsdialog_filemanager":"A file with that name has already been attached","renameto":"Rename to \"{$a}\"","referencesexist":"There are {$a} alias\/shortcut files that use this file as their source","select":"Select"},"block":{"addtodock":"Move this to the dock","undockitem":"Undock this item","dockblock":"Dock {$a} block","undockblock":"Undock {$a} block","undockall":"Undock all","hidedockpanel":"Hide the dock panel","hidepanel":"Hide panel"},"langconfig":{"thisdirectionvertical":"btt"},"admin":{"confirmation":"Confirmation"}};
+//]]>
+</script>
+<script type="text/javascript">
+//<![CDATA[
+var navtreeexpansions5361 = [{"id":"expandable_branch_30_5443","key":"5443","type":30},{"id":"expandable_branch_30_5449","key":"5449","type":30},{"id":"expandable_branch_30_5445","key":"5445","type":30},{"id":"expandable_branch_30_5450","key":"5450","type":30},{"id":"expandable_branch_30_5446","key":"5446","type":30},{"id":"expandable_branch_30_5447","key":"5447","type":30},{"id":"expandable_branch_30_5451","key":"5451","type":30},{"id":"expandable_branch_30_5448","key":"5448","type":30},{"id":"expandable_branch_0_mycourses","key":"mycourses","type":0}];
+//]]>
+</script>
+<script type="text/javascript">
+//<![CDATA[
+YUI().use('node', function(Y) {
+M.util.load_flowplayer();
+setTimeout("fix_column_widths()", 20);
+M.yui.galleryversion="2010.04.08-12-35";Y.use("core_dock","moodle-block_navigation-navigation",function() {M.block_navigation.init_add_tree({"id":"5361","instance":"5361","candock":true,"courselimit":"20","expansionlimit":0});
+});
+M.yui.galleryversion="2010.04.08-12-35";Y.use("core_dock","moodle-block_navigation-navigation",function() {M.block_navigation.init_add_tree({"id":"5362","instance":"5362","candock":true});
+});
+M.yui.galleryversion="2010.04.08-12-35";Y.use("node-menunav",function() {(function(){M.core_custom_menu.init(Y, "custom_menu_1");
+})();
+});
+M.util.help_popups.setup(Y);
+M.yui.galleryversion="2010.04.08-12-35";Y.use("moodle-core-popuphelp",function() {M.core.init_popuphelp();
+});
+M.util.init_block_hider(Y, {"id":"inst5361","title":"Navigation","preference":"block5361hidden","tooltipVisible":"Hide Navigation block","tooltipHidden":"Show Navigation block"});
+M.util.init_block_hider(Y, {"id":"inst5362","title":"Administration","preference":"block5362hidden","tooltipVisible":"Hide Administration block","tooltipHidden":"Show Administration block"});
+
+});
+//]]>
+</script>
+</body>
+</html>

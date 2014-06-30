@@ -7,7 +7,7 @@
 * 
 *   Write C programs implementing the following three algorithms of multiplication of two n×n 
 *   dense matrices:
-*   1)    Straightforward non-blocked ijk algorithm. <*****
+*   1)    Straightforward non-blocked ijk algorithm.        <*****
 *   2)    Blocked ijk algorithm using square b×b blocks.
 *   3)    Blocked kij algorithm using square b×b blocks.
 *
@@ -286,7 +286,7 @@ int main ( int argc, char *argv[] )
     double elapsed_cblas = (double) (tv2.tv_sec-tv1.tv_sec) + (double) (tv2.tv_usec-tv1.tv_usec) * 1.e-6;
 
 //  output results to .dat file : matrix size || Time/manual 	|| Time / dgemm
-    printf("%d \t %g \t %g \t %g \n",  nx, elapsed_simple, elapsed_complex, elapsed_cblas);
+    fprintf(fp_timing, "%d \t %g \t %g \t %g \n",  nx, elapsed_simple, elapsed_complex, elapsed_cblas);
    	
 //  De-allocate memory for matrices A, B & C
     printf("CLEAN-UP : \n");

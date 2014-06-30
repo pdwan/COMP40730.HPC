@@ -125,36 +125,35 @@ add_comments_to_log_file() {
 
     l_LOG_FILE=$1
     l_PROG_NAME=$2
+    l_BLOCK_ENABLED=$3
     file_type_dat="dat"
-    file_type_txt="txt"
 
     $_ECHO -e "# Program running :\t$l_PROG_NAME \n# File name is : \t$l_LOG_FILE" > $l_LOG_FILE
     $_ECHO -e "# Computation of Straight-forward IJK, Blocked IJK or Blocked KIJ using square NxN & square bxb block (as applicable) \n # for matrices |A| & |B| storing results in |C|	" >> $l_LOG_FILE
 
 my_string=abc # l_LOG_FILE
-substring=ab # file_type_dat
-if [ "${my_string/$substring}" = "$my_string" ] ; then
-  echo "${substring} is not in ${my_string}"
+file_type_dat=ab # file_type_dat
+if [ "${l_LOG_FILE/$file_type_dat}" = "$l_LOG_FILE" ] ; then
+  echo "${file_type_dat} is not in ${l_LOG_FILE}"
 else
-  echo "${substring} was found in ${my_string}"
+  echo "${file_type_dat} was found in ${l_LOG_FILE}"
 fi
 
-# 			
-
-    if [ "${l_LOG_FILE/$file_type_txt}" = "$my_string" ] ; then
+    if ( case ${l_LOG_FILE} in *"${file_type_dat}"*) true;; *) false;; esac) ; then
+    {
+        $_ECHO -e "'${l_LOG_FILE}' contains '${file_type_dat}'"
+        $_ECHO -e "DEBUG : \t'${l_LOG_FILE}' does contain '${file_type_dat}'"
+        if ( "$l_BLOCK_ENABLED" == "true" ) ; then 
         {
-     $_ECHO -e  "${substring} is not in ${my_string}"
-    else
-     $_ECHO -e  "${substring} was found in ${my_string}"
-fi
-
-if l_LOG_NAME
-#				
-#				
-#Matrix Size	Block Size	Time/manual	Time/manual	Time/dgenn
-#		Simple	Complex	
-
-
+            $_ECHO -e  "# \n#Matrix Size \tBlock Size \tTime/manual \tTime/manual \tTime/dgenn \n# \t\tSimple \tComplex \n #") >> $l_LOG_FILE
+        } else {
+            $_ECHO -e  "# \n#Matrix Size \tTime/manual \tTime/manual \tTime/dgenn \n# \tSimple \tComplex \n #") >> $l_LOG_FILE
+        }
+    } else 
+    {
+        $_ECHO -e  "# Summary of values added to each matrix - retained for later reference and validation " >> $l_LOG_FILE # txt 
+        $_ECHO -e "DEBUG : \t'${l_LOG_FILE}' does not contain '${file_type_dat}'"
+    }
 }
 
 # function : execute each algorithm in turn wih specified parameters / options
@@ -299,8 +298,8 @@ if [ "$BUILD_SIMPLE" == "true" ]  || [ "$BUILD_ALL" == "true" ] ; then
             DAT_FILE_SIMPLE_TIMING="${DAT_FILE_SIMPLE}-timing-$i${DAT_SUFFIX}"
             init_log_file $LOG_FILE_SIMPLE_VALUES 
             init_log_file $DAT_FILE_SIMPLE_TIMING
-            add_comments_to_log_file $LOG_FILE_SIMPLE_VALUES $ALGORITHIM_SIMPLE
-            add_comments_to_log_file $DAT_FILE_SIMPLE_TIMING $ALGORITHIM_SIMPLE
+            add_comments_to_log_file $LOG_FILE_SIMPLE_VALUES $ALGORITHIM_SIMPLE $BLOCK_ENABLED
+            add_comments_to_log_file $DAT_FILE_SIMPLE_TIMING $ALGORITHIM_SIMPLE $BLOCK_ENABLED
             EXECUTE_OPTIONS=" ${ALGORITHIM_OPTIONS} ${NX_ARRAY[$i]}"
             algorithm_execute "${ALGORITHIM_SIMPLE}" "${EXECUTE_OPTIONS}" "${LOG_FILE_SIMPLE_VALUES}" "${DAT_FILE_SIMPLE_TIMING}"
             LOG_FILE_SIMPLE_VALUES="${LOG_FILE_SIMPLE}"
@@ -323,9 +322,8 @@ if [ "$BUILD_BLOCKED_IJK" == "true" ]  || [ "$BUILD_ALL" == "true" ] ; then
             DAT_FILE_BIJK_TIMING="${DAT_FILE_BIJK}-timing-$i${DAT_SUFFIX}"
             init_log_file $LOG_FILE_BIJK_VALUES 
             init_log_file $DAT_FILE_BIJK_TIMING
-            add_comments_to_log_file $LOG_FILE_BIJK_VALUES ${ALGORITHIM_BIJK
-            add_comments_to_log_file $DAT_FILE_BIJK_TIMING $ALGORITHIM_BIJK
-
+            add_comments_to_log_file $LOG_FILE_BIJK_VALUES ${ALGORITHIM_BIJK $BLOCK_ENABLED
+            add_comments_to_log_file $DAT_FILE_BIJK_TIMING $ALGORITHIM_BIJK $BLOCK_ENABLED
             EXECUTE_OPTIONS="${ALGORITHIM_OPTIONS} ${NX_ARRAY[$i]} ${NB_ARRAY[$i]}"
             algorithm_execute "${ALGORITHIM_BLOCKED_IJK}" "${EXECUTE_OPTIONS}" "${LOG_FILE_BIJK_VALUES}" "${DAT_FILE_BIJK_TIMING}"
             LOG_FILE_BIJK_VALUES="${LOG_FILE_BIJK}"

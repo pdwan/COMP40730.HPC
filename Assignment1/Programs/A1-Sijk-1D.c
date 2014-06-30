@@ -45,14 +45,6 @@ void usage () {
     exit(1);
 }
 
-void add_comments_to_files (FILE *fp) 
-{
-    fprintf(fp, "# ......................................................................................................... \n");
-    fprintf(fp, "# Computation of Blocked IJK using square bxb block for matrices |A| & |B| storing results in |C|") ;
-    fprintf(fp, "#\n# Matrix Size\t Block Size\t Time/manual\t Time/manual\t Time/dgenn \n #\t\tSimple\tComplex");	
-    fprintf(fp, "# ......................................................................................................... \n");
-}
-
 double* allocate_memory_1d_matrix (int rows, int cols)
 {
     double* l_matrix;  

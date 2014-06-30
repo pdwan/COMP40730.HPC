@@ -145,15 +145,17 @@ fi
         $_ECHO -e "DEBUG : \t'${l_LOG_FILE}' does contain '${file_type_dat}'"
         if ( "$l_BLOCK_ENABLED" == "true" ) ; then 
         {
-            $_ECHO -e  "# \n#Matrix Size \tBlock Size \tTime/manual \tTime/manual \tTime/dgenn \n# \t\tSimple \tComplex \n #") >> $l_LOG_FILE
+            $_ECHO -e  "# \n#Matrix Size \tBlock Size \tTime/manual \tTime/manual \tTime/dgenn \n# \t\tSimple \tComplex \n #"	 >> $l_LOG_FILE
         } else {
-            $_ECHO -e  "# \n#Matrix Size \tTime/manual \tTime/manual \tTime/dgenn \n# \tSimple \tComplex \n #") >> $l_LOG_FILE
+            $_ECHO -e  "# \n#Matrix Size \tTime/manual \tTime/manual \tTime/dgenn \n# \tSimple \tComplex \n #" >> $l_LOG_FILE
         }
+        fi
     } else 
     {
         $_ECHO -e  "# Summary of values added to each matrix - retained for later reference and validation " >> $l_LOG_FILE # txt 
         $_ECHO -e "DEBUG : \t'${l_LOG_FILE}' does not contain '${file_type_dat}'"
     }
+    fi
 }
 
 # function : execute each algorithm in turn wih specified parameters / options

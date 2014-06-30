@@ -130,30 +130,23 @@ add_comments_to_log_file() {
 
     $_ECHO -e "# Program running :\t$l_PROG_NAME \n# File name is : \t$l_LOG_FILE" > $l_LOG_FILE
     $_ECHO -e "# Computation of Straight-forward IJK, Blocked IJK or Blocked KIJ using square NxN & square bxb block (as applicable) \n # for matrices |A| & |B| storing results in |C|	" >> $l_LOG_FILE
-
-my_string=abc # l_LOG_FILE
-file_type_dat=ab # file_type_dat
-if [ "${l_LOG_FILE/$file_type_dat}" = "$l_LOG_FILE" ] ; then
-  echo "${file_type_dat} is not in ${l_LOG_FILE}"
-else
-  echo "${file_type_dat} was found in ${l_LOG_FILE}"
-fi
-
     if ( case ${l_LOG_FILE} in *"${file_type_dat}"*) true;; *) false;; esac) ; then
     {
         $_ECHO -e "'${l_LOG_FILE}' contains '${file_type_dat}'"
         $_ECHO -e "DEBUG : \t'${l_LOG_FILE}' does contain '${file_type_dat}'"
         if ( "$l_BLOCK_ENABLED" == "true" ) ; then 
         {
-            $_ECHO -e  "# \n#Matrix Size \tBlock Size \tTime/manual \tTime/manual \tTime/dgenn \n# \t\tSimple \tComplex \n #") >> $l_LOG_FILE
+            $_ECHO -e  "# \n#Matrix Size \tBlock Size \tTime/manual \tTime/manual \tTime/dgenn \n# \t\tSimple \tComplex \n #"	 >> $l_LOG_FILE
         } else {
-            $_ECHO -e  "# \n#Matrix Size \tTime/manual \tTime/manual \tTime/dgenn \n# \tSimple \tComplex \n #") >> $l_LOG_FILE
+            $_ECHO -e  "# \n#Matrix Size \tTime/manual \tTime/manual \tTime/dgenn \n# \tSimple \tComplex \n #" >> $l_LOG_FILE
         }
+        fi
     } else 
     {
         $_ECHO -e  "# Summary of values added to each matrix - retained for later reference and validation " >> $l_LOG_FILE # txt 
         $_ECHO -e "DEBUG : \t'${l_LOG_FILE}' does not contain '${file_type_dat}'"
     }
+    fi
 }
 
 # function : execute each algorithm in turn wih specified parameters / options

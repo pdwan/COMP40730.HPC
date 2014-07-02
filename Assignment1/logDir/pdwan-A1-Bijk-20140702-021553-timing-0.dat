@@ -1,0 +1,13 @@
+# Program :  
+# Log file  : pdwan-A1-Bijk-20140702-021553-timing-0.dat 
+# where :  
+#     .dat contains timing data & .txt contains matrix values 
+#
+# Computation of Straight-forward IJK, Blocked IJK or Blocked KIJ using square NxN 
+# & square bxb block (as applicable) for matrices |C| += |A| * |B| 
+# 
+#Matrix Size 	Block Size 	Time/manual 	Time/manual 	Time/dgenn 
+# 	 	Simple 	Complex 
+#
+# ------------------------------------------------------------------------------------- 
+# 

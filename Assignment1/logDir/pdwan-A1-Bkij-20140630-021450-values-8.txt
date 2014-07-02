@@ -1,4 +1,0 @@
-# file name : logDir/pdwan-A1-Bkij-20140630-021450-values-8.txt 
- containing: 	matrix valuesfor |C| += |A| x |B| 
-# 
-# 

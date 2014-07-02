@@ -4,7 +4,7 @@
 # DESC:         Script to calculate infinity norm of |C| where |C| =+ |A| * |B|
 # AUTHOR :      Paula Dwan (paula.dwan@ericsson.com | paula.dwan@gmail.com)
 # DATE :        30-June-2014
-# ASSIGNMENT :  2
+# ASSIGNMENT :  3
 #
 # ##################################################################################
 
@@ -37,7 +37,7 @@ pause () {
 usage() 
 {
     $_ECHO -e "\nUSAGE : ./$($_BASENAME $0) -a|--all -1|--simple -2|--ijk -3|--kij -r|--random -i|--increment \ \n\t\t\t  -m|--matrix<n> -b|--block <b> -v|--values -?|-h|--help \n"
-    $_ECHO -e "TO : \tCalculate infinity norm using pthreads and single calculation using dgemm ATLAS / BLAS. \n"
+    $_ECHO -e "TO : \tCalculate infinity norm using openMP and single calculation using dgemm ATLAS / BLAS. \n"
     $_ECHO -e "\twhere:"
     $_ECHO -e "\t-r|--random :     initialization A| & |B| with random numbers and |C| with '0' "
     $_ECHO -e "\t-i|--increment :  initialize |A| & |B| incrementally with <row> value and |C| with '0' "
@@ -267,8 +267,8 @@ fi
 
 init_log_dir
 
-PROG_NAME="./Programs/A1-pthreads-1D"    
-LOG_TYPE="A1-pthreads-1D-"
+PROG_NAME="./Programs/A1-omp-1D"    
+LOG_TYPE="A1-omp-1D-"
 LOG_FILE_PROG="${LOG_PREFIX}${LOG_TYPE}${NOW}"
 DAT_FILE_PROG="${LOG_FILE_PROG}"
 if [[ ${#NX_ARRAY[*]} -ne ${#NB_ARRAY[*]} ]] ; then 

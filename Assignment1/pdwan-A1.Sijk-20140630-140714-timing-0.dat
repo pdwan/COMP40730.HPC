@@ -1,5 +1,0 @@
-# Program running :	./Programs/A1-Sijk-1D 
-# File name is : 	pdwan-A1.Sijk-20140630-140714-timing-0.dat
-# Computation of Straight-forward IJK, Blocked IJK or Blocked KIJ using square NxN & square bxb block (as applicable) 
- # for matrices |A| & |B| storing results in |C|	
-# Summary of values added to each matrix - retained for later reference and validation 

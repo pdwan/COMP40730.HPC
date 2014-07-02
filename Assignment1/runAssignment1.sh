@@ -26,8 +26,8 @@ BLOCK_ENABLED="false"
 DEFAULT_MATRIX_RANGE="false"
 let MATRIX_SIZE=0
 let BLOCK_SIZE=0 
-let MAX_MATRIX_SIZE=1000      # temp set for test purposes but usually large but reasonable matrix size
-let MAX_BLOCK_SIZE=50       # temp set for test purposes but usually large and multiple of <nx>
+let MAX_MATRIX_SIZE=1000 
+let MAX_BLOCK_SIZE=50  
 
 # ##################################################################################
 
@@ -68,25 +68,28 @@ error()
     shift
     case ${ERR} in
         1)
-            $_ECHO -e "ERROR : \t$($_BASENAME $0): Unknown parameter : $1"
+            $_ECHO -e "ERROR : \t$($_BASENAME $0): Unknown parameter $1."
             ;;
         2)
-            $_ECHO -e "ERROR : \t$($_BASENAME $0): error creating directory : $1"
+            $_ECHO -e "ERROR : \t$($_BASENAME $0): Error creating directory $1."
             ;;
         3)
-            $_ECHO -e "ERROR : \t$($_BASENAME $0): error creating file : $1"
+            $_ECHO -e "ERROR : \t$($_BASENAME $0): Error creating file $1."
             ;;     
         4)     
-            $_ECHO -e "ERROR : \t$($_BASENAME $0): missing parameter for : $1"
+            $_ECHO -e "ERROR : \t$($_BASENAME $0): Missing parameter for $1."
             ;;     
         5)     
-            $_ECHO -e "ERROR : \t$($_BASENAME $0): $1 values entered are not valid"
+            $_ECHO -e "ERROR : \t$($_BASENAME $0): $1, Values entered are not valid."
             ;;     
         6)     
-            $_ECHO -e "ERROR : \t$($_BASENAME $0): $1 : Mutually exclusive switches"
+            $_ECHO -e "ERROR : \t$($_BASENAME $0): $1, Mutually exclusive switches."
+            ;;     
+        7)     
+            $_ECHO -e "ERROR : \t$($_BASENAME $0): $1, Not a number."
             ;;     
         *)
-            $_ECHO -e "ERROR : \tUnknown error"
+            $_ECHO -e "ERROR : \tUnknown error."
             $_ECHO ${ERR}
             $_ECHO $*
             ;;
@@ -101,6 +104,7 @@ init_log_dir()
 {
     if [ ! -d ${LOG_DIR} ] || [ ! -e ${LOG_DIR} ] ; then 
         mkdir $LOG_DIR        
+         $_ECHO -e "WARNING : \tcreating $LOG_DIR" 
         if [[ $? -ne 0 ]] ; then 
             error 2 $LOG_DIR
         fi
@@ -116,7 +120,33 @@ init_log_file()
         $_ECHO -e "WARNING : \tFile backup  :  ${l_LOG_FILE} to ${l_LOG_FILE}.bup"
         mv "$LOG_DIR/${l_LOG_FILE}" "$LOG_DIR/${l_LOG_FILE}.bup"
     fi
-    touch $LOG_DIR/${l_LOG_FILE}
+}
+
+# function : add initial comments to matrix .txt and to timing .dat file
+add_comments_to_log_file() {
+
+    l_LOG_FILE=$1
+    l_PROG_NAME=$2
+    file_type_dat='dat'
+    file_type_simple='Sijk'
+
+    $_ECHO -e "# Program : ${l_PROG_NAME} \n# Log file  : ${l_LOG_FILE} \n# where :  \n#     .dat contains timing data & .txt contains matrix values \n#" > $LOG_DIR/${l_LOG_FILE}
+    $_ECHO -e "# Computation of Straight-forward IJK, Blocked IJK or Blocked KIJ using square NxN \n# & square bxb block (as applicable) for matrices |C| += |A| * |B| \n# " >> $LOG_DIR/${l_LOG_FILE}
+    if [[ $l_LOG_FILE == *"$file_type_dat"* ]] ; then
+    {
+    if [[ $l_LOG_FILE == *"$file_type_simple"* ]] ; then
+        {
+            $_ECHO -e "#Matrix Size \\tTime/manual \\tTime/manual \\tTime/dgenn \n# \\tSimple \\tComplex \n #" >> $LOG_DIR/${l_LOG_FILE}
+        } else {
+            $_ECHO -e "#Matrix Size \\tBlock Size \\tTime/manual \\tTime/manual \\tTime/dgenn \n# \\t \\tSimple \tComplex \n#" >> $LOG_DIR/${l_LOG_FILE}
+        }
+        fi
+    } else 
+    {
+        $_ECHO -e "# Summary of values added to each matrix - retained for later reference and validation \n# \n#" >> $LOG_DIR/${l_LOG_FILE} # txt 
+    }
+    fi
+    $_ECHO -e "# ------------------------------------------------------------------------------------- \n# " >> $LOG_DIR/${l_LOG_FILE}
 }
 
 # function : execute each algorithm in turn wih specified parameters / options
@@ -127,7 +157,7 @@ algorithm_execute()
      l_FILE_MATRIX="$3"
      l_FILE_TIME="$4"
      
-     $_ECHO -e "RUNNING : \t${l_CMD}  ${l_OPTIONS} ${l_FILE_MATRIX} ${l_FILE_TIME}"
+     $_ECHO -e "RUNNING : \t${l_CMD} ${l_OPTIONS} ${l_FILE_MATRIX} ${l_FILE_TIME}"
      # ${l_CMD}  ${l_OPTIONS} ${l_FILE_MATRIX} ${l_FILE_TIME}
 }
 
@@ -164,24 +194,39 @@ else
                     ;;
                 "-m" | "--matrix")
                     MATRIX_ENABLED="true"
-                    let MATRIX_SIZE=$2
+                    # if ! [ $2 =~ $'^[0-9]+$' ] ; then
+                    if [ "$2" -eq "$2" ] 2>/dev/null ; then
+                    { 
+                        let MATRIX_SIZE=$2 
+                    } else 
+                    { 
+                        error 7 "<${2}>" 
+                    } 
+                    fi                    
                     shift 
                     ;;
                 "-b" | "--block")
                     BLOCK_ENABLED="true"
-                    let BLOCK_SIZE=$2
-                     shift 
-                     ;;                     
+                    if ! [[ $2 =~ $'^[0-9]+$' ]] ; then
+                    { 
+                        let BLOCK_SIZE=$2
+                    } else 
+                    { 
+                        error 7 "<${2}>" 
+                    } 
+                    fi                    
+                    shift 
+                    ;;                     
                 "-v" | "--values")
                      DEFAULT_MATRIX_RANGE="true"
                      ;;
                 "-?" | "-h" | "--help")
-                     usage
-                     exit
-                     ;;
+                    usage
+                    exit
+                    ;;
                 *)
-                     error 1 $1
-                     ;;
+                    error 1 $1
+                    ;;
           esac
           shift
      done
@@ -198,8 +243,8 @@ else
         if [ "${MATRIX_SIZE}" == "" ] ; then 
             error 4 "matrix size"
         fi
-	# Validate matrix range
-        if [ ${MATRIX_SIZE} -eq 0 ] || [ ${MATRIX_SIZE} -gt ${MAX_MATRIX_SIZE} ] ; then
+	   # Validate matrix range
+        if [ ${MATRIX_SIZE} -le 0 ] || [ ${MATRIX_SIZE} -gt ${MAX_MATRIX_SIZE} ] ; then
             $_ECHO -e "WARNING : \t$($_BASENAME $0): matrix size <nx> is invalid, now set to default of : $MAX_MATRIX_SIZE"
             let MATRIX_SIZE=$MAX_MATRIX_SIZE
             MATRIX_ENABLED="true"
@@ -207,12 +252,13 @@ else
         if [ "${BLOCK_SIZE}" == "" ] ; then 
             error 4 "block size"
         fi
-	# Validate block range
-        if [ ${BLOCK_SIZE} -eq 0 ] || [ ${BLOCK_SIZE} -gt ${MAX_BLOCK_SIZE} ] ; then
+	   # Validate block range
+        if [ ${BLOCK_SIZE} -le 0 ] || [ ${BLOCK_SIZE} -gt ${MAX_BLOCK_SIZE} ] ; then
             $_ECHO -e "WARNING : \t$($_BASENAME $0): block size <nb> is invalid, now set to default of : $MAX_BLOCK_SIZE"
             let BLOCK_SIZE=$MAX_BLOCK_SIZE
             BLOCK_ENABLED="true"
         fi
+        # ensure both are enabled if one is
         if [ "${MATRIX_ENABLED}" == "false" ] ; then 
             $_ECHO -e "WARNING : \t$($_BASENAME $0): matrix size <nx> is not enabled, now enabled and set to default of : $MAX_MATRIX_SIZE"
             let MATRIX_SIZE=$MAX_MATRIX_SIZE
@@ -247,8 +293,11 @@ if [ "$INIT_RANDOM" == "true" ] && [ "$INIT_INCREMENT" == "true" ] ; then
 fi
 
 # execute algorithms
+
+init_log_dir
+
 if [ "$BUILD_SIMPLE" == "true" ]  || [ "$BUILD_ALL" == "true" ] ; then
-    ALGORITHIM_SIMPLE="./Programs/A1-Sijk"
+    ALGORITHIM_SIMPLE="./Programs/A1-Sijk-1D"    
     LOG_TYPE="A1.Sijk-"
     LOG_FILE_SIMPLE="${LOG_PREFIX}${LOG_TYPE}${NOW}"
     DAT_FILE_SIMPLE="${LOG_FILE_SIMPLE}"
@@ -261,7 +310,9 @@ if [ "$BUILD_SIMPLE" == "true" ]  || [ "$BUILD_ALL" == "true" ] ; then
             DAT_FILE_SIMPLE_TIMING="${DAT_FILE_SIMPLE}-timing-$i${DAT_SUFFIX}"
             init_log_file $LOG_FILE_SIMPLE_VALUES 
             init_log_file $DAT_FILE_SIMPLE_TIMING
-            EXECUTE_OPTIONS=" ${ALGORITHIM_OPTIONS} ${NX_ARRAY[$i]}"
+            add_comments_to_log_file "${LOG_FILE_SIMPLE_VALUES}" "${ALGORITHIM_SIMPLE}"
+            add_comments_to_log_file "${DAT_FILE_SIMPLE_TIMING}" "${ALGORITHIM_SIMPLE}"
+            EXECUTE_OPTIONS="${ALGORITHIM_OPTIONS} ${NX_ARRAY[$i]}"
             algorithm_execute "${ALGORITHIM_SIMPLE}" "${EXECUTE_OPTIONS}" "${LOG_FILE_SIMPLE_VALUES}" "${DAT_FILE_SIMPLE_TIMING}"
             LOG_FILE_SIMPLE_VALUES="${LOG_FILE_SIMPLE}"
             DAT_FILE_SIMPLE_TIMING="${DAT_FILE_SIMPLE}"
@@ -270,7 +321,7 @@ if [ "$BUILD_SIMPLE" == "true" ]  || [ "$BUILD_ALL" == "true" ] ; then
 fi
 
 if [ "$BUILD_BLOCKED_IJK" == "true" ]  || [ "$BUILD_ALL" == "true" ] ; then 
-    ALGORITHIM_BLOCKED_IJK="./Programs/A1-Bijk "
+    ALGORITHIM_BLOCKED_IJK="./Programs/A1-Bijk-1D"
     LOG_TYPE="A1-Bijk-"
     LOG_FILE_BIJK="${LOG_PREFIX}${LOG_TYPE}${NOW}"
     DAT_FILE_BIJK="${LOG_FILE_BIJK}"
@@ -283,6 +334,8 @@ if [ "$BUILD_BLOCKED_IJK" == "true" ]  || [ "$BUILD_ALL" == "true" ] ; then
             DAT_FILE_BIJK_TIMING="${DAT_FILE_BIJK}-timing-$i${DAT_SUFFIX}"
             init_log_file $LOG_FILE_BIJK_VALUES 
             init_log_file $DAT_FILE_BIJK_TIMING
+            add_comments_to_log_file "${LOG_FILE_BIJK_VALUES}" "${ALGORITHIM_BIJK}"
+            add_comments_to_log_file "${DAT_FILE_BIJK_TIMING}" "${ALGORITHIM_BIJK}"
             EXECUTE_OPTIONS="${ALGORITHIM_OPTIONS} ${NX_ARRAY[$i]} ${NB_ARRAY[$i]}"
             algorithm_execute "${ALGORITHIM_BLOCKED_IJK}" "${EXECUTE_OPTIONS}" "${LOG_FILE_BIJK_VALUES}" "${DAT_FILE_BIJK_TIMING}"
             LOG_FILE_BIJK_VALUES="${LOG_FILE_BIJK}"
@@ -292,7 +345,7 @@ if [ "$BUILD_BLOCKED_IJK" == "true" ]  || [ "$BUILD_ALL" == "true" ] ; then
 fi
 
 if [ "$BUILD_BLOCKED_KIJ" == "true" ]  || [ "$BUILD_ALL" == "true" ] ; then 
-    ALGORITHIM_BLOCKED_KIJ="./Programs/A1-Bkij "
+    ALGORITHIM_BLOCKED_KIJ="./Programs/A1-Bkij-1D"
     LOG_TYPE="A1-Bkij-"
     LOG_FILE_BKIJ="${LOG_PREFIX}${LOG_TYPE}${NOW}"
     DAT_FILE_BKIJ="${LOG_FILE_BKIJ}"
@@ -305,6 +358,8 @@ if [ "$BUILD_BLOCKED_KIJ" == "true" ]  || [ "$BUILD_ALL" == "true" ] ; then
             DAT_FILE_BKIJ_TIMING="${DAT_FILE_BKIJ}-timing-$i${DAT_SUFFIX}"
             init_log_file $LOG_FILE_BKIJ_VALUES 
             init_log_file $DAT_FILE_BKIJ_TIMING
+            add_comments_to_log_file "${LOG_FILE_BKIJ_VALUES}" "${ALGORITHIM_BKIJ}" 
+            add_comments_to_log_file "${DAT_FILE_BKIJ_TIMING}" "${ALGORITHIM_BKIJ}" 
             EXECUTE_OPTIONS="${ALGORITHIM_OPTIONS} ${NX_ARRAY[$i]} ${NB_ARRAY[$i]}"
             algorithm_execute "${ALGORITHIM_BLOCKED_KIJ}" "${EXECUTE_OPTIONS}" "${LOG_FILE_BKIJ_VALUES}" "${DAT_FILE_BKIJ_TIMING}"
             LOG_FILE_BKIJ_VALUES="${LOG_FILE_BKIJ}"

@@ -48,12 +48,12 @@ int get_value (int max_value)
      scanf("%d", &l_value);
      if (l_value >= max_value)
      {
-           printf("\tWARNING : value=%d was entered > <max_n_value>=%d, now reset to <max_n_value>. Calculation will now commence.\n", l_value, max_value);
+           printf("WARNING : \tvalue=%d was entered > <max_n_value>=%d, now reset to <max_n_value>. Calculation will now commence.\n", l_value, max_value);
            l_value = max_value;
      } 
      else 
      {
-           printf("      n=%d was entered. Calculation will now commence using absolute value.\n", l_value);
+           printf("\t<value>=%d was entered. Calculation will now commence using absolute value.\n", l_value);
      }
      return abs(l_value);}
 
@@ -65,10 +65,10 @@ double* create_1Dmatrix (int rc)
      local_matrix = malloc(rc * sizeof(double)); 
      if(!(local_matrix))
      {
-           printf("\tERROR : exiting - memory allocation failed for 1D matrix.\n");
+           printf("ERROR : \tExiting - memory allocation failed for 1D matrix.\n");
            exit(1);
      }
-     printf("      Memory allocation complete for 1D matrix matrix ...\n");
+     printf("\tMemory allocation complete for 1D matrix matrix ...\n");
      return local_matrix;     
 } 
 
@@ -76,7 +76,7 @@ double* create_1Dmatrix (int rc)
 void deallocate_matrix_memory(double *arr)
 {
      free(arr); 
-     printf("      Memory de-allocation completed for matrix ...\n");
+     printf("\tMemory de-allocation completed for matrix ...\n");
 }
 
 // function to initialize the non-zero 1D Matrices using random number
@@ -84,11 +84,11 @@ void init_1Dmatrix(double *arr, int rc)
 {
      int ni, mod_rand=10;
 
-     printf("      1D matrix initialization using (mod %d)+1 on random ...\n", mod_rand);
+     printf("\t1D matrix initialization using (mod %d)+1 on random ...\n", mod_rand);
      for(ni=0; ni<rc; ni++)
      {
            arr[ni]  = (double)((rand()%mod_rand) + 1);
-           printf("m[%d] = %g\t", ni, arr[ni]); 
+           printf("%g\t", ni, arr[ni]); 
      }
            printf ("\n");
 }
@@ -98,11 +98,11 @@ void init_1Dmatrix_specific_value(double *arr, int rc, double element_value)
 {
      int ni;
      
-     printf("      1D matrix initialization using set value : %g ...\n", element_value);
+     printf("\t1D matrix initialization using set value : %g ...\n", element_value);
      for(ni=0; ni<rc; ni++)
      {
            arr[ni] = element_value;
-           printf("m[%d] = %g\t", ni, arr[ni]); 
+           printf("%g\t",arr[ni]); 
      }
            printf ("\n");
 }
@@ -159,41 +159,38 @@ int main()
      int i = 0;
           
 // start of program
-     printf("\n\n");
      printf("\n............................................................................................................................\n");
-     printf("\nSTART :\n");
-
- printf("INPUT : \n      Use <pthreads> to calculate dot product and Infinity Norm of product of two NxN matrices ...\n");
+     printf("INPUT :\tUse <pthreads> to calculate dot product and Infinity Norm of product of two NxN matrices ...\n");
 
 // Get values for matrix row x col matrix, both equal to n
-     printf("      Please enter matrix dimension < maximun of [%d] i.e.: n : ", MAXNMATRIX);
+     printf("\tPlease enter matrix dimension < maximun of [%d] i.e.: n : ", MAXNMATRIX);
      int nx = get_value(MAXNMATRIX);
      int ny = nx;
 
 // Get number of processes
-     printf("      Please enter number of processors (i.e.: number of threads) < maximum of [%d] --> <np>: ", MAXPTHREADS);
+     printf("\tPlease enter number of processors (i.e.: number of threads) < maximum of [%d] --> <np>: ", MAXPTHREADS);
      int np = get_value(MAXPTHREADS);
           while ( (nx % np) > 0 )
      {
-           printf("\tERROR : matrix size = %d must  be an equal multiple of number of processors and < [%d]. Please reenter [np]: ", nx, MAXPTHREADS);
+           printf("ERROR : \tmatrix size = %d must  be an equal multiple of number of processors and < [%d]. Please reenter [np]: ", nx, MAXPTHREADS);
            np = get_value(MAXPTHREADS);
      }
  
 // Calculate slice information using number of processors <np> and matrix size <nx>
      int ns_size = (nx*np);
      int ns_no = (nx / np); 
-     printf("      No of slices = <matrix rows> x <number of processes> = [%d] x [%d] = [%d] ...\n", nx, np, ns_size);
-     printf("      Slice size       = <matrix rows> ÷ <number of processes> = [%d] ÷ [%d] = [%d] ...\n", nx, np, ns_no);
+     printf("\tNo of slices = <matrix rows> x <number of processes> = [%d] x [%d] = [%d] ...\n", nx, np, ns_size);
+     printf("\tSlice size       = <matrix rows> ÷ <number of processes> = [%d] ÷ [%d] = [%d] ...\n", nx, np, ns_no);
  
 // Allocate memory for & initialize matrices allA, allB ; create & initialize array C (row totals) 
-     printf("CREATE MATRICES <allA>, <allB>, <allC>, <sliceC> & <sliceC> :\n");
+     printf("CREATE MATRICES <allA>, <allB>, <allC>, <sliceA> & <sliceC> :\n");
      double *allA = create_1Dmatrix(nx*ny);
      double *allB = create_1Dmatrix(nx*ny);
      double *allC = create_1Dmatrix(nx*ny);
      double *sliceA = create_1Dmatrix(ns_size);
      double *sliceC = create_1Dmatrix(ns_size);
  
-     printf("INITIALIZE MATRICES <allA>, <allB>, <allC>, <sliceB>  & <sliceC> :\n");
+     printf("INITIALIZE MATRICES <allA>, <allB>, <allC>, <sliceA>  & <sliceC> :\n");
      init_1Dmatrix(allA, nx*ny);
      init_1Dmatrix(allB, nx*ny);
      init_1Dmatrix_specific_value(allC, nx*ny, 0.0);
@@ -216,7 +213,7 @@ int main()
 
     for(i=0; i<np; i++) 
     { 
-        printf("      Create working thread[%d] and send to norm_summation_calculation function ...\n", i);
+        printf("\tCreate working thread[%d] and send to norm_summation_calculation function ...\n", i);
         thread_norm_summation_data[i].my_sliceA = allA + (i * ns_size);
         thread_norm_summation_data[i].my_sliceC =  allC + (i * ns_size);
         thread_norm_summation_data[i].my_allB = allB;
@@ -243,7 +240,7 @@ int main()
         printf("\tImplement pthread_join for working thread[%d] ... \n", i);
         pthread_join(working_thread[i], &status); 
     }
-    printf("\nCalculate infintity norm of matrix C containing dot product of A and B using <mutex>...\n");
+    printf("\tCalculate infintity norm of matrix C containing dot product of A and B using <mutex>...\n");
       
 // program execution time taken : end
      gettimeofday(&tv2, &tz);
@@ -263,9 +260,7 @@ int main()
      pthread_mutex_destroy(mutex_dot_product);
      free(mutex_dot_product);
 
-     printf("\nEND :\n");
      printf("\n............................................................................................................................\n");
-     printf("\n\n");
   
 // finish
   return 0;

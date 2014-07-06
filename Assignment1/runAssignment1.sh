@@ -1,3 +1,4 @@
+#!/bin/bash 
 
 # ##################################################################################
 # 
@@ -14,13 +15,17 @@ _BASENAME="basename"
 _TEE="tee"
 Now=$(date +"%Y%m%d-%H%M%S")
 LogDir="logDir"
+graphDir="graphDir"
 LogPrefix="pdwan-"
 TxtSuffix=".txt"
 DatSuffix=".dat"
-StdLogFile=$(_BASENAME $0 +"-${Now}.log")
+pngSuffix=".png"
+StdLogFile=$($_BASENAME $0 +"-${Now}.log")
 BuildSimple="false" 
 BuildBlockedIJK="false"
 BuildBlockedKIJ="false" 
+compileUsingAtlas="false"
+compileUsingCblas="false"
 InitRandom="false"
 InitIncrement="false"
 MatrixEnabled="false"
@@ -44,12 +49,16 @@ usage()
 {
     $_ECHO -e "\nUSAGE :\t./$($_BASENAME $0) \ \n\t\t\t-a|--all -1|--simple -2|--ijk -3|--kij -r|--random -i|--increment \ \n\t\t\t-m|--matrix<n> -b|--block <b> -v|--values -?|-h|--help \n"
     $_ECHO -e "TO :\tCalculate |C| = |A| x |B| using one or three algoritms : Straight-forward IJK, Blocked IJK and Blocked KIJ. \n"   
-    $_ECHO -e "WHERE:\t-a | --all \tCalculate data for all algorithms via separate .c programs to multiply |A|x|B| -> |C|"
+    $_ECHO -e "WHERE:\t-a|--all \tCalculate data for all algorithms via separate .c programs to multiply |A|x|B| -> |C|"
     $_ECHO -e "\t\t\tStraightforward non-blocked ijk algorithm :\tA1-Sijk-1D.c \n\t\t\tBlocked ijk algorithm using square bxb blocks :\tA1-Bijk-1D.c \n\t\t\tBlocked kij algorithm using square bxb blocks :\tA1-Bkij-1D.c"
     $_ECHO -e "\t-1|--simple \tCalculate data for only the algorithm \n\t\t\tStraightforward non-blocked ijk algorithm :\tA1-Sijk-1D.c "
     $_ECHO -e "\t-2|--bijk \tCalculate data for only the algorithm \n\t\t\tBlocked ijk algorithm using square bxb blocks :\tA1-Bijk-1D.c " 
     $_ECHO -e "\t-3|--bkij \tCalculate data for only the algorithm \n\t\t\tBlocked kij algorithm using square bxb blocks :\tA1-Bkij-1D.c \n"
-    $_ECHO -e "\t-r|--random \tInitialization A| & |B| with random numbers and |C| with '0' "
+    $_ECHO -e "\t-d1|--atlas\tCompile .c source files using dgemm ATLAS \n\t\t\t'\$gcc ....'"
+    $_ECHO -e "\t-d2|--cblas\tCompile .c source files using dgemm cBLAS \n\t\t\t'\$gcc ....'"
+    $_ECHO -e "\t\t\tEach is mutually exclusive of the other.\n"    
+    $_ECHO -e "\t-p|--plot\tPlot graphs using GnuPlot creating .png for each algorithm and store in <assignment dir>/${graphDir} for \n\t\t\t(i)   matrix size  -v- time taken \n\t\t\t(ii)  block size -v- time taken\n"
+    $_ECHO -e "\t-r|--random \tInitialize |A| & |B| with random numbers and |C| with '0' "
     $_ECHO -e "\t-i|--increment \tInitialize |A| & |B| incrementally with <row> value and |C| with '0' "
     $_ECHO -e "\t\t\t'-i|--increment' & '-r|--random' are mutually exclusive. \n"
     $_ECHO -e "\t-m|--matrix <n>\tMatrix dimension, set to maximum of '1,000' if invalid or not provided"
@@ -105,14 +114,39 @@ error()
     exit ${err}
 }
 
-# function : create directory to store data if it does not exist & validate creation
-init_log_dir() 
+# TODO function : build applying dgemm atlas
+compile_dgemm_atlas()
 {
-    if [ ! -d ${LogDir} ] || [ ! -e ${LogDir} ] ; then 
+	localProgramToCompile=$1
+
+}
+
+# TODO function : build applying dgemm cblas
+compile_dgemm_cblas()
+{
+	localProgramToCompile=$1
+
+}
+
+# TODO function : plot graphs for each .dat file as called, in Graph directory
+plot_graph()
+{
+	localDatFileToGraph=$1
+	localPngGraph=$2
+# 	TODO launch gnuplot, load prog.gp, save as png in graph dir
+
+}
+
+
+# function : create directory, if it does not exist & validate creation
+init_dir() 
+{
+	creationDir=$1
+    if [ ! -d ${creationDir} ] || [ ! -e ${creationDir} ] ; then 
         mkdir $LogDir        
-         $_ECHO -e "WARNING :\tCreating $LogDir"  2>&1 |& $_TEE -a ${StdLogFile}
+         $_ECHO -e "WARNING :\tCreating $creationDir"  2>&1 |& $_TEE -a ${StdLogFile}
         if [[ $? -ne 0 ]] ; then 
-            error 2 $LogDir
+            error 2 $creationDir
         fi
     fi  
 }
@@ -120,20 +154,20 @@ init_log_dir()
 # function : create log files (.txt : matrix values, .dat : timing of each computation & .log : stderr, stdout) to store values for data for each alogrithim computation
 init_log_file() 
 {
-    localLogFile=$1
-   echo -e "DEBUG : initializing ${localLogFile}"
+	localLogFile=$1
+   	echo -e "DEBUG : initializing ${localLogFile}"
     if  [ -e $LogDir/${localLogFile} ]  ; then
     {
         $_ECHO -e "WARNING :\tFile backup : ${localLogFile} to ${localLogFile}.bup"  |& ${localLogFile}
         mv "$LogDir/${localLogFile}" "$LogDir/${localLogFile}.bup"
     } 
     fi
-    $_ECHO -e "LOG FILE :\tCreated on: ${Now} \n \tby :\t\t${USER}\n ------------------------------------------------------------------------------ \n" |& $_TEE ${localLogFile}
+    $_ECHO -e "LOG FILE :\t${localLogFile} \n\tCreated on: ${Now} \n\tby :\t\t${USER}\n ------------------------------------------------------------------------------ \n" |& $_TEE ${localLogFile}
 }
 
 # function : add initial comments to matrix .txt and to timing .dat file
-add_comments_to_log_file() {
-
+add_comments_to_log_file() 
+{
     localLogFile=$1
     localProgramName=$2
     FileTypeDat='dat'
@@ -149,7 +183,8 @@ add_comments_to_log_file() {
     if [[ $localLogFile == *"$FileTypeSimple"* ]] ; then
         {
             $_ECHO "# Matrix Size \tTime/manual \tTime/manual \tTime/dgenn \n# \tSimple \tComplex \n# " 2>&1 |& $_TEE -a $LogDir/${localLogFile}
-        } else {
+        } else 
+		{
             $_ECHO -e "# Matrix Size \tBlock Size \tTime/manual \tTime/manual \tTime/dgenn \n# \t \tSimple \t\tComplex \n# " 2>&1 |& $_TEE -a $LogDir/${localLogFile}
         }
         fi
@@ -168,9 +203,8 @@ algorithm_execute()
      localOptions="$2"
      localFileMatrix="$3"
      localFileTime="$4"
-     echo -e "DEBUG :\tlocalCmd\t${localCmd} \n\tl_OPTIONS\t${localOptions} \n\tlocalFileMatrix \t${localFileMatrix} \n\tlocalFileTime \t${localFileTime}"
-     
-     $_ECHO -e "RUNNING :\t${localCmd} ${localOptions} ${localFileMatrix} ${localFileTime}"  2>&1 |& $_TEE -a  ${StdLogFile}
+     echo -e "DEBUG :\tlocalCmd\t${localCmd} \n\tl_OPTIONS\t${localOptions} \n\tlocalFileMatrix \t${localFileMatrix} \n\tlocalFileTime \t${localFileTime}"     
+     $_ECHO -e "RUNNING :\t${localCmd} ${localOptions} ${localFileMatrix} ${localFileTime}"  2>&1 |& $_TEE -a ${StdLogFile}
      # ${localCmd}  ${localOptions} ${localFileMatrix} ${localFileTime}
 }
 
@@ -199,6 +233,15 @@ else
                 "-3" | "--kij")
                     BuildBlockedKIJ="true"
                     ;;                     
+				"-d1" | "--atlas")
+					compileUsingAtlas="true"
+                    ;;                     
+				"-d2" | "--cblas")
+					compileUsingCblas="true"
+                    ;;
+                "-i" | "--increment") 
+                    InitIncrement="true"
+
                 "-r" | "--random")
                     InitRandom="true"
                     ;;
@@ -253,7 +296,8 @@ if [ "${DefaultMatrixRange}" == "true" ] && ( [ "${MatrixEnabled}" == "true" ] |
 {
     echo -e "DEBUG : all true \n\tDefaultMatrixRange = ${DefaultMatrixRange}\n\tMatrixEnabled=${MatrixEnabled}\n\tBlockEnabled=${BlockEnabled} "
     error 6 "<-b>, <-m> & <-v>"
-}   elif  [ "${DefaultMatrixRange}" == "true" ] && ( [ "${MatrixEnabled}" == "false" ] || [ "${BlockEnabled}" == "false" ] ) ; then 
+}
+if  [ "${DefaultMatrixRange}" == "true" ] && ( [ "${MatrixEnabled}" == "false" ] || [ "${BlockEnabled}" == "false" ] ) ; then 
 {
     echo -e "DEBUG : first true \n\tDefaultMatrixRange = ${DefaultMatrixRange}\n\tMatrixEnabled=${MatrixEnabled}\n\tBlockEnabled=${BlockEnabled}"
      declare -a NXArray=( 50 50 50 100 100 100 500 500 500 500 1000 1000 1000 1000 )
@@ -267,39 +311,53 @@ if [ "${DefaultMatrixRange}" == "true" ] && ( [ "${MatrixEnabled}" == "true" ] |
     echo -e "DEBUG : matrix & block only \n\tDefaultMatrixRange = ${DefaultMatrixRange}\n\tMatrixEnabled=${MatrixEnabled}\n\tBlockEnabled=${BlockEnabled} "
     if [ "${MatrixEnabled}" == "true" ] || [ "${BlockEnabled}" == "true" ] ; then
         if [ "${MatrixSize}" == "" ] ; then 
+		{
             error 4 "matrix size"
+        }
         fi
 	   # Validate matrix range
         if [ ${MatrixSize} -le 0 ] || [ ${MatrixSize} -gt ${MaxMatrixSize} ] ; then
-            $_ECHO -e "WARNING :\t$($_BASENAME $0): matrix size <nx> is invalid, now set to default of : $MaxMatrixSize"  2>&1 |& $_TEE -a  ${StdLogFile}
+		{
+            $_ECHO -e "WARNING :\t$($_BASENAME $0): matrix size <nx> is invalid, now set to default of : $MaxMatrixSize"  2>&1 |& $_TEE -a ${StdLogFile}
             let MatrixSize=$MaxMatrixSize
             MatrixEnabled="true"
-        fi        
+        }
+		fi        
         if [ "${BlockSize}" == "" ] ; then 
+		{
             error 4 "block size"
+        }
         fi
 	   # Validate block range
         if [ ${BlockSize} -le 0 ] || [ ${BlockSize} -gt ${MaxBlockSize} ] ; then
-            $_ECHO -e "WARNING :\t$($_BASENAME $0): block size <nb> is invalid, now set to default of : $MaxBlockSize"  2>&1 |& $_TEE -a  ${StdLogFile}
+		{
+            $_ECHO -e "WARNING :\t$($_BASENAME $0): block size <nb> is invalid, now set to default of : $MaxBlockSize"  2>&1 |& $_TEE -a ${StdLogFile}
             let BlockSize=$MaxBlockSize
             BlockEnabled="true"
+        }
         fi
         # ensure both are enabled if one is
         if [ "${MatrixEnabled}" == "false" ] ; then 
-            $_ECHO -e "WARNING :\t$($_BASENAME $0): matrix size <nx> is not enabled, now enabled and set to default of : $MaxMatrixSize"  2>&1 |& $_TEE -a  ${StdLogFile}
+		{
+            $_ECHO -e "WARNING :\t$($_BASENAME $0): matrix size <nx> is not enabled, now enabled and set to default of : $MaxMatrixSize"  2>&1 |& $_TEE -a ${StdLogFile}
             let MatrixSize=$MaxMatrixSize
             MatrixEnabled="true"
+        }
         fi
         if [ "${BlockEnabled}" == "false" ] ; then 
-            $_ECHO -e "WARNING :\t$($_BASENAME $0): block size <nb> is not enabled, now enabled and set to default of : $MaxBlockSize"  2>&1 |& $_TEE -a  ${StdLogFile}
+		{
+            $_ECHO -e "WARNING :\t$($_BASENAME $0): block size <nb> is not enabled, now enabled and set to default of : $MaxBlockSize"  2>&1 |& $_TEE -a ${StdLogFile}
             let BlockSize=$MaxBlockSize
             BlockEnabled="true"
+        }
         fi
         # Validate matrix / block remainder
     	if [ $(( ${MatrixSize} % ${BlockSize} )) -ne 0 ]; then
-	        $_ECHO -e "WARNING :\t$($_BASENAME $0): block size needs to be an even multiple of matrix size. Using defaults."  2>&1 |& $_TEE -a  ${StdLogFile}
+		{
+	        $_ECHO -e "WARNING :\t$($_BASENAME $0): block size needs to be an even multiple of matrix size. Using defaults."  2>&1 |& $_TEE -a ${StdLogFile}
 	        let BlockSize=$MaxBlockSize
 	        let MatrixSize=$MaxMatrixSize
+        }
     	fi
         declare -a NXArray=( $MatrixSize )
         declare -a NBArray=( $BlockSize )
@@ -310,93 +368,127 @@ fi
 # build up commands to run
 AlgorithmOptions=""
 if [ "$InitRandom" == "true" ] && [ "$InitIncrement" == "false" ] ; then 
-    AlgorithmOptions="-r"
+{
+    AlgorithmOptions="R"
+}
 fi
 if [ "$InitRandom" == "false" ] && [ "$InitIncrement" == "true" ] ; then 
-    AlgorithmOptions="-i"
+{
+    AlgorithmOptions="I"
+}
 fi
 if [ "$InitRandom" == "true" ] && [ "$InitIncrement" == "true" ] ; then 
-        error 6 "<-i> and <-r>"    
+{
+	error 6 "<-i> and <-r>"    
+}
 fi
 
 # execute algorithms
 
-init_log_dir
-init_log_file  $StdLogFile
+init_dir ${LogDir}
+init_dir ${graphDir}
+init_log_file $StdLogFile
+
+# TODO restructure log file name creation - simply it
+# TODO compile c program based on cblas or atlas
 
 if [ "$BuildSimple" == "true" ]  || [ "$BUILD_ALL" == "true" ] ; then
-    Algorithm_SIMPLE="./Programs/A1-Sijk-1D"    
-    LogType_SIMPLE="A1.Sijk-"
-    MAT_FILE_SIMPLE="${LogPrefix}${LogType_SIMPLE}${Now}"
-    DAT_FILE_SIMPLE="${MAT_FILE_SIMPLE}"
-    STD_FILE_SIMPLE="${MAT_FILE_SIMPLE}"
-    STD_FILE_SIMPLE="${STD_FILE_SIMPLE}${STD_SUFFIX}"
-    
+    AlgorithmSimple="A1-Sijk-1D"    
+    MatrixFileSimple="${LogPrefix}${AlgorithmSimple}${Now}-values"
+    DataFileSimple="${LogPrefix}${AlgorithmSimple}${Now}-timing"
     if [[ ${#NXArray[*]} -ne ${#NBArray[*]} ]] ; then 
         error 5 "matrix size and block size"
     else        
+	{
         ExecuteOptions=""
-        for (( i = 0 ; i < ${#NXArray[@]} ; i++ )) do
-            MAT_FILE_SIMPLE_VALUES="${MAT_FILE_SIMPLE}-values-$i${TxtSuffix}"
-            DAT_FILE_SIMPLE_TIMING="${DAT_FILE_SIMPLE}-timing-$i${DatSuffix}"
-            init_log_file $MAT_FILE_SIMPLE_VALUES 
-            init_log_file $DAT_FILE_SIMPLE_TIMING
-            init_log_file $DAT_FILE_SIMPLE_TIMING
-
-            add_comments_to_log_file "${MAT_FILE_SIMPLE_VALUES}" "${Algorithm_SIMPLE}"
-            add_comments_to_log_file "${DAT_FILE_SIMPLE_TIMING}" "${Algorithm_SIMPLE}"
+		if [ "${compileUsingAtlas}" == "true" ] ; then 
+		{
+			compile_dgemm_atlas "${AlgorithmSimple}.c"
+        } elif [ "${compileUsingCblas}" == "true" ] ; then
+		{
+			compile_dgemm_cblas "${AlgorithmSimple}.c"
+		}
+        fi
+		for (( i = 0 ; i < ${#NXArray[@]} ; i++ )) do
+            MatrixFileSimpleValues="${MatrixFileSimple}-$i${TxtSuffix}"
+            DataFileSimpleTiming="${DataFileSimple}-$i${DatSuffix}"
+			GraphFileSimple="${GraphFileSimple}-$i${pngSuffix}"
+            init_log_file $MatrixFileSimpleValues 
+            init_log_file $DataFileSimpleTiming
+            add_comments_to_log_file "${MatrixFileSimpleValues}" "${AlgorithmSimple}"
+            add_comments_to_log_file "${DataFileSimpleTiming}" "${AlgorithmSimple}"
             ExecuteOptions="${AlgorithmOptions} ${NXArray[$i]}"
-            algorithm_execute "${Algorithm_SIMPLE}" "${ExecuteOptions}" "${MAT_FILE_SIMPLE_VALUES}" "${DAT_FILE_SIMPLE_TIMING}"
-            MAT_FILE_SIMPLE_VALUES="${MAT_FILE_SIMPLE}"
-            DAT_FILE_SIMPLE_TIMING="${DAT_FILE_SIMPLE}"
+            algorithm_execute "${AlgorithmSimple}" "${ExecuteOptions}" "${MatrixFileSimpleValues}" "${DataFileSimpleTiming}"
+            MatrixFileSimpleValues="${MatrixFileSimple}"
+            DataFileSimpleTiming="${DataFileSimple}"
+			plot_graph ${DataFileSimpleTiming} ${GraphFileSimple}
         done
+	}
     fi
 fi
 
 if [ "$BuildBlockedIJK" == "true" ]  || [ "$BUILD_ALL" == "true" ] ; then 
-    Algorithm_BLOCKED_IJK="./Programs/A1-Bijk-1D"
-    LogType_BIJK="A1-Bijk-"
-    MAT_FILE_BIJK="${LogPrefix}${LogType_BIJK}${Now}"
-    DAT_FILE_BIJK="${MAT_FILE_BIJK}"
+    AlgorithmBlockedIJK="A1-Bijk-1D"
+    MatrixFileBlockedIJK="${LogPrefix}${AlgorithmBlockedIJK}${Now}-values"
+    DataFileBlockedIJK="${LogPrefix}${AlgorithmBlockedIJK}${Now}-timing"
     if [[ ${#NXArray[*]} -ne ${#NBArray[*]} ]] ; then 
         error 5 "matrix size and block size"
     else 
         ExecuteOptions=""
+		if [ "${compileUsingAtlas}" == "true" ] ; then 
+		{
+			compile_dgemm_atlas "${AlgorithmBlockedIJK}.c"
+        } elif [ "${compileUsingCblas}" == "true" ] ; then
+		{
+			compile_dgemm_cblas "${AlgorithmBlockedIJK}.c"
+		}
+        fi
         for (( i = 0 ; i < ${#NXArray[@]} ; i++ )) do
-            MAT_FILE_BIJK_VALUES="${MAT_FILE_BIJK}-values-$i${TxtSuffix}"
-            DAT_FILE_BIJK_TIMING="${DAT_FILE_BIJK}-timing-$i${DatSuffix}"
-            init_log_file $MAT_FILE_BIJK_VALUES 
-            init_log_file $DAT_FILE_BIJK_TIMING
-            add_comments_to_log_file "${MAT_FILE_BIJK_VALUES}" "${Algorithm_BIJK}"
-            add_comments_to_log_file "${DAT_FILE_BIJK_TIMING}" "${Algorithm_BIJK}"
+            MatrixFileBlockedIJKValues="${MatrixFileBlockedIJK}-$i${TxtSuffix}"
+            DataFileBlockedIJKTiming="${DataFileBlockedIJK}-$i${DatSuffix}"
+			GraphFileBlockedIJK="${DataFileBlockedIJK}-$i${pngSuffix}"
+            init_log_file $MatrixFileBlockedIJKValues 
+            init_log_file $DataFileBlockedIJKTiming
+            add_comments_to_log_file "${MatrixFileBlockedIJKValues}" "${AlgorithmBlockedIJK}"
+            add_comments_to_log_file "${DataFileBlockedIJKTiming}" "${AlgorithmBlockedIJK}"
             ExecuteOptions="${AlgorithmOptions} ${NXArray[$i]} ${NBArray[$i]}"
-            algorithm_execute "${Algorithm_BLOCKED_IJK}" "${ExecuteOptions}" "${MAT_FILE_BIJK_VALUES}" "${DAT_FILE_BIJK_TIMING}"
-            MAT_FILE_BIJK_VALUES="${MAT_FILE_BIJK}"
-            DAT_FILE_BIJK_TIMING="${DAT_FILE_BIJK}"
+            algorithm_execute "${AlgorithmBlockedIJK}" "${ExecuteOptions}" "${MatrixFileBlockedIJKValues}" "${DataFileBlockedIJKTiming}"
+            MatrixFileBlockedIJKValues="${MatrixFileBlockedIJK}"
+            DataFileBlockedIJKTiming="${DataFileBlockedIJK}"
+			plot_graph ${DataFileBlockedIJKTiming} ${GraphFileBlockedIJK}
         done
     fi
 fi
 
 if [ "$BuildBlockedKIJ" == "true" ]  || [ "$BUILD_ALL" == "true" ] ; then 
-    Algorithm_BLOCKED_KIJ="./Programs/A1-Bkij-1D"
-    LogType_BKIJ="A1-Bkij-"
-    MAT_FILE_BKIJ="${LogPrefix}${LogType_BKIJ}${Now}"
-    DAT_FILE_BKIJ="${MAT_FILE_BKIJ}"
+    AlgorithmBlockedKIJ="A1-Bkij-1D"
+    MatrixFileBlockedKIJ="${LogPrefix}${AlgorithmBlockedKIJ}${Now}-values"
+    DataFileBlockedKIJ="${LogPrefix}${AlgorithmBlockedKIJ}${Now}-timing"
     if [[ ${#NXArray[*]} -ne ${#NBArray[*]} ]] ; then 
         error 5 "matrix size and block size"
     else 
         ExecuteOptions=""
+		if [ "${compileUsingAtlas}" == "true" ] ; then 
+		{
+			compile_dgemm_atlas "${AlgorithmBlockedKIJ}.c"
+        } elif [ "${compileUsingCblas}" == "true" ] ; then
+		{
+			compile_dgemm_cblas "${AlgorithmBlockedKIJ}.c"
+		}
+        fi
         for (( i = 0 ; i < ${#NXArray[@]} ; i++ )) do
-            MAT_FILE_BKIJ_VALUES="${MAT_FILE_BKIJ}-values-$i${TxtSuffix}"
-            DAT_FILE_BKIJ_TIMING="${DAT_FILE_BKIJ}-timing-$i${DatSuffix}"
-            init_log_file $MAT_FILE_BKIJ_VALUES 
-            init_log_file $DAT_FILE_BKIJ_TIMING
-            add_comments_to_log_file "${MAT_FILE_BKIJ_VALUES}" "${Algorithm_BKIJ}" 
-            add_comments_to_log_file "${DAT_FILE_BKIJ_TIMING}" "${Algorithm_BKIJ}" 
+            MatrixFileBlockedKIJValues="${MatrixFileBlockedKIJ}-$i${TxtSuffix}"
+            DataFileBlockedKIJTiming="${DataFileBlockedKIJ}-$i${DatSuffix}"
+			GraphFileBlockedKIJ="${DataFileBlockedKIJ}-$i${pngSuffix}"
+            init_log_file $MatrixFileBlockedKIJValues 
+            init_log_file $DataFileBlockedKIJTiming
+            add_comments_to_log_file "${MatrixFileBlockedKIJValues}" "${AlgorithmBlockedKIJ}" 
+            add_comments_to_log_file "${DataFileBlockedKIJTiming}" "${AlgorithmBlockedKIJ}" 
             ExecuteOptions="${AlgorithmOptions} ${NXArray[$i]} ${NBArray[$i]}"
-            algorithm_execute "${Algorithm_BLOCKED_KIJ}" "${ExecuteOptions}" "${MAT_FILE_BKIJ_VALUES}" "${DAT_FILE_BKIJ_TIMING}"
-            MAT_FILE_BKIJ_VALUES="${MAT_FILE_BKIJ}"
-            DAT_FILE_BKIJ_TIMING="${DAT_FILE_BKIJ}"
+            algorithm_execute "${AlgorithmBlockedKIJ}" "${ExecuteOptions}" "${MatrixFileBlockedKIJValues}" "${DataFileBlockedKIJTiming}"
+            MatrixFileBlockedKIJValues="${MatrixFileBlockedKIJ}"
+            DataFileBlockedKIJTiming="${DataFileBlockedKIJ}"
+			plot_graph ${DataFileBlockedKIJTiming} ${GraphFileBlockedKIJ}
         done
     fi
 fi

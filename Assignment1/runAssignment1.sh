@@ -52,7 +52,7 @@ usage()
 {
     $_ECHO -e "\nUSAGE :\t./$($_BASENAME $0) -a|--all -1|--simple -2|--ijk -3|--kij -d1|--atlas -p|--plot -r|--random -i|--increment \ \n\t\t\t-m|--matrix<n> -b|--block <b> -v|--values -?|-h|--help"
     $_ECHO -e "TO :\tCalculate |C| = |A| x |B| using 1 -> 3 algoritms : Straight-forward IJK, Blocked IJK and Blocked KIJ." 
-    $_ECHO -e "LOGS :\tCreated in <${logDir}> : <file>.txt matrix values for matrices |A| |B| & |C|, \n\t<file>.dat : timing of each computation & <${stdLogFile}> summary of stdout. \n"
+    $_ECHO -e "LOGS :\tCreated in <${logDir}> : <file>.txt matrix values for matrices |A| |B| & |C|, \n\t<file>.dat : timing of each computation & <${logDir}/runAssignment1-timestamp.log> summary of stdout. \n"
     $_ECHO -e "WHERE :\t-a|--all \tCalculate data for all algorithms via separate .c programs to multiply |A|x|B| -> |C| "
     $_ECHO -e "\t\t\tStraightforward IJK algorithm :\tA1-Sijk-1D.c \n\t\t\tBlocked IJK algorithm using square bxb blocks :\tA1-Bijk-1D.c \n\t\t\tBlocked KIJ algorithm using square bxb blocks :\tA1-Bkij-1D.c "
     $_ECHO -e "\t-1|--simple \tCalculate data for only the algorithm \n\t\t\tStraightforward IJK algorithm :\tA1-Sijk-1D.c "
@@ -96,13 +96,13 @@ error()
             $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): '${1}', Values entered are not valid or not a number." |& $_TEE -a ${stdLogFile}
             ;;     
         6)     
-            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): '${1}', Mutually exclusive switches." |& $_TEE  -a ${stdLogFile}
+            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): '${1}', Mutually exclusive switches." |& $_TEE -a ${stdLogFile}
             ;;     
         7)     
-            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): '${1}', Compilation failed." |& $_TEE  -a ${stdLogFile}
+            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): '${1}', Compilation failed." |& $_TEE -a ${stdLogFile}
             ;;     
         8)     
-            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): '${1}', GnuPlot - graph export error." |& $_TEE  -a ${stdLogFile}
+            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): '${1}', GnuPlot - graph export error." |& $_TEE -a ${stdLogFile}
             ;;     
         *)
             $_ECHO -e "ERROR :\tUnknown error." |& $_TEE -a ${stdLogFile}

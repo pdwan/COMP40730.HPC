@@ -1,292 +1,312 @@
+#!/bin/bash 
 
 # ##################################################################################
 # 
-# DESC:         Script to calculate infinity norm of |C| where |C| =+ |A| * |B|
-# AUTHOR :      Paula Dwan (paula.dwan@ericsson.com | paula.dwan@gmail.com)
-# DATE :        30-June-2014
-# ASSIGNMENT :  3
+# DESC : Script to multiply two nxn matrices using three algorithms.
+# AUTHOR : Paula Dwan (paula.dwan@ericsson.com | paula.dwan@gmail.com)
+# GIT : https://github.com/pdwan/COMP40730.HPC.git
+# DUE DATE : 30-June-2014 (extended to : 08-July-2014)
+# ASSIGNMENT : 3
 #
 # ##################################################################################
 
 # constants and variables and executables
 _ECHO="echo"
 _BASENAME="basename"
-NOW=$(date +"%Y%m%d-%H%M%S")
-LOG_DIR="logDir"
-LOG_PREFIX="pdwan-"
-TXT_SUFFIX=".txt"
-DAT_SUFFIX=".dat"
-INIT_RANDOM="false"
-INIT_INCREMENT="false"
-MATRIX_ENABLED="false"
-BLOCK_ENABLED="false"
-DEFAULT_MATRIX_RANGE="false"
-let MATRIX_SIZE=0
-let BLOCK_SIZE=0 
-let MAX_MATRIX_SIZE=1000 
-let MAX_BLOCK_SIZE=50
+_TEE="tee"
+Now=$(date +"%Y%m%d.%H%M%S")
+logDir="logDir"
+graphDir="graphDir"
+logPrefix="${logDir}/pdwan-"
+txtSuffix=".txt"
+DatSuffix=".dat"
+pngSuffix=".png"
+stdLogFile="${logDir}/runAssignment3-${Now}.log"
+compileUsingAtlas="false"
+compileUsingCblas="false"
+plotGraphUsingGnuPlot="false"
+initRandom="false"
+initIncrement="false"
+matrixEnabled="false"
+defaultMatrixRange="false"
+let matrixSize=0
+let maxMatrixSize=1000 
 
 # ##################################################################################
 
-#  function pause
+# function : pause
 pause () {
-    read -p "Press <any key> to continue ... " nothing
+    $_ECHO -e "\n"
+    read -p "Press <enter> to continue ... " nothing
 }
 
 # function : usage instructions
 usage() 
 {
-    $_ECHO -e "\nUSAGE : ./$($_BASENAME $0) -a|--all -1|--simple -2|--ijk -3|--kij -r|--random -i|--increment \ \n\t\t\t  -m|--matrix<n> -b|--block <b> -v|--values -?|-h|--help \n"
-    $_ECHO -e "TO : \tCalculate infinity norm using openMP and single calculation using dgemm ATLAS / BLAS. \n"
-    $_ECHO -e "\twhere:"
-    $_ECHO -e "\t-r|--random :     initialization A| & |B| with random numbers and |C| with '0' "
-    $_ECHO -e "\t-i|--increment :  initialize |A| & |B| incrementally with <row> value and |C| with '0' "
-    $_ECHO -e "\t\t\t  '-i|--increment' & '-r|--random' are mutually exclusive. \n"
-    $_ECHO -e "\t-m|--matrix <n> : matrix dimension, set to maximum of '1,000' if invalid or not provided"
-    $_ECHO -e "\t-b|--block <b> :  block size, with '<nb> < <nx>' and '<nx> % <nb> = 0', \n\t\t\t  defaults to '50' if invalid or not provided and <nx> will be reset to 1,000." 
-    $_ECHO -e "\t\t\t  Mutually exclusive with '-v|--values' \n"    
-    $_ECHO -e "\t-v|--values :     use predefined range of valid values for <nx> and <nb> as follows :"
-    $_ECHO -e "\t\t\t  <nx> = { 50, 50, 50, 100, 100, 100, 500, 500, 500, 1000, 1000, 1000 } "
-    $_ECHO -e "\t\t\t  <nb> = { 2, 5, 10, 5, 10, 20, 10, 20, 50, 10, 50, 100 } "
-    $_ECHO -e "\t\t\t  Mutually exclusive with '-m|--matrix <n>' and '-b|--block <b>' \n"
-    $_ECHO -e "\t-?|-h|--help :    usage"
-    $_ECHO ""
+    $_ECHO -e "\nUSAGE :\t./$($_BASENAME $0) -d1|--atlas -p|--plot -r|--random -i|--increment -m|--matrix<n> -v|--values -?|-h|--help \n"
+    $_ECHO -e "TO :\tCalculate |C| = |A| x |B| and then dot product using Open MP." 
+    $_ECHO -e "LOGS :\tCreated in <${logDir}> : <file>.txt matrix values for matrices |A| |B| & |C|, \n\t<file>.dat : timing of each computation & <${logDir}/runAssignment3-timestamp.log> summary of stdout. \n"
+    $_ECHO -e "WHERE :\t-d1|--atlas\tCompile .c source files using dgemm ATLAS "
+    $_ECHO -e "\t-d2|--cblas\tCompile .c source files using dgemm cBLAS"
+    $_ECHO -e "\t\t\tEach is mutually exclusive of the other. \n" 
+    $_ECHO -e "\t-p|--plot\tPlot graphs using GnuPlot creating .png for each algorithm and store in <${logDir}> for \n\t\t\t(i) matrix size -v- time taken  &  (ii) block size -v- time taken \n"
+    $_ECHO -e "\t-r|--random \tInitialize |A| & |B| with random numbers and |C| with '0' "
+    $_ECHO -e "\t-i|--increment \tInitialize |A| & |B| incrementally with <row> value and |C| with '0' "
+    $_ECHO -e "\t\t\t'-i|--increment' & '-r|--random' are mutually exclusive \n"
+    $_ECHO -e "\t-m|--matrix <n>\tMatrix dimension, if invalid set to '1,000' "
+    $_ECHO -e "\t-v|--values \tUse predefined range of valid values for <nx> and <nb> as follows :"
+    $_ECHO -e "\t\t\t<nx> = { 50, 50, 50, 100, 100, 100, 500, 500, 500, 1000, 1000, 1000 } "
+    $_ECHO -e "\t\t\t'-m|--matrix <n>' & '-v|--values' mutually exclusive.\n"
+    $_ECHO -e "\t-?|-h|--help \tusage \n"
 }
 
 # function : error message and then usage
 error() 
 {
-    ERR=$1
-    shift
-    case ${ERR} in
+    err=$1
+    case ${err} in
         1)
-            $_ECHO -e "ERROR : \t$($_BASENAME $0): Unknown parameter $1."
+            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): Unknown parameter '${1}'." |& $_TEE -a ${stdLogFile}
             ;;
         2)
-            $_ECHO -e "ERROR : \t$($_BASENAME $0): Error creating directory $1."
+            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): Error creating directory '${1}'." |& $_TEE -a ${stdLogFile}
             ;;
         3)
-            $_ECHO -e "ERROR : \t$($_BASENAME $0): Error creating file $1."
+            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): Error creating file '${1}'." |& $_TEE -a ${stdLogFile}
             ;;     
         4)     
-            $_ECHO -e "ERROR : \t$($_BASENAME $0): Missing parameter for $1."
+            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): Missing parameter for '${1}'." |& $_TEE -a ${stdLogFile}
             ;;     
         5)     
-            $_ECHO -e "ERROR : \t$($_BASENAME $0): $1, Values entered are not valid."
+            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): '${1}', Values entered are not valid or not a number." |& $_TEE -a ${stdLogFile}
             ;;     
         6)     
-            $_ECHO -e "ERROR : \t$($_BASENAME $0): $1, Mutually exclusive switches."
+            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): '${1}', Mutually exclusive switches." |& $_TEE  -a ${stdLogFile}
             ;;     
         7)     
-            $_ECHO -e "ERROR : \t$($_BASENAME $0): $1, Not a number."
+            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): '${1}', Compilation failed." |& $_TEE  -a ${stdLogFile}
+            ;;     
+        8)     
+            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): '${1}', GnuPlot - graph export error." |& $_TEE  -a ${stdLogFile}
             ;;     
         *)
-            $_ECHO -e "ERROR : \tUnknown error."
-            $_ECHO ${ERR}
-            $_ECHO $*
+            $_ECHO -e "ERROR :\tUnknown error." |& $_TEE -a ${stdLogFile}
+            $_ECHO ${err} |& $_TEE -a ${stdLogFile}
+            $_ECHO $* |& $_TEE -a ${stdLogFile}
             ;;
     esac
     $_ECHO -e
     usage
-    exit ${ERR}
+    exit ${err}
 }
 
-# function : create directory to store data if it does not exist & validate creation
-init_log_dir() 
+#function : build applying dgemm atlas
+compile_dgemm_atlas()
 {
-    if [ ! -d ${LOG_DIR} ] || [ ! -e ${LOG_DIR} ] ; then 
-        mkdir $LOG_DIR        
-         $_ECHO -e "WARNING : \tcreating $LOG_DIR" 
+    localProgramToCompile=$1
+    $_ECHO -e "RUNNING :\tCompiling <localProgramToCompile>=${localProgramToCompile} using atlas" |& $_TEE ${localLogFile}
+    gcc -o ATLAS ${localProgramToCompile}.c -I/home/cs/khasanov/libs/ATLAS/include/ -L/home/cs/khasanov/libs/ATLAS/lib/Linux_UNKNOWNSSE2_4/ -lcblas -latlas -lm -O3
+}
+
+# function : build applying dgemm cblas
+compile_dgemm_cblas()
+{
+    localProgramToCompile=$1
+    $_ECHO -e "RUNNING :\tCompiling <localProgramToCompile>=${localProgramToCompile} using cblas" |& $_TEE ${localLogFile}
+    gcc -Wall -I/home/cs/khasanov/libs/CBLAS/src ${localProgramToCompile}.c -o ${localProgramToCompile}  /home/cs/khasanov/libs/cblas_LINUX.a  /usr/lib/libblas.a -lgfortran
+}
+
+# TODO function : plot graphs for each .dat file as called, in Graph directory
+plot_graph()
+{
+    localDatFileToGraph=$1
+    localPngGraph=$2
+    $_ECHO -e "RUNNING :\tCreating <localPngGraph>=${localPngGraph} in <graph Dir>=${graphDir} from <localDatFileToGraph>=${localDatFileToGraph}" |& $_TEE ${localLogFile}
+}
+
+# function : create directory, if it does not exist & validate creation
+init_dir() 
+{
+    creationDir=$1
+    if [ ! -d ${creationDir} ] || [ ! -e ${creationDir} ] ; then 
+        mkdir ${creationDir}        
+        $_ECHO -e "WARNING :\tCreating $creationDir" |& $_TEE -a ${stdLogFile}
         if [[ $? -ne 0 ]] ; then 
-            error 2 $LOG_DIR
+            error 2 $creationDir
         fi
     fi  
 }
 
-# function : create log file to store values for data for each alogrithim computation
+# function : create log files (.txt : matrix values, .dat : timing of each computation & .log : stderr, stdout) to store values for data for each alogrithim computation
 init_log_file() 
 {
-    l_LOG_FILE=$1
-    if  [ -e $LOG_DIR/${l_LOG_FILE} ]  ;
-    then
-        $_ECHO -e "WARNING : \tFile backup  :  ${l_LOG_FILE} to ${l_LOG_FILE}.bup"
-        mv "$LOG_DIR/${l_LOG_FILE}" "$LOG_DIR/${l_LOG_FILE}.bup"
+    localLogFile=$1
+    if  [ -e ${localLogFile} ]  ; then
+        $_ECHO -e "WARNING :\tFile backup : ${localLogFile} to ${localLogFile}.bup" |& ${localLogFile}
+        mv "${localLogFile}" "${localLogFile}.bup"
     fi
+    $_ECHO -e "# LOG :\t${localLogFile} \n\tCreated on ${Now} by ${USER}." |& $_TEE ${localLogFile}
 }
 
 # function : add initial comments to matrix .txt and to timing .dat file
-add_comments_to_log_file() {
+add_comments_to_log_file() 
+{
+    localLogFile=$1
+    localProgramName=$2
+    FileTypeDat='dat'
 
-    l_LOG_FILE=$1
-    l_PROG_NAME=$2
-    file_type_dat='dat'
-    
-    $_ECHO -e "# Program : ${l_PROG_NAME} \n# Log file  : ${l_LOG_FILE} \n# where :  \n#     .dat contains timing data & .txt contains matrix values \n#" > $LOG_DIR/${l_LOG_FILE}
-    $_ECHO -e "# Computation of Straight-forward IJK, Blocked IJK or Blocked KIJ using square NxN \n# & square bxb block (as applicable) for matrices |C| += |A| * |B| \n# " >> $LOG_DIR/${l_LOG_FILE}
-    if [[ $l_LOG_FILE == *"$file_type_dat"* ]] ; then
-    {
-        $_ECHO -e "#Matrix Size \\tBlock Size \\tTime/manual \\tTime/manual \\tTime/dgenn \n# \\t \\tSimple \tComplex \n#" >> $LOG_DIR/${l_LOG_FILE}
-    } else 
-    {
-        $_ECHO -e "# Summary of values added to each matrix - retained for later reference and validation \n# \n#" >> $LOG_DIR/${l_LOG_FILE} # txt 
-    }
+    $_ECHO -e "# ------------------------------------------------------------------------------------- \n# " >> ${localLogFile}
+    $_ECHO -e "# Program : ${localProgramName} \n# \n# Log file : ${localLogFile} \n# where :\t.dat contains timing data & .txt contains matrix values \n#" >> ${localLogFile}
+    $_ECHO -e "# Computation of Straight-forward IJK, Blocked IJK or Blocked KIJ using square NxN \n# & square bxb block (as applicable) for matrices |C| += |A| * |B| \n# " >> ${localLogFile}
+    $_ECHO -e "# ------------------------------------------------------------------------------------- \n# " >> ${localLogFile}
+    if [[ $localLogFile == *"$FileTypeDat"* ]] ; then
+		$_ECHO -e "# Time taken to compute \n#" >> ${localLogFile} # dat
+ 		$_ECHO -e "# Matrix Size \tTime/manual \tTime/manual \tTime/dgenn \n# \tSimple \tComplex \n# " |& $_TEE -a ${localLogFile}
+    else 
+        $_ECHO -e "# Summary of values added to each matrix - retained for later reference and validation \n#" >> ${localLogFile} # txt 
     fi
-    $_ECHO -e "# ------------------------------------------------------------------------------------- \n# " >> $LOG_DIR/${l_LOG_FILE}
+    $_ECHO -e "# ------------------------------------------------------------------------------------- \n# " >> ${localLogFile}
 }
 
 # function : execute each algorithm in turn wih specified parameters / options
 algorithm_execute() 
 {
-     l_CMD="$1"
-     l_OPTIONS="$2"
-     l_FILE_MATRIX="$3"
-     l_FILE_TIME="$4"
-     
-     $_ECHO -e "RUNNING : \t${l_CMD} ${l_OPTIONS} ${l_FILE_MATRIX} ${l_FILE_TIME}"
-     # ${l_CMD}  ${l_OPTIONS} ${l_FILE_MATRIX} ${l_FILE_TIME}
+    localCmd="$1"
+    localOptions="$2"
+    localFileMatrix="$3"
+    localFileTime="$4"
+    $_ECHO -e "RUNNING :\t${localCmd} ${localOptions} ${localFileMatrix} ${localFileTime}" |& $_TEE -a ${stdLogFile}
+    # ${localCmd} ${localOptions} ${localFileMatrix} ${localFileTime}
 }
 
 # ##################################################################################
 
-# clear
+clear
 
 # Process parameters
 if [[ $# -eq 0 ]]; then
-    usage
+    usage 
     exit
 else 
     while [ "$1" != "" ]; do
         case ${1,,} in
-                "-r" | "--random")
-                    INIT_RANDOM="true"
-                    ;;
-                "-i" | "--increment") 
-                    INIT_INCREMENT="true"
-                    ;;
-                "-m" | "--matrix")
-                    MATRIX_ENABLED="true"
-                    # if ! [ $2 =~ $'^[0-9]+$' ] ; then
-                    if [ "$2" -eq "$2" ] 2>/dev/null ; then
-                    { 
-                        let MATRIX_SIZE=$2 
-                    } else 
-                    { 
-                        error 7 "<${2}>" 
-                    } 
-                    fi                    
-                    shift 
-                    ;;
-                "-b" | "--block")
-                    BLOCK_ENABLED="true"
-                    if ! [[ $2 =~ $'^[0-9]+$' ]] ; then
-                    { 
-                        let BLOCK_SIZE=$2
-                    } else 
-                    { 
-                        error 7 "<${2}>" 
-                    } 
-                    fi                    
-                    shift 
-                    ;;                     
-                "-v" | "--values")
-                     DEFAULT_MATRIX_RANGE="true"
-                     ;;
-                "-?" | "-h" | "--help")
-                    usage
-                    exit
-                    ;;
-                *)
-                    error 1 $1
-                    ;;
-          esac
-          shift
-     done
+	    	"-d1" | "--atlas")
+				compileUsingAtlas="true"
+                ;;                     
+		    "-d2" | "--cblas")
+				compileUsingCblas="true"
+                ;;
+		    "-p" | "--plot")
+				plotGraphUsingGnuPlot="true"
+                ;;
+            "-i" | "--increment") 
+                initIncrement="true"
+                ;;
+            "-r" | "--random")
+                initRandom="true"
+                ;;
+            "-i" | "--increment") 
+                initIncrement="true"
+                ;;
+            "-v" | "--values")
+                defaultMatrixRange="true"
+                ;;                    
+            "-m" | "--matrix")
+                matrixEnabled="true"
+                if [ "${2}" -eq "${2}" ] 2>/dev/null ; then
+                    let matrixSize=$2 
+                else 
+                    error 5 "${1} ${2}" 
+                fi                    
+                shift 
+                ;;
+            "-?" | "-h" | "--help")
+                usage
+                exit
+                ;;
+            *)
+                error 1 $1
+                ;;
+        esac
+        shift
+    done
 fi
 
-# process and validate parameter values for matrix and block sizes, if applicable
-if [ "${DEFAULT_MATRIX_RANGE}" == "true" ] ; then 
-    declare -a NX_ARRAY=( 50 50 50 100 100 100 500 500 500 500 1000 1000 1000 1000 ) ;
-    declare -a NB_ARRAY=( 2 5 10 5 10 20 5 10 20 50 5 10 50 100 ) ;
-    MATRIX_ENABLED="false"
-    BLOCK_ENABLED="false"
+# process and validate parameter values for matrix sizes, if applicable
+if [ "${defaultMatrixRange}" == "true" ] && [ "${matrixEnabled}" == "true" ] ; then 
+    error 6 "<-m> & <-v>"
+fi
+if  [ "${defaultMatrixRange}" == "true" ] && [ "${matrixEnabled}" == "false" ] ; then 
+    declare -a NXArray=( 50 50 50 100 100 100 500 500 500 500 1000 1000 1000 1000 )
+    matrixEnabled="false"
+    echo ${#NXArray[@]} 
 else
-    if [ "${MATRIX_ENABLED}" == "true" ] || [ "${BLOCK_ENABLED}" == "true" ] ; then
-        if [ "${MATRIX_SIZE}" == "" ] ; then 
-            error 4 "matrix size"
-        fi
-	   # Validate matrix range
-        if [ ${MATRIX_SIZE} -le 0 ] || [ ${MATRIX_SIZE} -gt ${MAX_MATRIX_SIZE} ] ; then
-            $_ECHO -e "WARNING : \t$($_BASENAME $0): matrix size <nx> is invalid, now set to default of : $MAX_MATRIX_SIZE"
-            let MATRIX_SIZE=$MAX_MATRIX_SIZE
-            MATRIX_ENABLED="true"
-        fi        
-        if [ "${BLOCK_SIZE}" == "" ] ; then 
-            error 4 "block size"
-        fi
-	   # Validate block range
-        if [ ${BLOCK_SIZE} -le 0 ] || [ ${BLOCK_SIZE} -gt ${MAX_BLOCK_SIZE} ] ; then
-            $_ECHO -e "WARNING : \t$($_BASENAME $0): block size <nb> is invalid, now set to default of : $MAX_BLOCK_SIZE"
-            let BLOCK_SIZE=$MAX_BLOCK_SIZE
-            BLOCK_ENABLED="true"
-        fi
-        # ensure both are enabled if one is
-        if [ "${MATRIX_ENABLED}" == "false" ] ; then 
-            $_ECHO -e "WARNING : \t$($_BASENAME $0): matrix size <nx> is not enabled, now enabled and set to default of : $MAX_MATRIX_SIZE"
-            let MATRIX_SIZE=$MAX_MATRIX_SIZE
-            MATRIX_ENABLED="true"
-        fi
-        if [ "${BLOCK_ENABLED}" == "false" ] ; then 
-            $_ECHO -e "WARNING : \t$($_BASENAME $0): block size <nb> is not enabled, now enabled and set to default of : $MAX_BLOCK_SIZE"
-            let BLOCK_SIZE=$MAX_BLOCK_SIZE
-            BLOCK_ENABLED="true"
-        fi
-        # Validate matrix / block remainder
-    	if [ $(( ${MATRIX_SIZE} % ${BLOCK_SIZE} )) -ne 0 ]; then
-	        $_ECHO -e "WARNING : \t$($_BASENAME $0): block size needs to be an even multiple of matrix size. Using defaults."
-	        let BLOCK_SIZE=$MAX_BLOCK_SIZE
-	        let MATRIX_SIZE=$MAX_MATRIX_SIZE
-    	fi
-        declare -a NX_ARRAY=( $MATRIX_SIZE )
-        declare -a NB_ARRAY=( $BLOCK_SIZE )
+    if [ "${matrixEnabled}" == "true" ] ; then
+		if [ "${matrixSize}" == "" ] ; then 
+		    error 4 "matrix size"
+		fi
+		# Validate matrix range
+		if [ ${matrixSize} -le 0 ] || [ ${matrixSize} -gt ${maxMatrixSize} ] ; then
+		    $_ECHO -e "WARNING :\t$($_BASENAME $0): matrix size <nx> is invalid, now set to default of : $maxMatrixSize" |& $_TEE -a ${stdLogFile}
+		    let matrixSize=$maxMatrixSize
+		    matrixEnabled="true"
+		fi        
+		declare -a NXArray=( $matrixSize )
     fi
 fi
 
 # build up commands to run
-ALGORITHIM_OPTIONS=""
-if [ "$INIT_RANDOM" == "true" ] && [ "$INIT_INCREMENT" == "false" ] ; then 
-    ALGORITHIM_OPTIONS="-r"
+algorithmOptions=""
+if [ "${initRandom}" == "true" ] && [ "${initIncrement}" == "false" ] ; then 
+    algorithmOptions="-r"
 fi
-if [ "$INIT_RANDOM" == "false" ] && [ "$INIT_INCREMENT" == "true" ] ; then 
-    ALGORITHIM_OPTIONS="-i"
+if [ "${initRandom}" == "false" ] && [ "${initIncrement}" == "true" ] ; then 
+    algorithmOptions="-i"
 fi
-if [ "$INIT_RANDOM" == "true" ] && [ "$INIT_INCREMENT" == "true" ] ; then 
-        error 6 "<-i> and <-r>"    
+if [ "${initRandom}" == "true" ] && [ "${initIncrement}" == "true" ] ; then 
+    error 6 "<-i> & <-r>" 
 fi
 
 # execute algorithms
 
-init_log_dir
+init_dir ${logDir}
+init_dir ${graphDir}
+init_log_file ${stdLogFile}
 
-PROG_NAME="./Programs/A1-omp-1D"    
-LOG_TYPE="A1-omp-1D-"
-LOG_FILE_PROG="${LOG_PREFIX}${LOG_TYPE}${NOW}"
-DAT_FILE_PROG="${LOG_FILE_PROG}"
-if [[ ${#NX_ARRAY[*]} -ne ${#NB_ARRAY[*]} ]] ; then 
-    error 5 "matrix size and block size"
+matrixFileRoot="${logPrefix}${Now}-values"
+dataFileRoot="${logPrefix}${Now}-timing"
+
+algorithmName="A3-omp-1D" 
+matrixFileName="${matrixFileRoot}-${algorithmName}"
+dataFileName="${dataFileRoot}-${algorithmName}"
+graphFileSimple="${dataFileRoot}-${algorithmName}"
+if [[ ${#NXArray[*]} -gt 0 ]] ; then 
+	error 5 "matrix size"
 else        
-    EXECUTE_OPTIONS=""
-    for (( i = 0 ; i < ${#NX_ARRAY[@]} ; i++ )) do
-        LOG_FILE_PROG_VALUES="${LOG_FILE_PROG}-values-$i${TXT_SUFFIX}"
-        DAT_FILE_PROG_TIMING="${DAT_FILE_PROG}-timing-$i${DAT_SUFFIX}"
-        init_log_file $LOG_FILE_PROG_VALUES 
-        init_log_file $DAT_FILE_PROG_TIMING
-        add_comments_to_log_file "${LOG_FILE_PROG_VALUES}" "${PROG_NAME}"
-        add_comments_to_log_file "${DAT_FILE_PROG_TIMING}" "${PROG_NAME}"
-        EXECUTE_OPTIONS="${ALGORITHIM_OPTIONS} ${NX_ARRAY[$i]}"
-        algorithm_execute "${PROG_NAME}" "${EXECUTE_OPTIONS}" "${LOG_FILE_PROG_VALUES}" "${DAT_FILE_PROG_TIMING}"
-        LOG_FILE_PROG_VALUES="${LOG_FILE_PROG}"
-        DAT_FILE_PROG_TIMING="${DAT_FILE_PROG}"
-    done
+	executeOptions=""
+	if [ "${compileUsingAtlas}" == "true" ] ; then 
+	    compile_dgemm_atlas ${algorithmName}
+	elif [ "${compileUsingCblas}" == "true" ] ; then
+	    compile_dgemm_cblas ${algorithmName}
+	fi
+	for (( i = 0 ; i < ${#NXArray[@]} ; i++ )); do
+	    matrixFileNameValues="${matrixFileName}-$i${txtSuffix}"
+	    dataFileNameTiming="${dataFileName}-$i${DatSuffix}"
+	    graphFileSimplePlotted="${graphFileSimple}-$i${pngSuffix}"
+	    init_log_file ${matrixFileNameValues} 
+	    init_log_file ${dataFileNameTiming}
+	    add_comments_to_log_file "${matrixFileNameValues}" "${algorithmName}"
+	    add_comments_to_log_file "${dataFileNameTiming}" "${algorithmName}"
+	    executeOptions="${algorithmOptions} ${NXArray[$i]}"
+	    algorithm_execute "${algorithmName}" "${executeOptions}" "${matrixFileNameValues}" "${dataFileNameTiming}"
+ 	    if [ "${plotGraphUsingGnuPlot}" == "true" ] ; then 
+		plot_graph ${dataFileNameTiming} ${graphFileSimplePlotted}
+	    fi  
+	    matrixFileNameValues="${matrixFileName}"
+	    dataFileNameTiming="${dataFileName}"
+	    graphFileSimplePlotted="${graphFileSimple}"
+	done
+    fi
 fi
 
 pause

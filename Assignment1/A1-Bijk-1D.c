@@ -1,8 +1,7 @@
 /* ********************************************************************************
 *
 *   Paula Dwan
-*   13208660 : COMP40730 : Assignment 1 : Part 2
-*
+*   13208660 : COMP40730 : Assignment 1
 *   STRAIGHT-FORWARD IJK IMPLEMENTATION
 * 
 *   Write C programs implementing the following three algorithms of multiplication of two n×n 
@@ -34,14 +33,14 @@
 #include <string.h>
 
 void usage_script () {
-    printf( "USAGE : \t<program name> <-i | -r> <N> <B> <matrix contents file>.txt <timing file>.dat");
-    
+    printf( "USAGE : \t<program name> <i> |<r> <N> <B> <matrix contents file>.txt <timing file>.dat");
+    printf ("TO : \tCalculate |C| = |A| x |B| using algorithm : Blocked IJK using square bxb block - via bash script. \n");    
     printf( "where ");
-    printf("\t1. \t-r \tinitialize A| & |B| with _random_ numbers and |C| with '0' ");
-    printf("\t2. \t-i \tinitialize |A| & |B| _incrementally_ with <row> value and |C| with '0' ");
+    printf("\t1. \t<R>\tinitialize |A| & |B| with _random_ numbers and |C| with '0' ");
+    printf("\t2. \t<I>\tinitialize |A| & |B| _incrementally_ with <row> value and |C| with '0' ");
     printf("\t3. \t<N> \tmax size of each matrix, defaults to 1,000 if invalid or not provided - verified in calling script ");
     printf("\t4. \t<B> \tsize of each block, defaults to 50 if invalid or not provided - verified in calling script ");
-    printf("\t5. \t<matrix contents file>.txt\n\t\tname of .txt file to contain the matrix contents ");
+    printf("\t5. \t<matrix contents file>.txt\n\t\tname of .txt file to store values of matrices |A| |B| & |C| ");
     printf("\t6. \t<timing .dat file> .dat \n\t\tname of .dat file to contain time to complete for each iteration ");
     exit(1);
 }
@@ -49,24 +48,26 @@ void usage_script () {
 void usage_cli () {
     printf ("USAGE : \t./<program name> -?|-h|--help \n");
     printf ("TO : \tCalculate |C| = |A| x |B| using algorithm : Blocked IJK using square bxb block - via CLI. \n");
-    printf ("\twhere user is requested to confirm:");
+    printf ("\twhere user is requested to provide :");
     printf ("\t<r | R> : \tinitialization A| & |B| with random numbers and |C| with '0' ");
     printf ("\t<i | I> : \tinitialize |A| & |B| incrementally with <row> value and |C| with '0' ");
     printf ("\t\t'<i | I>' and '<r | R>' are mutually exclusive. \n");
     printf ("\t<N> : \tmatrix dimension, set to maximum of '100' if invalid or not provided");
     printf ("\t<B> : \tblock size, with '<B> < <N>' and '<N> % <B> = 0', \n\t\t\t  defaults to '5' if invalid or not provided and <nx> will be reset to '100'.");
-    printf ("\t-?|-h|--help :    usage");
+    printf("\tA1-Bijk-1D.txt\n\t\tfile storing values of matrices |A| |B| & |C|");
+    printf("\tA1-Bijk-1D.dat \n\t\tfile storing time to complete each iteration ");    
+    printf ("\t-?|-h|--help :\tusage");
     exit(1);
 }
 
-int get_value (int default_value)
+int get_value (int max_value)
 {
-   int l_value=default_value;
+   int l_value=max_value;
    scanf("%d", &l_value);
-   if (l_value > default_value)
+   if (l_value > max_value)
    {
-      printf("WARNING : \t<value> = %d was entered. Set to to <default_value>=%d.\n", l_value, default_value);
-      l_value = default_value;
+      printf("WARNING : \t<value> = %d was entered. Set to to <max_value>=%d.\n", l_value, max_value);
+      l_value = max_value;
    } 
    return l_value;
 }
@@ -248,20 +249,21 @@ int main ( int argc, char *argv[] )
     if ( ( argc != max_num_args ) && ( argc != 1 ) )
     {
         usage_script();
-    } else if (  argc == 1 ))
+    } else if (  argc == 1 )
     {
         printf("INPUT : \n   Blocked IJK (here nx = ny, i.e. |row| = |col|) ...\n");
-        printf("\tPlease enter matrix dimension less than <max_n_value> = %d --> <nx> : ", DEFAULTNVALUE);
-        int nx = get_value(DEFAULTNVALUE);
+        printf("\tPlease enter matrix dimension less than <max_n_value> = %d --> <nx> : ", MAXNVALUE);
+        int nx = get_value(MAXNVALUE);
         int ny = nx;
-        printf("\tPlease enter matrix block size < <max_n_value> = %d --> <nb> : ", DEFAULTNVALUE);
-        int nb = get_value(DEFAULTBVALUE);
+        printf("\tPlease enter matrix block size less than <max_b_value> = %d --> <nb> : ", MAXBVALUE);
+        int nb = get_value(MAXBVALUE);
         while ( (!((nx % nb)==0)) && (!(nb<nx)) )
         {
-            printf("WARNING : \tnb must be < nx and (nx %% nb = 0) must be true. Please re-enter <nb> : ");
-            nb = get_value(DEFAULTBVALUE);
+            printf("WARNING : \t<nb> < <nx> and (<nx> %% <nb> = 0) must both be true. Please re-enter <nb> : ");
+            nb = get_value(MAXBVALUE);
         }
-        int reps = get_value(DEFAULTREPS);
+        printf("\tPlease enter number of repetitions to calculate results using these matrix and block sizes <max repetitions> = %d : ", MAXREPS);
+        int reps = get_value(MAXREPS);
        cli_usage = 1;
     }
 

@@ -5,7 +5,7 @@
 # DESC : Script to multiply two nxn matrices using three algorithms.
 # AUTHOR : Paula Dwan (paula.dwan@ericsson.com | paula.dwan@gmail.com)
 # GIT : https://github.com/pdwan/COMP40730.HPC.git
-# DUE DATE : 30-June-2014 (extended to : 08-July-2014)
+# DUE DATE : 30-June-2014 (extended to : 09-July-2014)
 # ASSIGNMENT : 1
 #
 # ##################################################################################
@@ -17,11 +17,11 @@ _TEE="tee"
 Now=$(date +"%Y%m%d.%H%M%S")
 logDir="logDir"
 graphDir="graphDir"
-logPrefix="${logDir}/pdwan-"
+logPrefix="pdwan-"
 txtSuffix=".txt"
 DatSuffix=".dat"
 pngSuffix=".png"
-stdLogFile="${logDir}/runAssignment1-${Now}.log"
+stdLogFile="runAssignment1-${Now}.log"
 buildAll="false"
 buildSimple="false" 
 buildBlockedIJK="false"
@@ -79,35 +79,36 @@ usage()
 error() 
 {
     err=$1
+    mess=$2
     case ${err} in
         1)
-            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): Unknown parameter '${1}'." |& $_TEE -a ${stdLogFile}
+            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): Unknown parameter '${mess}'." |& $_TEE -a ${logDir}/${stdLogFile}
             ;;
         2)
-            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): Error creating directory '${1}'." |& $_TEE -a ${stdLogFile}
+            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): Error creating directory '${mess}'." |& $_TEE -a ${logDir}/${stdLogFile}
             ;;
         3)
-            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): Error creating file '${1}'." |& $_TEE -a ${stdLogFile}
+            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): Error creating file '${mess}'." |& $_TEE -a ${logDir}/${stdLogFile}
             ;;     
         4)     
-            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): Missing parameter for '${1}'." |& $_TEE -a ${stdLogFile}
+            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): Missing parameter for '${mess}'." |& $_TEE -a ${logDir}/${stdLogFile}
             ;;     
         5)     
-            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): '${1}', Values entered are not valid or not a number." |& $_TEE -a ${stdLogFile}
+            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): '${mess}', Values entered are not valid or not a number." |& $_TEE -a ${logDir}/${stdLogFile}
             ;;     
         6)     
-            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): '${1}', Mutually exclusive switches." |& $_TEE -a ${stdLogFile}
+            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): '${mess}', Mutually exclusive switches." |& $_TEE -a ${logDir}/${stdLogFile}
             ;;     
         7)     
-            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): '${1}', Compilation failed." |& $_TEE -a ${stdLogFile}
+            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): '${mess}', Compilation failed." |& $_TEE -a ${logDir}/${stdLogFile}
             ;;     
         8)     
-            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): '${1}', GnuPlot - graph export error." |& $_TEE -a ${stdLogFile}
+            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): '${mess}', GnuPlot - graph export error." |& $_TEE -a ${logDir}/${stdLogFile}
             ;;     
         *)
-            $_ECHO -e "ERROR :\tUnknown error." |& $_TEE -a ${stdLogFile}
-            $_ECHO ${err} |& $_TEE -a ${stdLogFile}
-            $_ECHO $* |& $_TEE -a ${stdLogFile}
+            $_ECHO -e "ERROR :\tUnknown error." |& $_TEE -a ${logDir}/${stdLogFile}
+            $_ECHO ${err} |& $_TEE -a ${logDir}/${stdLogFile}
+            $_ECHO $* |& $_TEE -a ${logDir}/${stdLogFile}
             ;;
     esac
     $_ECHO -e
@@ -119,7 +120,7 @@ error()
 compile_dgemm_atlas()
 {
     localProgramToCompile=$1
-    $_ECHO -e "RUNNING :\tCompiling <localProgramToCompile>=${localProgramToCompile} using atlas" |& $_TEE ${localLogFile}
+    $_ECHO -e "ATLAS :\t\tCompiling ${localProgramToCompile} using atlas \n" |& $_TEE -a ${logDir}/${stdLogFile}
     gcc -o ATLAS ${localProgramToCompile}.c -I/home/cs/khasanov/libs/ATLAS/include/ -L/home/cs/khasanov/libs/ATLAS/lib/Linux_UNKNOWNSSE2_4/ -lcblas -latlas -lm -O3
 }
 
@@ -127,16 +128,16 @@ compile_dgemm_atlas()
 compile_dgemm_cblas()
 {
     localProgramToCompile=$1
-    $_ECHO -e "RUNNING :\tCompiling <localProgramToCompile>=${localProgramToCompile} using cblas" |& $_TEE ${localLogFile}
+    $_ECHO -e "CBLAS :\t\tCompiling ${localProgramToCompile} using cblas \n" |& $_TEE -a ${logDir}/${stdLogFile}
     gcc -Wall -I/home/cs/khasanov/libs/CBLAS/src ${localProgramToCompile}.c -o ${localProgramToCompile}  /home/cs/khasanov/libs/cblas_LINUX.a  /usr/lib/libblas.a -lgfortran
 }
 
-# TODO function : plot graphs for each .dat file as called, in Graph directory
+# function : plot graph using GnuPlot
 plot_graph()
 {
     localDatFileToGraph=$1
     localPngGraph=$2
-    $_ECHO -e "RUNNING :\tCreating <localPngGraph>=${localPngGraph} in <graph Dir>=${graphDir} from <localDatFileToGraph>=${localDatFileToGraph}" |& $_TEE ${localLogFile}
+    $_ECHO -e "GNUplot :\tCreating ${localPngGraph} from ${localDatFileToGraph}" |& $_TEE -a ${logDir}/${stdLogFile}
 }
 
 # function : create directory, if it does not exist & validate creation
@@ -145,7 +146,7 @@ init_dir()
     creationDir=$1
     if [ ! -d ${creationDir} ] || [ ! -e ${creationDir} ] ; then 
         mkdir ${creationDir}        
-        $_ECHO -e "WARNING :\tCreating $creationDir" |& $_TEE -a ${stdLogFile}
+        $_ECHO -e "WARNING :\tCreating $creationDir" |& $_TEE -a ${logDir}/${stdLogFile}
         if [[ $? -ne 0 ]] ; then 
             error 2 $creationDir
         fi
@@ -157,10 +158,10 @@ init_log_file()
 {
     localLogFile=$1
     if  [ -e ${localLogFile} ]  ; then
-        $_ECHO -e "WARNING :\tFile backup : ${localLogFile} to ${localLogFile}.bup" |& ${localLogFile}
+        $_ECHO -e "WARNING :\tFile backup : ${localLogFile} to ${localLogFile}.bup" 
         mv "${localLogFile}" "${localLogFile}.bup"
     fi
-    $_ECHO -e "# LOG :\t${localLogFile} \n\tCreated on ${Now} by ${USER}." |& $_TEE ${localLogFile}
+    $_ECHO -e "# LOG FILE :\t${localLogFile} \tcreated on ${Now} by ${USER}." |& $_TEE ${localLogFile}
 }
 
 # function : add initial comments to matrix .txt and to timing .dat file
@@ -171,21 +172,20 @@ add_comments_to_log_file()
     FileTypeDat='dat'
     FileTypeSimple='Sijk'
 
-    $_ECHO -e "# ------------------------------------------------------------------------------------- \n# " >> ${localLogFile}
+    $_ECHO -e "# -----------------------------------------------------------------------------------------------------------------------------------------  \n# " >> ${localLogFile}
     $_ECHO -e "# Program : ${localProgramName} \n# \n# Log file : ${localLogFile} \n# where :\t.dat contains timing data & .txt contains matrix values \n#" >> ${localLogFile}
     $_ECHO -e "# Computation of Straight-forward IJK, Blocked IJK or Blocked KIJ using square NxN \n# & square bxb block (as applicable) for matrices |C| += |A| * |B| \n# " >> ${localLogFile}
-    $_ECHO -e "# ------------------------------------------------------------------------------------- \n# " >> ${localLogFile}
+    $_ECHO -e "# -----------------------------------------------------------------------------------------------------------------------------------------  \n# " >> ${localLogFile}
     if [[ $localLogFile == *"$FileTypeDat"* ]] ; then
-	$_ECHO -e "# Time taken to compute \n#" >> ${localLogFile} # dat
-	if [[ "${localLogFile}" == *"$FileTypeSimple"* ]] ; then
-	    $_ECHO -e "# Matrix Size \tTime/manual \tTime/manual \tTime/dgenn \n# \tSimple \tComplex \n# " |& $_TEE -a ${localLogFile}
-	else 
-	    $_ECHO -e "# Matrix Size \tBlock Size \tTime/manual \tTime/manual \tTime/dgenn \n# \t \tSimple \t\tComplex \n# " |& $_TEE -a ${localLogFile}
+	    $_ECHO -e "# Time taken to compute \n#" >> ${localLogFile} # dat
+	    if [[ "${localLogFile}" == *"$FileTypeSimple"* ]] ; then
+	        $_ECHO -e "# Matrix Size \tTime/Simple \tTime/Complex \tTime/dgenn \n# " |& $_TEE -a ${localLogFile}
+	    else 
+	        $_ECHO -e "# Matrix Size \tBlock Size \tTime/Simple \tTime/Complex \tTime/dgenn \n# " |& $_TEE -a ${localLogFile}
         fi
     else 
         $_ECHO -e "# Summary of values added to each matrix - retained for later reference and validation \n#" >> ${localLogFile} # txt 
     fi
-    $_ECHO -e "# ------------------------------------------------------------------------------------- \n# " >> ${localLogFile}
 }
 
 # function : execute each algorithm in turn wih specified parameters / options
@@ -195,7 +195,7 @@ algorithm_execute()
     localOptions="$2"
     localFileMatrix="$3"
     localFileTime="$4"
-    $_ECHO -e "RUNNING :\t${localCmd} ${localOptions} ${localFileMatrix} ${localFileTime}" |& $_TEE -a ${stdLogFile}
+    $_ECHO -e "RUNNING :\t${localCmd} ${localOptions} ${localFileMatrix} ${localFileTime}" |& $_TEE -a ${logDir}/${stdLogFile}
     # ${localCmd} ${localOptions} ${localFileMatrix} ${localFileTime}
 }
 
@@ -276,7 +276,6 @@ else
 fi
 
 # process and validate parameter values for matrix and block sizes, if applicable
-# TODO add check for buildBlockedIJK="false" and buildBlockedKIJ="false" and no block size added --> correct
 if [ "${defaultMatrixRange}" == "true" ] && ( [ "${matrixEnabled}" == "true" ] || [ "${blockEnabled}" == "true" ] ) ; then 
     error 6 "<-b>, <-m> & <-v>"
 fi
@@ -285,8 +284,6 @@ if  [ "${defaultMatrixRange}" == "true" ] && ( [ "${matrixEnabled}" == "false" ]
     declare -a NBArray=( 2 5 10 5 10 20 5 10 20 50 5 10 50 100 )
     matrixEnabled="false"
     blockEnabled="false"
-    echo ${#NXArray[@]} 
-    echo ${#NBArray[@]} 
 else
     if [ "${matrixEnabled}" == "true" ] || [ "${blockEnabled}" == "true" ] ; then
 	if [ "${matrixSize}" == "" ] ; then 
@@ -297,30 +294,30 @@ else
 	fi
 	# Validate matrix range
 	if [ ${matrixSize} -le 0 ] || [ ${matrixSize} -gt ${maxMatrixSize} ] ; then
-	    $_ECHO -e "WARNING :\t$($_BASENAME $0): matrix size <nx> is invalid, now set to default of : $maxMatrixSize" |& $_TEE -a ${stdLogFile}
+	    $_ECHO -e "WARNING :\t$($_BASENAME $0): Invalid matrix size <nx>, now set to default of : $maxMatrixSize" |& $_TEE -a ${logDir}/${stdLogFile}
 	    let matrixSize=$maxMatrixSize
 	    matrixEnabled="true"
 	fi        
 	# Validate block range
 	if [ ${blockSize} -le 0 ] || [ ${blockSize} -gt ${maxBlockSize} ] ; then
-	    $_ECHO -e "WARNING :\t$($_BASENAME $0): block size <nb> is invalid, now set to default of : $maxBlockSize" |& $_TEE -a ${stdLogFile}
+	    $_ECHO -e "WARNING :\t$($_BASENAME $0): Invalid block size <nb>, now set to default of : $maxBlockSize" |& $_TEE -a ${logDir}/${stdLogFile}
 	    let blockSize=$maxBlockSize
 	    blockEnabled="true"
 	fi
 	# ensure both are enabled if one is unless Simple only
 	if [ "${matrixEnabled}" == "false" ] ; then 
-	    $_ECHO -e "WARNING :\t$($_BASENAME $0): matrix size <nx> is not enabled, now enabled and set to default of : $maxMatrixSize" |& $_TEE -a ${stdLogFile}
+	    $_ECHO -e "WARNING :\t$($_BASENAME $0): matrix size <nx> is now enabled and set to default of : $maxMatrixSize" |& $_TEE -a ${logDir}/${stdLogFile}
 	    let matrixSize=$maxMatrixSize
 	    matrixEnabled="true"
 	fi
 	if [ "${blockEnabled}" == "false" ] && ( ["${buildBlockedIJK}"="true"] || ["${buildBlockedKIJ}"="true" ] ) ; then 
-	    $_ECHO -e "WARNING :\t$($_BASENAME $0): block size <nb> is not enabled, now enabled and set to default of : $maxBlockSize" |& $_TEE -a ${stdLogFile}
+	    $_ECHO -e "WARNING :\t$($_BASENAME $0): block size <nb> is now enabled and set to default of : $maxBlockSize" |& $_TEE -a ${logDir}/${stdLogFile}
 	    let blockSize=$maxBlockSize
 	    blockEnabled="true"
 	fi
 	# Validate matrix / block remainder
     	if [ $(( ${matrixSize} % ${blockSize} )) -ne 0 ]; then
-	    $_ECHO -e "WARNING :\t$($_BASENAME $0): block size needs to be an even multiple of matrix size. Using defaults." |& $_TEE -a ${stdLogFile}
+	    $_ECHO -e "WARNING :\t$($_BASENAME $0): block size needs to be an even multiple of matrix size. Using defaults." |& $_TEE -a ${logDir}/${stdLogFile}
 	    let blockSize=$maxBlockSize
 	    let matrixSize=$maxMatrixSize
     	fi
@@ -345,42 +342,47 @@ fi
 
 init_dir ${logDir}
 init_dir ${graphDir}
-init_log_file ${stdLogFile}
+init_log_file ${logDir}/${stdLogFile}
 
-matrixFileRoot="${logPrefix}${Now}-values"
-dataFileRoot="${logPrefix}${Now}-timing"
+matrixFileRoot="${logDir}/${logPrefix}${Now}-values"
+dataFileRoot="${logDir}/${logPrefix}${Now}-timing"
+graphFileRoot="${graphDir}/${logPrefix}${Now}-graph"
+
 
 if [ "${buildSimple}" == "true" ]  || [ "${buildAll}" == "true" ] ; then
     algorithmSimple="A1-Sijk-1D" 
     matrixFileSimple="${matrixFileRoot}-${algorithmSimple}"
     dataFileSimple="${dataFileRoot}-${algorithmSimple}"
-    graphFileSimple="${dataFileRoot}-${algorithmSimple}"
+    graphFileSimple="${graphFileRoot}-${algorithmSimple}"
     if [[ ${#NXArray[*]} -ne ${#NBArray[*]} ]] ; then 
-	error 5 "matrix size and block size"
+	    error 5 "matrix size and block size"
     else        
-	executeOptions=""
-	if [ "${compileUsingAtlas}" == "true" ] ; then 
-	    compile_dgemm_atlas ${algorithmSimple}
-	elif [ "${compileUsingCblas}" == "true" ] ; then
-	    compile_dgemm_cblas ${algorithmSimple}
-	fi
-	for (( i = 0 ; i < ${#NXArray[@]} ; i++ )); do
-	    matrixFileSimpleValues="${matrixFileSimple}-$i${txtSuffix}"
-	    dataFileSimpleTiming="${dataFileSimple}-$i${DatSuffix}"
-	    graphFileSimplePlotted="${graphFileSimple}-$i${pngSuffix}"
-	    init_log_file ${matrixFileSimpleValues} 
-	    init_log_file ${dataFileSimpleTiming}
-	    add_comments_to_log_file "${matrixFileSimpleValues}" "${algorithmSimple}"
-	    add_comments_to_log_file "${dataFileSimpleTiming}" "${algorithmSimple}"
-	    executeOptions="${algorithmOptions} ${NXArray[$i]}"
-	    algorithm_execute "${algorithmSimple}" "${executeOptions}" "${matrixFileSimpleValues}" "${dataFileSimpleTiming}"
- 	    if [ "${plotGraphUsingGnuPlot}" == "true" ] ; then 
-		plot_graph ${dataFileSimpleTiming} ${graphFileSimplePlotted}
-	    fi  
-	    matrixFileSimpleValues="${matrixFileSimple}"
-	    dataFileSimpleTiming="${dataFileSimple}"
-	    graphFileSimplePlotted="${graphFileSimple}"
-	done
+	    executeOptions=""
+	    if [ "${compileUsingAtlas}" == "true" ] && [ "${compileUsingCblas}" == "true" ] ; then 
+            error 7 "Atlas & cBlas"
+        fi
+        if [ "${compileUsingAtlas}" == "true" ] ; then
+	        compile_dgemm_atlas ${algorithmSimple}
+	    elif [ "${compileUsingCblas}" == "true" ] ; then
+	        compile_dgemm_cblas ${algorithmSimple}
+	    fi
+	    for (( i = 0 ; i < ${#NXArray[@]} ; i++ )); do
+	        matrixFileSimpleValues="${matrixFileSimple}-$i${txtSuffix}"
+	        dataFileSimpleTiming="${dataFileSimple}-$i${DatSuffix}"
+	        graphFileSimplePlotted="${graphFileSimple}-$i${pngSuffix}"
+	        init_log_file ${matrixFileSimpleValues} 
+	        init_log_file ${dataFileSimpleTiming}
+	        add_comments_to_log_file "${matrixFileSimpleValues}" "${algorithmSimple}"
+	        add_comments_to_log_file "${dataFileSimpleTiming}" "${algorithmSimple}"
+	        executeOptions="${algorithmOptions} ${NXArray[$i]}"
+	        algorithm_execute "${algorithmSimple}" "${executeOptions}" "${matrixFileSimpleValues}" "${dataFileSimpleTiming}"
+ 	        if [ "${plotGraphUsingGnuPlot}" == "true" ] ; then 
+	    	    plot_graph ${dataFileSimpleTiming} ${graphFileSimplePlotted}
+	        fi  
+	        matrixFileSimpleValues="${matrixFileSimple}"
+	        dataFileSimpleTiming="${dataFileSimple}"
+	        graphFileSimplePlotted="${graphFileSimple}"
+	    done
     fi
 fi
 
@@ -388,36 +390,37 @@ if [ "${buildBlockedIJK}" == "true" ]  || [ "${buildAll}" == "true" ] ; then
     algorithmBlockedIJK="A1-Bijk-1D"
     matrixFileBlockedIJK="${matrixFileRoot}-${algorithmBlockedIJK}"
     dataFileBlockedIJK="${dataFileRoot}-${algorithmBlockedIJK}"
-    graphFileBlockedIJK="${dataFileRoot}-${algorithmBlockedIJK}"
+    graphFileBlockedIJK="${graphFileRoot}-${algorithmBlockedIJK}"
     if [[ ${#NXArray[*]} -ne ${#NBArray[*]} ]] ; then 
-	error 5 "matrix size and block size"
+	    error 5 "matrix size and block size"
     else 
-	executeOptions=""
-	if [ "${compileUsingAtlas}" == "true" ] ; then 
-	    compile_dgemm_atlas ${algorithmBlockedIJK}
-	elif [ "${compileUsingCblas}" == "true" ] ; then
-	    compile_dgemm_cblas ${algorithmBlockedIJK}
-	fi
-	for (( i = 0 ; i < ${#NXArray[@]} ; i++ )); do
-	    matrixFileBlockedIJKValues="${matrixFileBlockedIJK}-$i${txtSuffix}"
-	    dataFileBlockedIJKTiming="${dataFileBlockedIJK}-$i${DatSuffix}"
-	    graphFileBlockedIJKPlotted="${graphFileBlockedIJK}-$i${pngSuffix}"
-	    init_log_file $matrixFileBlockedIJKValues 
-	    init_log_file $dataFileBlockedIJKTiming
-	    add_comments_to_log_file "${matrixFileBlockedIJKValues}" "${algorithmBlockedIJK}"
-	    add_comments_to_log_file "${dataFileBlockedIJKTiming}" "${algorithmBlockedIJK}"
-	    executeOptions="${algorithmOptions} ${NXArray[$i]} ${NBArray[$i]}"
-	    algorithm_execute "${algorithmBlockedIJK}"        \
-                              "${executeOptions}"             \
-                              "${matrixFileBlockedIJKValues}" \
-                              "${dataFileBlockedIJKTiming}"
-	    if [ "${plotGraphUsingGnuPlot}" == "true" ] ; then 
-		plot_graph ${dataFileBlockedIJKTiming} ${graphFileBlockedIJKPlotted}
-	    fi  
-	    matrixFileBlockedIJKValues="${matrixFileBlockedIJK}"
-	    dataFileBlockedIJKTiming="${dataFileBlockedIJK}"
-	    graphFileBlockedIJKPlotted="${graphFileBlockedIJK}"
-	done
+	    executeOptions=""
+	    if [ "${compileUsingAtlas}" == "true" ] && [ "${compileUsingCblas}" == "true" ] ; then 
+            error 7 "Atlas & cBlas"
+        fi
+	    if [ "${compileUsingAtlas}" == "true" ] ; then 
+	        compile_dgemm_atlas ${algorithmBlockedIJK}
+	    elif [ "${compileUsingCblas}" == "true" ] ; then
+	        compile_dgemm_cblas ${algorithmBlockedIJK}
+	    fi
+	    for (( i = 0 ; i < ${#NXArray[@]} ; i++ )); do
+	        matrixFileBlockedIJKValues="${matrixFileBlockedIJK}-$i${txtSuffix}"
+	        dataFileBlockedIJKTiming="${dataFileBlockedIJK}-$i${DatSuffix}"
+	        graphFileBlockedIJKPlotted="${graphFileBlockedIJK}-$i${pngSuffix}"
+	        init_log_file $matrixFileBlockedIJKValues 
+	        init_log_file $dataFileBlockedIJKTiming
+	        add_comments_to_log_file "${matrixFileBlockedIJKValues}" "${algorithmBlockedIJK}"
+	        add_comments_to_log_file "${dataFileBlockedIJKTiming}" "${algorithmBlockedIJK}"
+	        executeOptions="${algorithmOptions} ${NXArray[$i]} ${NBArray[$i]}"
+	        algorithm_execute "${algorithmBlockedIJK}"       "${executeOptions}"             \
+                                  "${matrixFileBlockedIJKValues}"  "${dataFileBlockedIJKTiming}"
+    	    if [ "${plotGraphUsingGnuPlot}" == "true" ] ; then 
+	    	    plot_graph ${dataFileBlockedIJKTiming} ${graphFileBlockedIJKPlotted}
+	        fi  
+	        matrixFileBlockedIJKValues="${matrixFileBlockedIJK}"
+	        dataFileBlockedIJKTiming="${dataFileBlockedIJK}"
+	        graphFileBlockedIJKPlotted="${graphFileBlockedIJK}"
+	    done
     fi
 fi
 
@@ -425,34 +428,37 @@ if [ "${buildBlockedKIJ}" == "true" ]  || [ "${buildAll}" == "true" ] ; then
     algorithmBlockedKIJ="A1-Bkij-1D"
     matrixFileBlockedKIJ="${matrixFileRoot}-${algorithmBlockedKIJ}"
     dataFileBlockedKIJ="${dataFileRoot}-${algorithmBlockedKIJ}"
-    graphFileBlockedKIJ="${dataFileRoot}-${algorithmBlockedKIJ}"
+    graphFileBlockedKIJ="${graphFileRoot}-${algorithmBlockedKIJ}"
     if [[ ${#NXArray[*]} -ne ${#NBArray[*]} ]] ; then 
-	error 5 "matrix size and block size"
+	    error 5 "matrix size and block size"
     else 
-	executeOptions=""
-	if [ "${compileUsingAtlas}" == "true" ] ; then 
-	    compile_dgemm_atlas ${algorithmBlockedKIJ}
-	elif [ "${compileUsingCblas}" == "true" ] ; then
-	    compile_dgemm_cblas ${algorithmBlockedKIJ}
-	fi
-	for (( i = 0 ; i < ${#NXArray[@]} ; i++ )); do
-	    matrixFileBlockedKIJValues="${matrixFileBlockedKIJ}-$i${txtSuffix}"
-	    dataFileBlockedKIJTiming="${dataFileBlockedKIJ}-$i${DatSuffix}"
-	    graphFileBlockedKIJPlotted="${graphFileBlockedKIJ}-$i${pngSuffix}"
-	    init_log_file $matrixFileBlockedKIJValues 
-	    init_log_file $dataFileBlockedKIJTiming
-	    add_comments_to_log_file "${matrixFileBlockedKIJValues}" "${algorithmBlockedKIJ}" 
-	    add_comments_to_log_file "${dataFileBlockedKIJTiming}" "${algorithmBlockedKIJ}" 
-	    executeOptions="${algorithmOptions} ${NXArray[$i]} ${NBArray[$i]}"
-	    algorithm_execute "${algorithmBlockedKIJ}" "${executeOptions}" \
-                        "${matrixFileBlockedKIJValues}" "${dataFileBlockedKIJTiming}"
-	    if [ "${plotGraphUsingGnuPlot}" == "true" ] ; then 
-		plot_graph ${dataFileBlockedKIJTiming} ${graphFileBlockedKIJPlotted}
+	    executeOptions=""
+	    if [ "${compileUsingAtlas}" == "true" ] && [ "${compileUsingCblas}" == "true" ] ; then 
+            error 7 "Atlas & cBlas"
+        fi
+	    if [ "${compileUsingAtlas}" == "true" ] ; then 
+	        compile_dgemm_atlas ${algorithmBlockedKIJ}
+	    elif [ "${compileUsingCblas}" == "true" ] ; then
+	        compile_dgemm_cblas ${algorithmBlockedKIJ}
 	    fi
-	    matrixFileBlockedKIJValues="${matrixFileBlockedKIJ}"
-	    dataFileBlockedKIJTiming="${dataFileBlockedKIJ}"
-	    graphFileBlockedKIJPlotted="${graphFileBlockedKIJ}"
-	done
+	    for (( i = 0 ; i < ${#NXArray[@]} ; i++ )); do
+	        matrixFileBlockedKIJValues="${matrixFileBlockedKIJ}-$i${txtSuffix}"
+    	    dataFileBlockedKIJTiming="${dataFileBlockedKIJ}-$i${DatSuffix}"
+	        graphFileBlockedKIJPlotted="${graphFileBlockedKIJ}-$i${pngSuffix}"
+	        init_log_file ${matrixFileBlockedKIJValues} 
+	        init_log_file ${dataFileBlockedKIJTiming}
+	        add_comments_to_log_file "${matrixFileBlockedKIJValues}" "${algorithmBlockedKIJ}" 
+	        add_comments_to_log_file "${dataFileBlockedKIJTiming}" "${algorithmBlockedKIJ}" 
+	        executeOptions="${algorithmOptions} ${NXArray[$i]} ${NBArray[$i]}"
+	        algorithm_execute "${algorithmBlockedKIJ}" "${executeOptions}" \
+                            "${matrixFileBlockedKIJValues}" "${dataFileBlockedKIJTiming}"
+	        if [ "${plotGraphUsingGnuPlot}" == "true" ] ; then 
+	    	    plot_graph ${dataFileBlockedKIJTiming} ${graphFileBlockedKIJPlotted}
+	        fi
+	        matrixFileBlockedKIJValues="${matrixFileBlockedKIJ}"
+	        dataFileBlockedKIJTiming="${dataFileBlockedKIJ}"
+	        graphFileBlockedKIJPlotted="${graphFileBlockedKIJ}"
+	    done
     fi
 fi
 

@@ -1,0 +1,15 @@
+# LOG FILE :	logDir/pdwan-20140708.163544-values-A1-Bkij-1D-0.txt 	created on 20140708.163544 by epaudwa.
+# -----------------------------------------------------------------------------------------------------------------------------------------  
+# 
+# Program : A1-Bkij-1D 
+# 
+# Log file : logDir/logDir/pdwan-20140708.163544-values-A1-Bkij-1D-0.txt 
+# where :	.dat contains timing data & .txt contains matrix values 
+#
+# Computation of Straight-forward IJK, Blocked IJK or Blocked KIJ using square NxN 
+# & square bxb block (as applicable) for matrices |C| += |A| * |B| 
+# 
+# -----------------------------------------------------------------------------------------------------------------------------------------  
+# 
+# Summary of values added to each matrix - retained for later reference and validation 
+#

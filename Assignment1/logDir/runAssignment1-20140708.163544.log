@@ -1,0 +1,13 @@
+# LOG FILE :	logDir/runAssignment1-20140708.163544.log 	created on 20140708.163544 by epaudwa.
+ATLAS :		Compiling A1-Sijk-1D using atlas 
+
+RUNNING :	A1-Sijk-1D -i 1000 logDir/pdwan-20140708.163544-values-A1-Sijk-1D-0.txt logDir/pdwan-20140708.163544-timing-A1-Sijk-1D-0.dat
+GNUplot :	Creating graphDir/pdwan-20140708.163544-graph-A1-Sijk-1D-0.png from logDir/pdwan-20140708.163544-timing-A1-Sijk-1D-0.dat
+ATLAS :		Compiling A1-Bijk-1D using atlas 
+
+RUNNING :	A1-Bijk-1D -i 1000 50 logDir/pdwan-20140708.163544-values-A1-Bijk-1D-0.txt logDir/pdwan-20140708.163544-timing-A1-Bijk-1D-0.dat
+GNUplot :	Creating graphDir/pdwan-20140708.163544-graph-A1-Bijk-1D-0.png from logDir/pdwan-20140708.163544-timing-A1-Bijk-1D-0.dat
+ATLAS :		Compiling A1-Bkij-1D using atlas 
+
+RUNNING :	A1-Bkij-1D -i 1000 50 logDir/pdwan-20140708.163544-values-A1-Bkij-1D-0.txt logDir/pdwan-20140708.163544-timing-A1-Bkij-1D-0.dat
+GNUplot :	Creating graphDir/pdwan-20140708.163544-graph-A1-Bkij-1D-0.png from logDir/pdwan-20140708.163544-timing-A1-Bkij-1D-0.dat

@@ -50,7 +50,7 @@ pause () {
 # function : usage instructions
 usage() 
 {
-    $_ECHO -e "\nUSAGE :\t./$($_BASENAME $0) -a|--all -1|--simple -2|--ijk -3|--kij -d1|--atlas -p|--plot -r|--random -i|--increment \ \n\t\t\t-m|--matrix<n> -b|--block <b> -v|--values -?|-h|--help"
+    $_ECHO -e "\nUSAGE :\t./$($_BASENAME $0) -a|--all -1|--simple -2|--ijk -3|--kij -d1|--atlas -p|--plot -r|--random -i|--increment \ \n\t\t\t-m|--matrix<n> -b|--block <b> -v|--values -?|-h|--help \n"
     $_ECHO -e "TO :\tCalculate |C| = |A| x |B| using 1 -> 3 algoritms : Straight-forward IJK, Blocked IJK and Blocked KIJ." 
     $_ECHO -e "LOGS :\tCreated in <${logDir}> : <file>.txt matrix values for matrices |A| |B| & |C|, \n\t<file>.dat : timing of each computation & <${logDir}/runAssignment1-timestamp.log> summary of stdout. \n"
     $_ECHO -e "WHERE :\t-a|--all \tCalculate data for all algorithms via separate .c programs to multiply |A|x|B| -> |C| "

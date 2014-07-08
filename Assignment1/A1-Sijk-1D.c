@@ -34,17 +34,32 @@
 #include <string.h>
 
 
-void usage () {
-    printf( "USAGE : \t<program name> <-i | -r> <N> <matrix contents .txt file> <timing .dat file>");
+void usage_script () {
+    printf( "USAGE : \t<program name> <i> |<r> <N> <B> <matrix contents file>.txt <timing file>.dat");
+    printf ("TO : \tCalculate |C| = |A| x |B| using algorithm : Blocked KIJ using square bxb block - via bash script. \n");    
     printf( "where ");
-    printf("-r| \tinitialize A| & |B| with random numbers and |C| with '0' ");
-    printf("\t-t \tinitialize |A| & |B| incrementally with <row> value and |C| with '0' ");
-    printf("\t-t \tmax size of each matrix, defaults to 1000 if invalid - verified in calling script");
-    printf( "\t<matrix contents .txt file>\n\t\tname of .txt file to contain the matrix contents");
-    printf( "\t<timing .dat file>\n\t\tname of .dat file to contain time to complete for each iteration");
+    printf("\t1. \t<R>\tinitialize |A| & |B| with _random_ numbers and |C| with '0' ");
+    printf("\t2. \t<I>\tinitialize |A| & |B| _incrementally_ with <row> value and |C| with '0' ");
+    printf("\t3. \t<N> \tmax size of each matrix, defaults to 1,000 if invalid or not provided - verified in calling script ");
+    printf("\t4. \t<B> \tsize of each block, defaults to 50 if invalid or not provided - verified in calling script ");
+    printf("\t5. \t<matrix contents file>.txt\n\t\tname of .txt file to store values of matrices |A| |B| & |C| ");
+    printf("\t6. \t<timing .dat file> .dat \n\t\tname of .dat file to contain time to complete for each iteration ");
     exit(1);
 }
 
+void usage_cli () {
+    printf ("USAGE : \t./<program name> -?|-h|--help \n");
+    printf ("TO : \tCalculate |C| = |A| x |B| using algorithm : Straight-forward IJK - via CLI. \n");
+    printf ("\twhere user is requested to provide :");
+    printf ("\t<r | R> : \tinitialization A| & |B| with random numbers and |C| with '0' ");
+    printf ("\t<i | I> : \tinitialize |A| & |B| incrementally with <row> value and |C| with '0' ");
+    printf ("\t\t'<i | I>' and '<r | R>' are mutually exclusive. \n");
+    printf ("\t<N> : \tmatrix dimension, set to maximum of '100' if invalid or not provided");
+    printf("\tA1-Sijk-1D.txt\n\t\tfile storing values of matrices |A| |B| & |C|");
+    printf("\tA1-Sijk-1D.dat \n\t\tfile storing time to complete each iteration ");    
+    printf ("\t-?|-h|--help :\tusage");
+    exit(1);
+}
 double* allocate_memory_1d_matrix (int rows, int cols)
 {
     double* l_matrix;  
@@ -112,8 +127,9 @@ void init_C_1d_matrix(double *matrix1d, int rows, int cols, FILE *fp)
         if (count == rows) {
             fprintf(fp, "\n");
             count =1;
-        }else {
-        count++;
+        }else 
+        {
+            count++;
         }
     }
 }
@@ -204,36 +220,56 @@ int main ( int argc, char *argv[] )
    int increment_or_random = 5;
    int max_num_args = 5;
 
-//  USAGE: <program name> <-i | -r> <N> <matrix contents .txt file> <timing .dat file>
-
-    if ( argc != max_num_args )
+/   if ( ( argc != max_num_args ) && ( argc != 1 ) )
     {
-        usage();
+        usage_script();
+    } else if (  argc == 1 )
+    {
+        printf("INPUT : \n   Blocked IJK (here nx = ny, i.e. |row| = |col|) ...\n");
+        printf("\tPlease enter matrix dimension less than <max_n_value> = %d --> <nx> : ", MAXNVALUE);
+        int nx = get_value(MAXNVALUE);
+        int ny = nx;
+        printf("\tPlease enter matrix block size less than <max_b_value> = %d --> <nb> : ", MAXBVALUE);
+        int nb = get_value(MAXBVALUE);
+        while ( (!((nx % nb)==0)) && (!(nb<nx)) )
+        {
+            printf("WARNING : \t<nb> < <nx> and (<nx> %% <nb> = 0) must both be true. Please re-enter <nb> : ");
+            nb = get_value(MAXBVALUE);
+        }
+        printf("\tPlease enter number of repetitions to calculate results using these matrix and block sizes <max repetitions> = %d : ", MAXREPS);
+        int reps = get_value(MAXREPS);
+       cli_usage = 1;
+       fprintf(fp_matrix, "RUNNING : \t%s %s %d %s %s \n", argv[0],cell_value_type,nx,filename_matrix,filename_timing );
+       FILE *fp_matrix = fopen("A1-Sijk-1D.txt", "wa" );
+       FILE *fp_matrix = fopen("A1-Sijk-1D.dat", "wa" );
     }
 
+    if ( cli_usage == 0) 
+    {
 //  initialise values using parameters provided
-    char cell_value_type[3];
-    strncpy(cell_value_type, argv[1], 2);
-    cell_value_type[3] = '\0';
-    if (strcmp(cell_value_type,"-i") == 0)
-    {
-        increment_or_random = 1;        
-    } else if (strcmp(cell_value_type,"-r") == 0)
-    {
-        increment_or_random = 0;
+        char cell_value_type[3];
+        strncpy(cell_value_type, argv[1], 2);
+        cell_value_type[3] = '\0';
+        if (strcmp(cell_value_type,"-i") == 0)
+        {
+            increment_or_random = 1;        
+        } else if (strcmp(cell_value_type,"-r") == 0)
+        {
+            increment_or_random = 0;
+        }
+        int nx = atoi(argv[2]);                                     
+        int ny = nx;      
+        char filename_matrix[50];
+        strncpy(filename_matrix, argv[3], 49);
+        filename_matrix[50] = '\0';
+        FILE *fp_matrix = fopen( filename_matrix, "wa" );
+        char filename_timing[50];
+        strncpy(filename_timing, argv[4], 49);
+        filename_timing[50] = '\0';
+        FILE *fp_timing = fopen(filename_timing, "wa" );
+        fprintf(fp_matrix, "RUNNING : \t%s %s %d %s %s \n", argv[0],cell_value_type,nx,filename_matrix,filename_timing );
     }
-    int nx = atoi(argv[2]);                                     
-    int ny = nx;      
-    char filename_matrix[50];
-    strncpy(filename_matrix, argv[3], 49);
-    filename_matrix[50] = '\0';
-    FILE *fp_matrix = fopen( filename_matrix, "wa" );
-    char filename_timing[50];
-    strncpy(filename_timing, argv[4], 49);
-    filename_timing[50] = '\0';
-    FILE *fp_timing = fopen(filename_timing, "wa" );
-            
-    fprintf(fp_matrix, "RUNNING : \t%s %s %d %s %s \n", argv[0],cell_value_type,nx,filename_matrix,filename_timing );
+        
 
 //  add initial comments to matrix values and timing data files 
     add_comments_to_files(fp_matrix);			

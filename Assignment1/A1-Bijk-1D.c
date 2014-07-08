@@ -72,14 +72,6 @@ int get_value (int max_value)
    return l_value;
 }
 
-void add_comments_to_files (FILE *fp) 
-{
-    fprintf(fp, "# ......................................................................................................... \n");
-    fprintf(fp, "# Computation of Blocked IJK using square bxb block for matrices |A| & |B| storing results in |C|") ;
-    fprintf(fp, "# \n# Matrix Size \tBlock Size \tTime/manual \tTime/manual \tTime/dgenn \n# \t \tSimple \tComplex");	  
-    fprintf(fp, "# ......................................................................................................... \n");
-}
-
 double* allocate_memory_1d_matrix (int rows, int cols)
 {
     double* l_matrix;  
@@ -106,7 +98,8 @@ void init_1d_matrix_random(double *matrix1d, int rows, int cols, FILE *fp)
     {
         matrix1d[ni]= (double) ((rand()%mod_rand) + 1);
         fprintf(fp, "%g\t", matrix1d[ni]); 
-        if (count == rows) {
+        if (count == rows) 
+        {
             fprintf(fp, "\n");
             count =1;
         } else 
@@ -147,8 +140,9 @@ void init_C_1d_matrix(double *matrix1d, int rows, int cols, FILE *fp)
         if (count == rows) {
             fprintf(fp, "\n");
             count =1;
-        }else {
-        count++;
+        }else 
+        {
+            count++;
         }
     }
 }
@@ -244,8 +238,6 @@ int main ( int argc, char *argv[] )
     const int MAXBVALUE = 5;
     const int MAXREPS = 10;
 
-//  USAGE: <program name> <-i | -r> <N> <matrix contents .txt file> <timing .dat file>
-
     if ( ( argc != max_num_args ) && ( argc != 1 ) )
     {
         usage_script();
@@ -265,6 +257,9 @@ int main ( int argc, char *argv[] )
         printf("\tPlease enter number of repetitions to calculate results using these matrix and block sizes <max repetitions> = %d : ", MAXREPS);
         int reps = get_value(MAXREPS);
        cli_usage = 1;
+       fprintf(fp_matrix, "RUNNING : \t%s %s %d %s %s \n", argv[0],cell_value_type,nx,filename_matrix,filename_timing );
+       FILE *fp_matrix = fopen("A1-Bijk-1D-matrixValues.txt", "wa" );
+       FILE *fp_matrix = fopen("A1-Bijk-1D-timing.dat", "wa" );
     }
 
     if ( cli_usage == 0) 
@@ -289,11 +284,7 @@ int main ( int argc, char *argv[] )
         strncpy(filename_timing, argv[4], 49);
         filename_timing[50] = '\0';
         FILE *fp_timing = fopen(filename_timing, "wa" );    
-        fprintf(fp_matrix, "RUNNING : \t%s %s %d %s %s \n", argv[0],cell_value_type,nx,filename_matrix,filename_timing );
-
-        //  add initial comments to matrix values and timing data files 
-        add_comments_to_files(fp_matrix);			
-        add_comments_to_files(fp_timing);			
+       fprintf(fp_matrix, "RUNNING : \t%s %s %d %s %s \n", argv[0],cell_value_type,nx,filename_matrix,filename_timing );
     }
         
 //  Allocate memory for matrices A, B & C
@@ -335,13 +326,19 @@ int main ( int argc, char *argv[] )
     double elapsed_cblas = (double) (tv2.tv_sec-tv1.tv_sec) + (double) (tv2.tv_usec-tv1.tv_usec) * 1.e-6;
 
 //  output results to .dat file : matrix size || Time/manual 	|| Time / dgemm
-    printf("%d \t %g \t %g \t %g \n",  nx, elapsed_simple, elapsed_complex, elapsed_cblas);
+    printf(fp_timing "%d \t %g \t %g \t %g \n",  nx, elapsed_simple, elapsed_complex, elapsed_cblas);
    	
 //  De-allocate memory for matrices A, B & C
     printf("CLEAN-UP : \n");
     deallocate_1d_matrix_memory(A);
     deallocate_1d_matrix_memory(B);
     deallocate_1d_matrix_memory(C);
+ 
+     if ( cli_usage == 1) 
+    {
+        printf("PLOT : Graphs will need to be plotted manually using GnuPlot");
+    
+    }
     
     fclose(fp_matrix);
     fclose(fp_timing);

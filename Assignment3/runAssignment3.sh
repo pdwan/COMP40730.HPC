@@ -13,7 +13,6 @@
 # constants and variables and executables
 _ECHO="echo"
 _BASENAME="basename"
-_TEE="tee"
 Now=$(date +"%Y%m%d.%H%M%S")
 logDir="logDir"
 graphDir="graphDir"
@@ -22,7 +21,6 @@ txtSuffix=".txt"
 DatSuffix=".dat"
 pngSuffix=".png"
 stdLogFile="${logDir}/runAssignment3-${Now}.log"
-compileUsingAtlas="false"
 compileUsingCblas="false"
 plotGraphUsingGnuPlot="false"
 initRandom="false"
@@ -43,19 +41,17 @@ pause () {
 # function : usage instructions
 usage() 
 {
-    $_ECHO -e "\nUSAGE :\t./$($_BASENAME $0) -d1|--atlas -p|--plot -r|--random -i|--increment -m|--matrix<n> -v|--values -?|-h|--help \n"
-    $_ECHO -e "TO :\tCalculate |C| = |A| x |B| and then dot product using Open MP." 
+    $_ECHO -e "\nUSAGE :\t./$($_BASENAME $0) -d2|--cblas -p|--plot -r|--random -i|--increment -m|--matrix <n> -v|--values -?|-h|--help \n"
+    $_ECHO -e "TO :\tCalculate |C| = |A| x |B| and then infintiy norm using Open MP." 
     $_ECHO -e "LOGS :\tCreated in <${logDir}> : <file>.txt matrix values for matrices |A| |B| & |C|, \n\t<file>.dat : timing of each computation & <${logDir}/runAssignment3-timestamp.log> summary of stdout. \n"
-    $_ECHO -e "WHERE :\t-d1|--atlas\tCompile .c source files using dgemm ATLAS "
-    $_ECHO -e "\t-d2|--cblas\tCompile .c source files using dgemm cBLAS"
-    $_ECHO -e "\t\t\tEach is mutually exclusive of the other. \n" 
-    $_ECHO -e "\t-p|--plot\tPlot graphs using GnuPlot creating .png for each algorithm and store in <${logDir}> for \n\t\t\t(i) matrix size -v- time taken  &  (ii) block size -v- time taken \n"
+    $_ECHO -e "WHERE :\t-d2|--cblas\tCompile .c source files using dgemm cblas &  openmp"
+    $_ECHO -e "\t-p|--plot\tPlot graphs using GnuPlot creating .png for each algorithm and store in <${graphDir}> for time taken-v- infinity norm \n"
     $_ECHO -e "\t-r|--random \tInitialize |A| & |B| with random numbers and |C| with '0' "
     $_ECHO -e "\t-i|--increment \tInitialize |A| & |B| incrementally with <row> value and |C| with '0' "
     $_ECHO -e "\t\t\t'-i|--increment' & '-r|--random' are mutually exclusive \n"
-    $_ECHO -e "\t-m|--matrix <n>\tMatrix dimension, if invalid set to '1,000' "
+    $_ECHO -e "\t-m|--matrix <n>\tMatrix dimension, if odd number +1 added or if invalid set to '1,000', thread count set to { 2 } "
     $_ECHO -e "\t-v|--values \tUse predefined range of valid values for <nx> and <nb> as follows :"
-    $_ECHO -e "\t\t\t<nx> = { 50, 50, 50, 100, 100, 100, 500, 500, 500, 1000, 1000, 1000 } "
+    $_ECHO -e "\t\t\t<nx> = { 50, 50, 50, 100, 100, 100, 500, 500, 500, 1000, 1000, 1000 }  and \n\t\t\t<threadArray> \t{  10 10 10 10 10 10 20 20 20 20 20 20 20 20 }"
     $_ECHO -e "\t\t\t'-m|--matrix <n>' & '-v|--values' mutually exclusive.\n"
     $_ECHO -e "\t-?|-h|--help \tusage \n"
 }
@@ -66,33 +62,33 @@ error()
     err=$1
     case ${err} in
         1)
-            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): Unknown parameter '${1}'." |& $_TEE -a ${stdLogFile}
+            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): Unknown parameter '${1}'." >> -a ${stdLogFile}
             ;;
         2)
-            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): Error creating directory '${1}'." |& $_TEE -a ${stdLogFile}
+            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): Error creating directory '${1}'." >> -a ${stdLogFile}
             ;;
         3)
-            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): Error creating file '${1}'." |& $_TEE -a ${stdLogFile}
+            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): Error creating file '${1}'." >> -a ${stdLogFile}
             ;;     
         4)     
-            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): Missing parameter for '${1}'." |& $_TEE -a ${stdLogFile}
+            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): Missing parameter for '${1}'." >> -a ${stdLogFile}
             ;;     
         5)     
-            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): '${1}', Values entered are not valid or not a number." |& $_TEE -a ${stdLogFile}
+            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): '${1}', Values entered are not valid or not a number." >> -a ${stdLogFile}
             ;;     
         6)     
-            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): '${1}', Mutually exclusive switches." |& $_TEE  -a ${stdLogFile}
+            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): '${1}', Mutually exclusive switches." >>  -a ${stdLogFile}
             ;;     
         7)     
-            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): '${1}', Compilation failed." |& $_TEE  -a ${stdLogFile}
+            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): '${1}', Compilation failed." >>  -a ${stdLogFile}
             ;;     
         8)     
-            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): '${1}', GnuPlot - graph export error." |& $_TEE  -a ${stdLogFile}
+            $_ECHO -e "ERROR ${err} :\t$($_BASENAME $0): '${1}', GnuPlot - graph export error." >>  -a ${stdLogFile}
             ;;     
         *)
-            $_ECHO -e "ERROR :\tUnknown error." |& $_TEE -a ${stdLogFile}
-            $_ECHO ${err} |& $_TEE -a ${stdLogFile}
-            $_ECHO $* |& $_TEE -a ${stdLogFile}
+            $_ECHO -e "ERROR :\tUnknown error." >> -a ${stdLogFile}
+            $_ECHO ${err} >> -a ${stdLogFile}
+            $_ECHO $* >> -a ${stdLogFile}
             ;;
     esac
     $_ECHO -e
@@ -100,28 +96,21 @@ error()
     exit ${err}
 }
 
-#function : build applying dgemm atlas
-compile_dgemm_atlas()
-{
-    localProgramToCompile=$1
-    $_ECHO -e "RUNNING :\tCompiling <localProgramToCompile>=${localProgramToCompile} using atlas" |& $_TEE ${localLogFile}
-    gcc -o ATLAS ${localProgramToCompile}.c -I/home/cs/khasanov/libs/ATLAS/include/ -L/home/cs/khasanov/libs/ATLAS/lib/Linux_UNKNOWNSSE2_4/ -lcblas -latlas -lm -O3
-}
-
 # function : build applying dgemm cblas
 compile_dgemm_cblas()
 {
     localProgramToCompile=$1
-    $_ECHO -e "RUNNING :\tCompiling <localProgramToCompile>=${localProgramToCompile} using cblas" |& $_TEE ${localLogFile}
-    gcc -Wall -I/home/cs/khasanov/libs/CBLAS/src ${localProgramToCompile}.c -o ${localProgramToCompile}  /home/cs/khasanov/libs/cblas_LINUX.a  /usr/lib/libblas.a -lgfortran
+    $_ECHO -e "CBLAS :\t\tCompiling ${localProgramToCompile} using cblas \n" >> -a ${logDir}/${stdLogFile}
+    gcc -Wall -I/home/cs/khasanov/libs/CBLAS/src ${localProgramToCompile}.c -o ${localProgramToCompile}  /home/cs/khasanov/libs/cblas_LINUX.a  /usr/lib/libblas.a -lgfortran -fopenmp
 }
+
 
 # TODO function : plot graphs for each .dat file as called, in Graph directory
 plot_graph()
 {
     localDatFileToGraph=$1
     localPngGraph=$2
-    $_ECHO -e "RUNNING :\tCreating <localPngGraph>=${localPngGraph} in <graph Dir>=${graphDir} from <localDatFileToGraph>=${localDatFileToGraph}" |& $_TEE ${localLogFile}
+    $_ECHO -e "RUNNING :\tCreating <localPngGraph>=${localPngGraph} in <graph Dir>=${graphDir} from <localDatFileToGraph>=${localDatFileToGraph}" >> ${localLogFile}
 }
 
 # function : create directory, if it does not exist & validate creation
@@ -130,7 +119,7 @@ init_dir()
     creationDir=$1
     if [ ! -d ${creationDir} ] || [ ! -e ${creationDir} ] ; then 
         mkdir ${creationDir}        
-        $_ECHO -e "WARNING :\tCreating $creationDir" |& $_TEE -a ${stdLogFile}
+        $_ECHO -e "WARNING :\tCreating $creationDir" >> -a ${stdLogFile}
         if [[ $? -ne 0 ]] ; then 
             error 2 $creationDir
         fi
@@ -142,30 +131,10 @@ init_log_file()
 {
     localLogFile=$1
     if  [ -e ${localLogFile} ]  ; then
-        $_ECHO -e "WARNING :\tFile backup : ${localLogFile} to ${localLogFile}.bup" |& ${localLogFile}
+        $_ECHO -e "WARNING :\tFile backup : ${localLogFile} to ${localLogFile}.bup" >> ${localLogFile}
         mv "${localLogFile}" "${localLogFile}.bup"
     fi
-    $_ECHO -e "# LOG :\t${localLogFile} \n\tCreated on ${Now} by ${USER}." |& $_TEE ${localLogFile}
-}
-
-# function : add initial comments to matrix .txt and to timing .dat file
-add_comments_to_log_file() 
-{
-    localLogFile=$1
-    localProgramName=$2
-    FileTypeDat='dat'
-
-    $_ECHO -e "# ------------------------------------------------------------------------------------- \n# " >> ${localLogFile}
-    $_ECHO -e "# Program : ${localProgramName} \n# \n# Log file : ${localLogFile} \n# where :\t.dat contains timing data & .txt contains matrix values \n#" >> ${localLogFile}
-    $_ECHO -e "# Computation of Straight-forward IJK, Blocked IJK or Blocked KIJ using square NxN \n# & square bxb block (as applicable) for matrices |C| += |A| * |B| \n# " >> ${localLogFile}
-    $_ECHO -e "# ------------------------------------------------------------------------------------- \n# " >> ${localLogFile}
-    if [[ $localLogFile == *"$FileTypeDat"* ]] ; then
-		$_ECHO -e "# Time taken to compute \n#" >> ${localLogFile} # dat
- 		$_ECHO -e "# Matrix Size \tTime/manual \tTime/manual \tTime/dgenn \n# \tSimple \tComplex \n# " |& $_TEE -a ${localLogFile}
-    else 
-        $_ECHO -e "# Summary of values added to each matrix - retained for later reference and validation \n#" >> ${localLogFile} # txt 
-    fi
-    $_ECHO -e "# ------------------------------------------------------------------------------------- \n# " >> ${localLogFile}
+    $_ECHO -e "# LOG :\t${localLogFile} \n\tCreated on ${Now} by ${USER}." >> ${localLogFile}
 }
 
 # function : execute each algorithm in turn wih specified parameters / options
@@ -175,7 +144,7 @@ algorithm_execute()
     localOptions="$2"
     localFileMatrix="$3"
     localFileTime="$4"
-    $_ECHO -e "RUNNING :\t${localCmd} ${localOptions} ${localFileMatrix} ${localFileTime}" |& $_TEE -a ${stdLogFile}
+    $_ECHO -e "RUNNING :\t${localCmd} ${localOptions} ${localFileMatrix} ${localFileTime}" >> -a ${stdLogFile}
     # ${localCmd} ${localOptions} ${localFileMatrix} ${localFileTime}
 }
 
@@ -189,7 +158,7 @@ if [[ $# -eq 0 ]]; then
     exit
 else 
     while [ "$1" != "" ]; do
-        case ${1,,} in
+        case ${1} in
 	    	"-d1" | "--atlas")
 				compileUsingAtlas="true"
                 ;;                     
@@ -238,6 +207,7 @@ if [ "${defaultMatrixRange}" == "true" ] && [ "${matrixEnabled}" == "true" ] ; t
 fi
 if  [ "${defaultMatrixRange}" == "true" ] && [ "${matrixEnabled}" == "false" ] ; then 
     declare -a NXArray=( 50 50 50 100 100 100 500 500 500 500 1000 1000 1000 1000 )
+  	declare -a threadArray=( 10 10 10 10 10 10 20 20 20 20 20 20 20 20 )
     matrixEnabled="false"
     echo ${#NXArray[@]} 
 else
@@ -247,11 +217,17 @@ else
 		fi
 		# Validate matrix range
 		if [ ${matrixSize} -le 0 ] || [ ${matrixSize} -gt ${maxMatrixSize} ] ; then
-		    $_ECHO -e "WARNING :\t$($_BASENAME $0): matrix size <nx> is invalid, now set to default of : $maxMatrixSize" |& $_TEE -a ${stdLogFile}
-		    let matrixSize=$maxMatrixSize
-		    matrixEnabled="true"
-		fi        
+		    $_ECHO -e "WARNING :\t$($_BASENAME $0): matrix size <nx> is invalid, now set to default of : $maxMatrixSize" >> -a ${stdLogFile}
+	        let matrixSize=$maxMatrixSize
+	        matrixEnabled="true"
+	    fi       
+        if [[ $(expr ${matrixSize} % 2 ) -eq 0 ]] ; then 
+                let matrixSize=$matrixSize 
+            else 
+                let matrixSize=$(( matrixSize++ )) 
+        fi  
 		declare -a NXArray=( $matrixSize )
+		declare -a threadArray=( 2 )
     fi
 fi
 
@@ -295,9 +271,7 @@ else
 	    graphFileSimplePlotted="${graphFileSimple}-$i${pngSuffix}"
 	    init_log_file ${matrixFileNameValues} 
 	    init_log_file ${dataFileNameTiming}
-	    add_comments_to_log_file "${matrixFileNameValues}" "${algorithmName}"
-	    add_comments_to_log_file "${dataFileNameTiming}" "${algorithmName}"
-	    executeOptions="${algorithmOptions} ${NXArray[$i]}"
+	    executeOptions="${algorithmOptions} ${NXArray[$i]} 10"
 	    algorithm_execute "${algorithmName}" "${executeOptions}" "${matrixFileNameValues}" "${dataFileNameTiming}"
  	    if [ "${plotGraphUsingGnuPlot}" == "true" ] ; then 
 		plot_graph ${dataFileNameTiming} ${graphFileSimplePlotted}

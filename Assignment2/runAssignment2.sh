@@ -57,7 +57,7 @@ usage()
     $_ECHO -e "\t-m|--matrix <n>\tMatrix dimension, if odd number +1 added or if invalid set to '1,000', thread count set to { 2 }  "
     $_ECHO -e "\t\t\tMutually exclusive with '-v|--values'" 
     $_ECHO -e "\t-v|--values \tUse predefined range of valid values for <nx> and <nb> as follows :"
-    $_ECHO -e "\t\t\t<nx> \t\t{ 50, 50, 50, 100, 100, 100, 500, 500, 500, 1000, 1000, 1000 } and \n\t\t\t<threadArray> \t{ 10 10 10 20 20 20 50 50 50 50 50 50 50 50 } "
+    $_ECHO -e "\t\t\t<nx> \t\t{ 50, 50, 50, 100, 100, 100, 500, 500, 500, 1000, 1000, 1000 } and \n\t\t\t<threadArray> \t{  10 10 10 10 10 10 20 20 20 20 20 20 20 20  } "
     $_ECHO -e "\t\t\t'-m|--matrix <n>' & '-v|--values' mutually exclusive. \n"
     $_ECHO -e "\t-?|-h|--help \tusage \n"
 }

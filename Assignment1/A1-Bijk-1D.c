@@ -1,28 +1,30 @@
-/* ********************************************************************************
-*
-*   Paula Dwan
-*   13208660 : COMP40730 : Assignment 1
-*   STRAIGHT-FORWARD IJK IMPLEMENTATION
-* 
-*   Write C programs implementing the following three algorithms of multiplication of two n×n 
-*   dense matrices:
-*   1)    Straightforward non-blocked ijk algorithm.
-*   2)    Blocked ijk algorithm using square b×b blocks. <*****
-*   3)    Blocked kij algorithm using square b×b blocks.
-*
-*   Experiment with the programs and build/plot:
-*   1)  The dependence of the execution time of each program on the matrix size n and the 
-*        block size b .
-*   b.  BLAS calls
-*   2)  The speedup of the blocked algorithms over the non-blocked one as a function of the  
-*        matrix size and the block size.
-*   a.  manually written      
-*   3)  Compare the fastest program with the BLAS/ATLAS routine dgemm implementing the 
-*        same operation. 
-*        Explain the results.
-*   c.  ATLAS      
-*
-* *********************************************************************************
+/* 
+********************************************************************************
+
+    Paula Dwan
+    13208660 : COMP40730 : Assignment 1
+
+    BLOCKED IJK IMPLEMENTATION
+
+    Write C programs implementing the following three algorithms of multiplication of two n×n 
+    dense matrices:
+    1)    Straightforward non-blocked ijk algorithm.
+    2)    Blocked ijk algorithm using square b×b blocks.
+    3)    Blocked kij algorithm using square b×b blocks.
+
+    Experiment with the programs and build/plot:
+    1)  The dependence of the execution time of each program on the matrix size n and the 
+          block size b .
+          b.  BLAS calls
+    2)  The speedup of the blocked algorithms over the non-blocked one as a function of the  
+          matrix size and the block size.
+          a.  manually written      
+    3)  Compare the fastest program with the BLAS/ATLAS routine dgemm implementing the 
+          same operation. 
+          Explain the results.
+          c.  ATLAS      
+   
+*********************************************************************************
 */
 
 #include <stdio.h>
@@ -32,44 +34,43 @@
 #include <cblas.h>
 #include <string.h>
 
-void usage () {
-    printf( "USAGE : \t<program name> <i> |<r> <N> <B> <matrix contents file>.txt <timing file>.dat \n");
-    printf ("TO : \tCalculate |C| = |A| x |B| using algorithm : Blocked IJK using square bxb block - via bash script. \n");    
-    printf( "where \n");
-    printf("\t1. \t<R>\tinitialize |A| & |B| with _random_ numbers and |C| with '0' \n");
-    printf("\t2. \t<I>\tinitialize |A| & |B| _incrementally_ with <row> value and |C| with '0' \n");
-    printf("\t3. \t<N> \tmax size of each matrix, defaults to 1,000 if invalid or not provided - verified in calling script \n");
-    printf("\t4. \t<B> \tsize of each block, defaults to 50 if invalid or not provided - verified in calling script \n");
-    printf("\t5. \t<matrix contents file>.txt\n\t\tname of .txt file to store values of matrices |A| |B| & |C| \n");
-    printf("\t6. \t<timing .dat file> .dat \n\t\tname of .dat file to contain time to complete for each iteration \n");
-    exit(1);
+void usage () 
+{
+    fprintf(stdout,"\nUSAGE : \t<program name> [<-r>|<-i>] [N] <matrix contents file>.txt <data timing file>.dat \n");
+    fprintf(stdout,"\nTO : \t\tCalculate |C| = |A| x |B| using algorithm : Blocked IJK using square bxb block \n");    
+    fprintf(stdout,"\nWHERE :");
+    fprintf(stdout,"\t1. \t<-r>\tinitialize |A| & |B| with _random_ numbers and |C| with '0' \n");
+    fprintf(stdout,"\t   \t<-i>\tinitialize |A| & |B| _incrementally_ with <column> value and |C| with '0' \n");
+    fprintf(stdout,"\t2. \t[N] \tmax size of each matrix, if invalid defaults to 1,000 \n");
+    fprintf(stdout,"\t3. \t[B] \tblock size appliable to all matrices, if invalid defaults to 1,000 \n");
+    fprintf(stdout,"\t4. \t<matrix contents file>.txt\n\t\tname of .txt file to store values of matrices |A| |B| & |C| \n");
+    fprintf(stdout,"\t5. \t<data timingfile>.dat \n\t\tname of .dat file to contain time to complete for each iteration \n\n");
+    exit(0);
 }
 
-double* allocate_memory_1d_matrix (int rows, int cols)
+double* allocate_memory_matrix (int rows, int cols)
 {
     double* l_matrix;  
     l_matrix = (double *) malloc(rows*cols*sizeof (double));  
     if(!(l_matrix))
     {
-        printf("ERROR : \tExiting - memory allocation failed for matrix.\n");
+        fprintf(stderr,"ERROR : \texiting - memory allocation failed for matrix.\n");
         exit(1);
     }
     return l_matrix;  
 } 
 
-void deallocate_1d_matrix_memory(double *matrix1d)
+void deallocate_matrix_memory(double *matrix1d)
 {
     free(matrix1d); 
 }
 
-void init_1d_matrix_random(double *matrix1d, int rows, int cols, FILE *fp)
+void print_matrix(double *matrix1d, int rows, int cols, FILE *fp)
 {
-    int ni, mod_rand=10;
+    int ni;
     int count =1;
-    fprintf(fp, "\n# |A| or |B| : \tMatrix initialization using (mod %d)+1 on random number for matrix of size <%d> x <%d> ...\n", mod_rand, rows, cols);
-    for(ni=0; ni<(rows*cols); ni++)
+    for (ni=0; ni<(rows*cols); ni++)
     {
-        matrix1d[ni]= (double) ((rand()%mod_rand) + 1);
         fprintf(fp, "%g\t", matrix1d[ni]); 
         if (count == rows) 
         {
@@ -82,125 +83,79 @@ void init_1d_matrix_random(double *matrix1d, int rows, int cols, FILE *fp)
     }
 }
 
-void init_1d_matrix_increment(double *matrix1d, int rows, int cols, FILE *fp)
+void init_matrix_random(double *matrix1d, int rows, int cols)
+{
+    int ni, mod_rand=10;
+    for (ni=0; ni<(rows*cols); ni++)
+    {
+        matrix1d[ni]= (double) ((rand()%mod_rand) + 1);
+    }
+}
+
+void init_matrix_increment(double *matrix1d, int rows, int cols)
 {
     int ni;    
-    int count =1;
-    fprintf(fp, "\n# |A| or |B| : \tMatrix initialization with row value for matrix of size <%d> x <%d> ...\n", rows, cols);
-    for(ni=0; ni<(rows*cols); ni++)
+    for (ni=0; ni<(rows*cols); ni++)
     {
-        matrix1d[ni]= ((rows*cols) % rows);
-        fprintf(fp, "%g\t", matrix1d[ni]); 
-        if (count == rows) 
-        {
-            fprintf(fp, "\n");
-            count =1;
-        }else 
-        {
-            count ++;    
-        }
+        matrix1d[ni]= ((ni % rows) + 1);
     }
 }
 
-void init_C_1d_matrix(double *matrix1d, int rows, int cols, FILE *fp)
+void init_matrix_zero(double *matrix1d, int rows, int cols)
 {
     int ni;
-    int count =1;
-    fprintf(fp, "\n# |C| : \tMatrix initialization with value of zero for matrix of size <%d> x <%d> ...\n", rows, cols);
-    for(ni=0; ni<(rows*cols); ni++)
+    for (ni=0; ni<(rows*cols); ni++)
     {
         matrix1d[ni]=  0.0;
-        fprintf(fp, "%g\t", matrix1d[ni]); 
-        if (count == rows) 
-        {
-            fprintf(fp, "\n");
-            count =1;
-        }else 
-        {
-            count++;
-        }
     }
 }
 
-void multipy_ABC_simple(double *matrix_a, double *matrix_b, double *matrix_c, int rows, int cols, FILE *fp)
+int validate_if_file_exists(char * fn)
 {
-    int ni, nj, nk;
-    int count = 1;
-    fprintf(fp, "\n# |C| : \tMatrix computed values for matrix of size <%d> x <%d> ... using SIMPLE : Blocked IJK\n", rows, cols);
-    for (ni=0; ni<rows; ni++)
+    FILE *fp = fopen(fn, "r") ;
+    if ( fp !=  NULL )
     {
-        for (nj=0; nj<cols; nj++)
-        {
-            for (nk=0; nk<rows; nk++)
-            {
-                matrix_c[ni+(nj*cols)] += (matrix_a[(ni*rows)+nk]) * (matrix_b[(nk*rows)+nj]);
-            }
-            fprintf(fp, "%g\t",matrix_c[ni+(nj*cols)]); 
-            if (count == rows) 
-            {
-                fprintf(fp, "\n");
-                count =1;
-            }else 
-            {
-                count++;
-            }
-        }
+        fclose(fp);
+        return 1;
     }
+    return 0;
 }
 
-void multipy_ABC_complex(double *matrix_a, double *matrix_b, double *matrix_c, int rows, int cols, FILE *fp)
+void init_matrix_file_contents(FILE *fp) 
 {
-    int ni, nj, nk;
-    int count = 1;
-    fprintf(fp, "\n# |C| : \tMatrix computed values for matrix of size <%d> x <%d> ... using COMPELX : Blocked IJK\n", rows, cols);
-    for (ni=0; ni<rows; ni++)
-    {
-        for (nj=0; nj<cols; nj++)
-        {
-            double sum = 0.0;
-            for (nk=0; nk<rows; nk++)
-            {
-                sum+= (matrix_a[(ni*rows)+nk]) * (matrix_b[(nk*rows)+nj]);
-            }
-            matrix_c[ni+(nj*cols)] = sum;
-            fprintf(fp, "%g\t",matrix_c[ni+(nj*cols)]); 
-            if (count == rows) 
-            {
-                fprintf(fp, "\n");
-                count =1;
-            }else 
-            {
-            count++;
-            }
-        }
-    }
+    fprintf(fp, "#  --------------------------------------------------------------------------------------------------\n# \n");
+    fprintf(fp, "# Program :\tA1-Bijk-1D\n# where :\t.dat contains timing data & .txt contains matrix values \n# \n");
+    fprintf(fp, "# Summary of values added to each matrix - retained for later reference and validation \n# \n");
+    fprintf(fp, "#  --------------------------------------------------------------------------------------------------  \n");
 }
 
-void multipy_ABC_cblas(double *matrix_a, double *matrix_b, double *matrix_c, int rows, int cols, double alpha, double beta, FILE *fp)
+void init_timing_file_contents(FILE *fp) 
 {
-    int ni;
-    int count =1;
-// m, n, k :    local integers indicating the size of the matrices for rows x columns :: A :  m x  k, B :  k x n, C:  m x n
-//                 Here, m = n = k = rows = columns = <nx> = <ny> as supplied
-    int lm = rows, ln = rows;
-// la_offset, lb_offset, lc_offset :
-//                 Leading dimension of matrix A, B or C respectively, or the number of elements between 
+    fprintf(fp, "#  --------------------------------------------------------------------------------------------------\n# \n");
+    fprintf(fp, "# Program :\tA1-Bijk-1D\n# where :\t.dat contains timing data & .txt contains matrix values \n");
+    fprintf(fp, "#  --------------------------------------------------------------------------------------------------\n");
+    fprintf(fp, "# |Matrix| \tTime/simple \tTime/complex \tTime/dgemm \n# \n");
+}
+
+void multipy_ABC_cblas(double *matrix_a, double *matrix_b, double *matrix_c, int rows, int cols, int block, double alpha, double beta)
+{
+//                  m, n, k :    local integers indicating the size of the matrices for rows x columns :: A :  m x  k, B :  k x n, C:  m x n. Here, m = n = k = block
+//                  la_offset, lb_offset, lc_offset : Leading dimension of matrix A, B or C respectively, or the number of elements between 
 //                 successive rows for row-major storage or columns for column-major storage. 
+    int lm = block, ln = block; 
     int la_offset = rows, lb_offset = cols, lc_offset = rows;
-    fprintf(fp, "\n# |C| : \tMatrix computed values for matrix of size <%d> x <%d> ... using DGEMM : Blocked KIJ\n", rows, cols);
-    cblas_dgemm( CblasRowMajor, CblasTrans, CblasNoTrans, lm, ln, ln, alpha, matrix_a, la_offset, matrix_c, lb_offset, beta, matrix_c, lc_offset);   
-    for(ni=0; ni<(rows*cols); ni++)
+    int i, j, k;
+    for (i = 0; i < la_offset ; i += block)
     {
-        fprintf(fp, "%g\t", matrix_c[ni]); 
-        if (count == rows) 
+        for (j = 0; j < cols; j += block)
         {
-            fprintf(fp, "\n");
-            count =1;
-        }else 
-        {
-        count++;
+            for (k = 0; k < lb_offset ; k += block)
+            {
+                cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, lm, ln, ln, alpha, matrix_a, la_offset, matrix_b, lb_offset, beta, matrix_c, lc_offset);   
+            }
         }
     }
+// cblas_dgemm( CblasRowMajor, CblasNoTrans, CblasNoTrans, lm, ln, ln, alpha, matrix_a, la_offset, matrix_b, lb_offset, beta, matrix_c, lc_offset);   
 }
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -208,92 +163,195 @@ void multipy_ABC_cblas(double *matrix_a, double *matrix_b, double *matrix_c, int
 
 int main ( int argc, char *argv[] )
 {
-// define variables
+
+//  define variables
     struct timeval tv1, tv2;
     struct timezone tz;
     const double ALPHA = 1.0;
     const double BETA = 1.0;
-    int increment_or_random = 0;    // random enabled
-    int max_num_args = 7;
+    int increment_or_random = 5;
+    int max_num_args = 6;
     char filename_matrix[50];
     char filename_timing[50];
-
-
-    if ( argc != max_num_args )
+    int MAXN = 1000;
+    int MAXB=100;
+    int ni, nj, nk, bi, bj, bk;
+    double simple_elapsed=0.0, complex_elapsed=0.0, dgemm_elapsed=0.0;
+          
+//  CLI PARAMETERS :: validate and initialize
+    if ( argc != max_num_args ) 
     {
+        fprintf(stderr, "ERROR : \t<number of arguments> : %d, is invalid, less than <default> : %d. \n", argc, max_num_args);        
         usage();
-    } 
-    
-    char cell_value_type[3];
-    strncpy(cell_value_type, argv[1], 2);
-    cell_value_type[3] = '\0';
-    if (strcmp(cell_value_type,"-i") == 0)
-    {
-        increment_or_random = 1;        
-    } else if (strcmp(cell_value_type,"-r") == 0)
-    {
-        increment_or_random = 0;
     }
+//  random or increment initialization of matrices |A| and |B|
+    char init_type[3];
+    strncpy(init_type, argv[1], 2);
+    init_type[3] = '\0';
+    if (strncmp(init_type,"-i", 2) == 0) 
+    {   
+        increment_or_random = 0; 
+    } else if (strncmp(init_type,"-r", 2) == 0) 
+    {   
+        increment_or_random = 1; 
+    } else
+    { 
+        fprintf(stderr, "ERROR : \t'invalid entry : %s for '-i' or '-r'. \n", init_type);        
+        usage();
+    }
+//  matrix size
     int nx = atoi(argv[2]);                                     
-    int ny = nx;      
+    if ( nx > MAXN )
+    {
+        fprintf(stderr, "WARNING : \tMatrix size entered <nx> %d too large, now set to %d. \n", nx, MAXN);
+        nx = MAXN;
+    }    
+    int ny = nx;  
+//  block size 
     int nb = atoi(argv[3]);                                     
+    if ( nb > MAXB )
+    {
+        fprintf(stderr, "WARNING : \tMatrix size entered <nb> %d  too large, now set to %d. \n", nb, MAXB);
+        nb = MAXB;        
+    } else if (nb > nx)
+    {
+        fprintf(stderr, "ERROR : \t<nb> %d : block size must be less <nx> %d : matrix size. \n", nb, nx);
+        usage();
+    } else if ( (nx % nb) != 0 )
+    {
+        fprintf(stderr, "WARNING : \tBlock size <nb> %d is not an even multiple of Matrix size <nx> %d. Both set to defaults of <MAXN> %d and <MAXB> %d.\n", nb, nx, MAXN, MAXB);
+        nx = MAXN;
+        nb = MAXB;
+    }    
+//  matrix file name .txt
     strncpy(filename_matrix, argv[4], 49);
     filename_matrix[50] = '\0';
-    FILE *fp_matrix = fopen( filename_matrix, "wa" );
-    strncpy(filename_timing, argv[5], 49);
-    filename_timing[50] = '\0';
-    FILE *fp_timing = fopen(filename_timing, "wa" );    
-    fprintf(fp_matrix, "RUNNING : \t%s %s %d %d %s %s \n", argv[0],cell_value_type,nx,nb,filename_matrix,filename_timing );
-    fprintf(fp_timing, "RUNNING : \t%s %s %d %d %s %s \n", argv[0],cell_value_type,nx,nb,filename_matrix,filename_timing );
-        
-//  Allocate memory for matrices A, B & C
-    fprintf(fp_matrix, "CREATE MATRICES : \n");
-    double *A =  allocate_memory_1d_matrix(nx, ny);
-    double *B =  allocate_memory_1d_matrix(nx, ny);
-    double *C =  allocate_memory_1d_matrix(nx, ny);
-
-//  Initialize matrices A & B & C
-    fprintf(fp_matrix, "INITIALIZE MATRICES : \n");
-    if (increment_or_random == 0) {
-        init_1d_matrix_random(A, nx, ny, fp_matrix);
-        init_1d_matrix_random(B, nx, ny, fp_matrix);
-    } else if (increment_or_random == 1) 
+    FILE *fp_matrix;
+    int file_matrix_exists = validate_if_file_exists(filename_matrix);
+    if ( file_matrix_exists == 0 ) 
+    {   
+        fp_matrix= fopen(filename_matrix, "w" );
+        init_matrix_file_contents(fp_matrix); 
+    } else 
     {
-        init_1d_matrix_increment(A, nx, ny, fp_matrix);
-        init_1d_matrix_increment(B, nx, ny, fp_matrix);
+        fp_matrix = fopen(filename_matrix, "a" );
+    } 
+//  data file name .dat
+    strncpy(filename_timing, argv[5], 49);
+    filename_timing[50] = '\0';    
+    FILE *fp_timing; 
+    int file_timing_exists = validate_if_file_exists(filename_timing);
+    if ( file_timing_exists == 0 ) 
+    {   
+        fp_timing= fopen(filename_timing, "w" );
+        init_timing_file_contents(fp_timing); 
+    } else 
+    {
+        fp_timing = fopen(filename_timing, "a" );
+    } 
+    fprintf(fp_matrix, "# RUNNING : \t%s %.2s %d %d \n", argv[0], init_type, nx, nb);
+    fprintf(stdout, "# RUNNING : \t%s %.2s %d %d \n", argv[0], init_type, nx, nb);
+
+//  CREATE & INITIALIZE :: matrices A & B & C and output results to matrix file for reference
+    fprintf(stdout,"# CREATE MATRICES ... \n");
+    double *A =  allocate_memory_matrix(nx, ny);
+    double *B =  allocate_memory_matrix(nx, ny);
+    double *C =  allocate_memory_matrix(nx, ny);
+
+    fprintf(stdout,"# INITIALIZE MATRICES ... \n");
+    if (increment_or_random == 1) 
+    {
+        init_matrix_random(A, nx, ny);
+        init_matrix_random(B, nx, ny);
+    } else if (increment_or_random == 0) 
+    {
+        init_matrix_increment(A, nx, ny);
+        init_matrix_increment(B, nx, ny);
     }
-    init_C_1d_matrix(C, nx, ny, fp_matrix);
+    init_matrix_zero(C, nx, ny);
 
-//  MATRIX : simple matrix calculation
+    fprintf(fp_matrix, "# Initialize matrix <%d> x <%d> |A| ... \n", nx, ny);
+    print_matrix(A, nx, ny, fp_matrix);
+    fprintf(fp_matrix, "# Initialize matrix <%d> x <%d> |B| ... \n", nx, ny);
+    print_matrix(B, nx, ny, fp_matrix);
+    fprintf(fp_matrix, "# Initialize matrix <%d> x <%d> |C| ... \n", nx, ny);
+    print_matrix(C, nx, ny, fp_matrix);
+
+//  CALCULATION :: |C| using manual simple
+    fprintf(stdout,"# RESULTS : simple manual calculation ... \n");
     gettimeofday(&tv1, &tz);
-    fprintf(fp_matrix, "# RESULTS : simple manual calculation - \n");
-    multipy_ABC_simple(A, B, C, nx, ny, fp_matrix);
+    for (ni=0; ni<(nx/nb); ni++)
+    {
+        for (nj=0; nj<(ny/nb); nj++)
+        {
+            for (nk=0; nk<(nx/nb); nk++)
+            {
+                C[(ni*nb)+nj] += (A[(ni*nb)+nk]) * (B[(nk*nb)+nj]);
+                fprintf (stdout, "DEBUG : C[(ni*nx/nb)+nj] += (A[(ni*nx/nb)+nk]) * (B[(nk*nx/nb)+nj]) : C[%d] += A[%d] * B[%d] : %g += %g * %g \n", (ni*nx/nb)+nj, (ni*nx/nb)+nk, (nk*nx/nb)+nj, C[(ni*nx/nb)+nj],  A[(ni*nx/nb)+nk], B[(nk*nx/nb)+nj] ) ;
+            }
+        }
+    }
     gettimeofday(&tv2, &tz);
-    double elapsed_simple = (double) (tv2.tv_sec-tv1.tv_sec) + (double) (tv2.tv_usec-tv1.tv_usec) * 1.e-6;
+    simple_elapsed = (double) (tv2.tv_sec - tv1.tv_sec) + (double) (tv2.tv_usec - tv1.tv_usec) * 1.e-6;
+    fprintf(fp_matrix, "# |C| : <%d> x <%d> matrix computed values : MANUAL simple ... \n", nx, ny);
+    print_matrix(C, nx, ny, fp_matrix);
+    fprintf(fp_matrix, "# |C| : matrix calculated in %f seconds ... \n", simple_elapsed);
 
-//  MATRIX : complex matrix calculation
+//  CALCULATION :: |C| using manual complex
+    fprintf(stdout,"# RESULTS : complex manual calculation ... \n");
+    fprintf(fp_matrix, "# Initialize matrix <%d> x <%d> |C|, redone for MANUAL complex .. \n", nx, ny);
+    init_matrix_zero(C, nx, ny);
+    print_matrix(C, nx, ny, fp_matrix);       
     gettimeofday(&tv1, &tz);
-    fprintf(fp_matrix, "# RESULTS : simple manual calculation - \n");
-    multipy_ABC_complex(A, B, C, nx, ny, fp_matrix);
-    gettimeofday(&tv2, &tz);
-    double elapsed_complex = (double) (tv2.tv_sec-tv1.tv_sec) + (double) (tv2.tv_usec-tv1.tv_usec) * 1.e-6;
+    for (bj=0; bj<nx; bj+=nb)
+    {                
+        for (bk=0; bk<nx; bk+=nb)
+        {
+            for (ni=0; ni<nx; ni++)
+            {
+                for (nj=bj; nj <min(bj+nb,nx); nj++) 
+                {
+                    double sum = 0.0;
+                    for (nk=bk; nk<min(bk+nb, nx); nk++ )
+                    {
+                        sum+= (A[ni+nk]) * (B[nk+nj]);
+                    }
+                    C[ni+nj] = sum;
+                    fprintf (stdout, "DEBUG : C[ni+nj] += A[ni+nk] * B[nk+nj] : C[%d] += A[%d] * B[%d] : %g += %g * %g \n", ni+nj, ni+nk, nk+nj, C[ni+nj],  A[ni+nk], B[nk+nj] ) ;
+                }
+            }
+        }
+    }
 
+    gettimeofday(&tv2, &tz);
+    complex_elapsed = (double) (tv2.tv_sec - tv1.tv_sec) + (double) (tv2.tv_usec - tv1.tv_usec) * 1.e-6;
+    fprintf(fp_matrix, "# |C| : <%d> x <%d> matrix computed values : MANUAL complex ... \n", nx, ny);
+    print_matrix(C, nx, ny, fp_matrix);
+    fprintf(fp_matrix, "# |C| : matrix calculated in %f seconds ... \n", complex_elapsed);
+
+//  CALCULATION :: |C| using DGEMM
+    fprintf(stdout,"# RESULTS : BLAS/ATLAS calculation -\n");
+    fprintf(fp_matrix, "# Initialize matrix <%d> x <%d> |C|, redone for CBLAS/ATLAS ... \n", nx, ny);
+    init_matrix_zero(C, nx, ny);
+    print_matrix(C, nx, ny, fp_matrix);    
     gettimeofday(&tv1, &tz);
-    fprintf(fp_matrix, "# RESULTS : BLAS/ATLAS calculation -\n");
-    multipy_ABC_cblas(A, B, C, nx, ny, ALPHA,BETA, fp_matrix);
+    multipy_ABC_cblas(A, B, C, nx, ny, nb, ALPHA, BETA);
     gettimeofday(&tv2, &tz);
-    double elapsed_cblas = (double) (tv2.tv_sec-tv1.tv_sec) + (double) (tv2.tv_usec-tv1.tv_usec) * 1.e-6;
+    dgemm_elapsed = (double) (tv2.tv_sec-tv1.tv_sec) + (double) (tv2.tv_usec-tv1.tv_usec) * 1.e-6;
+    fprintf(fp_matrix, "# |C| : <%d> x <%d> matrix computed values using CBLAS/ATLAS ... \n", nx, ny);
+    print_matrix(C, nx, ny, fp_matrix);
+    fprintf(fp_matrix, "# |C| : calculated in %f seconds... \n",  dgemm_elapsed);
 
-//  output results to .dat file : matrix size || Time/manual 	|| Time / dgemm
-    fprintf(fp_timing, "%d \t %d \t %g \t %g \t %g \n",  nx, nb, elapsed_simple, elapsed_complex, elapsed_cblas);
-    printf("%d \t %d \t %g \t %g \t %g \n",  nx, nb, elapsed_simple, elapsed_complex, elapsed_cblas);
+//  OUTPUT :: results to stdout & .dat file : matrix size || Time/simple || Time/complex || Time / dgemm
+    fprintf(stdout,"# \t\t|Matrix|  Time/simple  Time/complex  Time/dgemm\n");
+    fprintf(stdout,"# Results: \t%d \t%fs \t%fs \t%fs \n", nx, simple_elapsed, complex_elapsed, dgemm_elapsed);
+    fprintf(fp_timing, "%d \t%fs \t%fs \t%fs \n", nx, simple_elapsed, complex_elapsed, dgemm_elapsed);
    	
-//  De-allocate memory for matrices A, B & C
-    printf("CLEAN-UP : \n");
-    deallocate_1d_matrix_memory(A);
-    deallocate_1d_matrix_memory(B);
-    deallocate_1d_matrix_memory(C);
- 
+//  CLEANUP & close files
+    fprintf(stdout,"# CLEAN-UP ... \n");
+    deallocate_matrix_memory(A);
+    deallocate_matrix_memory(B);
+    deallocate_matrix_memory(C);    
     fclose(fp_matrix);
     fclose(fp_timing);
     return 0;

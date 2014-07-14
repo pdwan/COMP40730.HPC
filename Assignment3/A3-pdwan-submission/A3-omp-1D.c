@@ -1,29 +1,19 @@
 /* 
 ********************************************************************************
-
     Paula Dwan
-    13208660 : COMP40730 : Assignment 1
+    13208660 : COMP40730 : Assignment 3
 
-    BLOCKED KIJ IMPLEMENTATION
-
-    Write C programs implementing the following three algorithms of multiplication of two n×n 
-    dense matrices:
-    1)    Straightforward non-blocked ijk algorithm.
-    2)    Blocked ijk algorithm using square b×b blocks.
-    3)    Blocked kij algorithm using square b×b blocks.
-
-    Experiment with the programs and build/plot:
-    1)  The dependence of the execution time of each program on the matrix size n and the 
-          block size b .
-          b.  BLAS calls
-    2)  The speedup of the blocked algorithms over the non-blocked one as a function of the  
-          matrix size and the block size.
-          a.  manually written      
-    3)  Compare the fastest program with the BLAS/ATLAS routine dgemm implementing the 
-          same operation. 
-          Explain the results.
-          c.  ATLAS      
-   
+    Open MP program computing norm of product of two nxn matrices
+    1/     Granularity of the product : 
+           (ii) One step algorithim. No intermediate resulting matrix
+    2/     Partitioning Scheme :
+           (a)  Left matrix is horizonitally partitioned
+    3/     Matrix norm to be computed :
+           (b)  Maximum absolute row sum norm (aka infinity-norm)
+                calculate max value of sum of each row (or product of same) 
+                    ||A|| infintity = max SUM | Aij |
+                    where   max :==> 0 <= i <=n
+                            SUM :==> j =0 to n-1      
 *********************************************************************************
 */
 
@@ -33,18 +23,19 @@
 #include <math.h>
 #include <cblas.h>
 #include <string.h>
+#include <omp.h>
 
 void usage () 
 {
-    fprintf(stdout,"\nUSAGE : \t<program name> [<-r>|<-i>] [N] <matrix contents file>.txt <data timing file>.dat \n");
-    fprintf(stdout,"\nTO : \t\tCalculate |C| = |A| x |B| using algorithm : Blocked KIJ using square bxb block \n");    
+    fprintf(stdout,"\nUSAGE : \t<program name> [<-r>|<-i>] [N] [T] <matrix contents file>.txt <timing file>.dat \n");
+    fprintf(stdout,"\nTO : \t\tCalculate |C| = |A| x |B| using Open MP and also calculate infinity norm of |C| \n");    
     fprintf(stdout,"\nWHERE :");
     fprintf(stdout,"\t1. \t<-r>\tinitialize |A| & |B| with _random_ numbers and |C| with '0' \n");
     fprintf(stdout,"\t   \t<-i>\tinitialize |A| & |B| _incrementally_ with <column> value and |C| with '0' \n");
     fprintf(stdout,"\t2. \t[N] \tmax size of each matrix, if invalid defaults to 1,000 \n");
-    fprintf(stdout,"\t3. \t[B] \tblock size appliable to all matrices, if invalid defaults to 1,000 \n");
+    fprintf(stdout,"\t3. \t[T] \tnumber of threads (i) less than [N] and (ii) [N] mod [T] = 0 \n");
     fprintf(stdout,"\t4. \t<matrix contents file>.txt\n\t\tname of .txt file to store values of matrices |A| |B| & |C| \n");
-    fprintf(stdout,"\t5. \t<data timingfile>.dat \n\t\tname of .dat file to contain time to complete for each iteration \n\n");
+    fprintf(stdout,"\t5. \t<timing .dat file> .dat \n\t\tname of timing data file to containing calculation time for each iteration \n\n");
     exit(0);
 }
 
@@ -124,7 +115,7 @@ int validate_if_file_exists(char * fn)
 void init_matrix_file_contents(FILE *fp) 
 {
     fprintf(fp, "#  --------------------------------------------------------------------------------------------------\n# \n");
-    fprintf(fp, "# Program :\tA1-Bkij-1D\n# where :\t.dat contains timing data & .txt contains matrix values \n# \n");
+    fprintf(fp, "# Program :\tA3-omp-1D \n# where :\t.dat contains timing data & .txt contains matrix values \n# \n");
     fprintf(fp, "# Summary of values added to each matrix - retained for later reference and validation \n# \n");
     fprintf(fp, "#  --------------------------------------------------------------------------------------------------  \n");
 }
@@ -132,19 +123,21 @@ void init_matrix_file_contents(FILE *fp)
 void init_timing_file_contents(FILE *fp) 
 {
     fprintf(fp, "#  --------------------------------------------------------------------------------------------------\n# \n");
-    fprintf(fp, "# Program :\tA1-Bkij-1D\n# where :\t.dat contains timing data & .txt contains matrix values \n");
+    fprintf(fp, "# Program :\tA3-omp-1D \n# where :\t.dat contains timing data & .txt contains matrix values \n");
     fprintf(fp, "#  --------------------------------------------------------------------------------------------------\n");
-    fprintf(fp, "# |Matrix| \tTime/simple \tTime/complex \tTime/dgemm \n# \n");
+    fprintf(fp, "# |Matrix| \t|Threads| \tTime/manual \tInf Norm/manual \tTime/dgemm \tInf Norm/dgemm \n# \n");
 }
 
-void multipy_ABC_cblas(double *matrix_a, double *matrix_b, double *matrix_c, int rows, int cols, int block, double alpha, double beta)
+void multipy_ABC_cblas(double *matrix_a, double *matrix_b, double *matrix_c, int rows, int cols, double alpha, double beta)
 {
-//                  m, n, k :    local integers indicating the size of the matrices for rows x columns :: A :  m x  k, B :  k x n, C:  m x n. Here, m = n = k = block
-//                  la_offset, lb_offset, lc_offset : Leading dimension of matrix A, B or C respectively, or the number of elements between 
+// m, n, k :    local integers indicating the size of the matrices for rows x columns :: A :  m x  k, B :  k x n, C:  m x n
+//                 Here, m = n = k = rows = columns = <nx> = <ny> as supplied
+    int lm = rows, ln = rows;
+// la_offset, lb_offset, lc_offset :
+//                 Leading dimension of matrix A, B or C respectively, or the number of elements between 
 //                 successive rows for row-major storage or columns for column-major storage. 
-    int lm = block, ln = block; 
     int la_offset = rows, lb_offset = cols, lc_offset = rows;
-    cblas_dgemm( CblasRowMajor, CblasNoTrans, CblasNoTrans, lm, ln, ln, alpha, matrix_a, la_offset, matrix_b, lb_offset, beta, matrix_c, lc_offset);     
+    cblas_dgemm( CblasRowMajor, CblasNoTrans, CblasNoTrans, lm, ln, ln, alpha, matrix_a, la_offset, matrix_b, lb_offset, beta, matrix_c, lc_offset);   
 }
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -157,20 +150,21 @@ int main ( int argc, char *argv[] )
     struct timeval tv1, tv2;
     struct timezone tz;
     const double ALPHA = 1.0;
-    const double BETA = 1.0;
+    const double BETA = 0.0;
     int increment_or_random = 5;
     int max_num_args = 6;
     char filename_matrix[50];
     char filename_timing[50];
+    int MAXTHREADS = omp_get_num_threads();
     int MAXN = 1000;
-    int MAXB=100;
-    int ni, nj, temp-nk;
-    double simple_elapsed=0.0, complex_elapsed=0.0, dgemm_elapsed=0.0;
+    int ni, nj, nk, number_of_row_slices, omp_nt;
+    double manual_row_norm=0.0, manual_inf_norm=0.0, dgemm_row_norm=0.0, dgemm_inf_norm=0.0;
+    double manual_elapsed=0.0, dgemm_elapsed=0.0;
           
 //  CLI PARAMETERS :: validate and initialize
     if ( argc != max_num_args ) 
     {
-        fprintf(stderr, "ERROR : \t<number of arguments> : %d, is invalid, less than <default> : %d. \n", argc, max_num_args);        
+        fprintf(stderr, "\nERROR : \t<number of arguments> : %d, is invalid, less than <default> : %d. \n", argc, max_num_args);        
         usage();
     }
 //  random or increment initialization of matrices |A| and |B|
@@ -185,33 +179,31 @@ int main ( int argc, char *argv[] )
         increment_or_random = 1; 
     } else
     { 
-        fprintf(stderr, "ERROR : \t'invalid entry : %s for '-i' or '-r'. \n", init_type);        
+        fprintf(stderr, "\nERROR : \t'invalid entry : %s for '-i' or '-r'", init_type);        
         usage();
     }
-//  matrix size
+    //  matrix size
     int nx = atoi(argv[2]);                                     
     if ( nx > MAXN )
     {
-        fprintf(stderr, "WARNING : \tMatrix size entered <nx> %d too large, now set to %d. \n", nx, MAXN);
+        fprintf(stderr, "\nWARNING : \tMatrix size entered <nx> %d  too large, now set to %d \n", nx, MAXN);
         nx = MAXN;
     }    
-    int ny = nx;  
-//  block size 
-    int nb = atoi(argv[3]);                                     
-    if ( nb > MAXB )
+    int ny = nx;
+//  number of threads      
+    int nt = atoi(argv[3]);  
+    if ( (nx % nt) != 0)
     {
-        fprintf(stderr, "WARNING : \tMatrix size entered <nb> %d  too large, now set to %d. \n", nb, MAXB);
-        nb = MAXB;        
-    } else if (nb > nx)
-    {
-        fprintf(stderr, "ERROR : \t<nb> %d : block size must be less <nx> %d : matrix size. \n", nb, nx);
+        fprintf(stderr, "\nERROR : \t<nt> %d : number of threads must divide evenly into <nx> %d : matrix size \n", nt, nx);
         usage();
-    } else if ( (nx % nb) != 0 )
+    }
+    if (nt > nx)
     {
-        fprintf(stderr, "WARNING : \tBlock size <nb> %d is not an even multiple of Matrix size <nx> %d. Both set to defaults of <MAXN> %d and <MAXB> %d.\n", nb, nx, MAXN, MAXB);
-        nx = MAXN;
-        nb = MAXB;
-    }    
+        fprintf(stderr, "\nERROR : \t<nt> %d : number of threads must be less <nx> %d : matrix size \n", nt, nx);
+        usage();
+    }
+    omp_set_num_threads(nt);
+    number_of_row_slices = nx / nt;
 //  matrix file name .txt
     strncpy(filename_matrix, argv[4], 49);
     filename_matrix[50] = '\0';
@@ -238,8 +230,7 @@ int main ( int argc, char *argv[] )
     {
         fp_timing = fopen(filename_timing, "a" );
     } 
-    fprintf(fp_matrix, "# RUNNING : \t%s %.2s %d %d \n", argv[0], init_type, nx, nb);
-    fprintf(stdout, "# RUNNING : \t%s %.2s %d %d \n", argv[0], init_type, nx, nb);
+    fprintf(stdout, "\n\n# RUNNING : \t%s %.2s %d %d \n", argv[0], init_type, nx, nt);
 
 //  CREATE & INITIALIZE :: matrices A & B & C and output results to matrix file for reference
     fprintf(stdout,"# CREATE MATRICES ... \n");
@@ -266,65 +257,71 @@ int main ( int argc, char *argv[] )
     fprintf(fp_matrix, "# Initialize matrix <%d> x <%d> |C| ... \n", nx, ny);
     print_matrix(C, nx, ny, fp_matrix);
 
-//  CALCULATION :: |C| using manual simple
-    fprintf(stdout,"# RESULTS : simple manual calculation ... \n");
-    gettimeofday(&tv1, &tz);
-    for (nk=0; nk<(nx/nb); nk++)
-    {
-        for (ni=0; ni<(nx/nb); ni++)
-        {
-            for (nj=0; nj<(ny/nb); nj++)
-            {
-                C[(ni*nx)+nj] += (A[(ni*nx)+nk]) * (B[(nk*nx)+nj]);
-            }
-        }
-    }
-    gettimeofday(&tv2, &tz);
-    simple_elapsed = (double) (tv2.tv_sec - tv1.tv_sec) + (double) (tv2.tv_usec - tv1.tv_usec) * 1.e-6;
-    fprintf(fp_matrix, "# |C| : <%d> x <%d> matrix computed values : MANUAL simple ... \n", nx, ny);
-    print_matrix(C, nx, ny, fp_matrix);
-    fprintf(fp_matrix, "# |C| : matrix calculated in %f seconds ... \n", simple_elapsed);
-
-//  CALCULATION :: |C| using manual complex
+//  CALCULATION :: |C| and infinity norm using manual
     fprintf(stdout,"# RESULTS : complex manual calculation ... \n");
-    fprintf(fp_matrix, "# Initialize matrix <%d> x <%d> |C|, redone for MANUAL complex .. \n", nx, ny);
-    init_matrix_zero(C, nx, ny);
-    print_matrix(C, nx, ny, fp_matrix);       
     gettimeofday(&tv1, &tz);
-    for (nk=0; nk<(nx/nb); nk++)
-    {
-        for (ni=0; ni<(nx/nb); ni++)
+#pragma omp parallel shared (A, B, C) private (omp_nt, ni, nj, nk, manual_row_norm, manual_inf_norm)
+    {        
+        omp_nt = omp_get_thread_num();
+        int slice_start = (((omp_nt+1) - 1) * number_of_row_slices);
+        int slice_end = (((omp_nt+1) * number_of_row_slices) - 1);
+        for (ni=slice_start; ni<slice_end; ni++)         
         {
-            double combine_a = (A[(ni*nx)+nk]);
-            for (nj=0; nj<(ny/nb); nj++)
+        for (nj=0; nj<ny; nj++)
             {
-            C[(ni*nx)+nj] += combine_a * (B[(nk*nx)+nj]);
+                double sum = 0.0;
+                for (nk=0; nk<nx; nk++)
+                {
+                sum+= (A[(ni*nx)+nk]) * (B[(nk*nx)+nj]);
+                }
+               C[(ni*nx)+nj] = sum;
             }
         }
-    }
+    } // end parallel
+#pragma omp critical
+    {
+        for (ni=0; ni<nx; ni++)
+        {
+            manual_row_norm =0.0;
+            for (nj=0; nj<nx; nj++)
+            {
+                manual_row_norm += C[(ni*nx) +nj];
+            
+            manual_inf_norm = ( manual_inf_norm < manual_row_norm ) ? manual_row_norm : manual_inf_norm;
+            }
+        }
+    } // end critcal
     gettimeofday(&tv2, &tz);
-    complex_elapsed = (double) (tv2.tv_sec - tv1.tv_sec) + (double) (tv2.tv_usec - tv1.tv_usec) * 1.e-6;
-    fprintf(fp_matrix, "# |C| : <%d> x <%d> matrix computed values : MANUAL complex ... \n", nx, ny);
+    manual_elapsed = (double) (tv2.tv_sec - tv1.tv_sec) + (double) (tv2.tv_usec - tv1.tv_usec) * 1.e-6;
+    fprintf(fp_matrix, "# RESULTS : \n\t# |C| : <%d> x <%d> matrix computed values : MANUAL ... \n", nx, ny);
     print_matrix(C, nx, ny, fp_matrix);
-    fprintf(fp_matrix, "# |C| : matrix calculated in %f seconds ... \n", complex_elapsed);
+    fprintf(fp_matrix, "\t# |C| : matrix infinity norm is %g, \tcalculated in %f seconds ... \n", manual_inf_norm, manual_elapsed);
 
-//  CALCULATION :: |C| using DGEMM
+//  CALCULATION :: |C| and infinity norm using DGEMM
     fprintf(stdout,"# RESULTS : BLAS/ATLAS calculation -\n");
-    fprintf(fp_matrix, "# Initialize matrix <%d> x <%d> |C|, redone for CBLAS/ATLAS ... \n", nx, ny);
+    fprintf(fp_matrix, "# \n# Initialize matrix <%d> x <%d> |C|, redone for CBLAS/ATLAS ... \n", nx, ny);
     init_matrix_zero(C, nx, ny);
     print_matrix(C, nx, ny, fp_matrix);    
-    gettimeofday(&tv1, &tz);
-    multipy_ABC_cblas(A, B, C, nx, ny, nb, ALPHA, BETA);
+    multipy_ABC_cblas(A, B, C, nx, ny, ALPHA, BETA);
+    for (ni=0; ni<nx; ni++)
+    {
+        dgemm_row_norm =0.0;
+        for (nj=0; nj<nx; nj++)
+        {
+            dgemm_row_norm += C[(ni*nx) +nj];
+        }
+        dgemm_inf_norm = ( dgemm_inf_norm < dgemm_row_norm ) ? dgemm_row_norm : dgemm_inf_norm;
+    }
     gettimeofday(&tv2, &tz);
     dgemm_elapsed = (double) (tv2.tv_sec-tv1.tv_sec) + (double) (tv2.tv_usec-tv1.tv_usec) * 1.e-6;
-    fprintf(fp_matrix, "# |C| : <%d> x <%d> matrix computed values using CBLAS/ATLAS ... \n", nx, ny);
+    fprintf(fp_matrix, "# RESULTS : \n\t# |C| : <%d> x <%d> matrix computed values : CBLAS/ATLAS ... \n", nx, ny);
     print_matrix(C, nx, ny, fp_matrix);
-    fprintf(fp_matrix, "# |C| : calculated in %f seconds... \n",  dgemm_elapsed);
+    fprintf(fp_matrix, "\t# |C| : matrix infinity norm is %g, \tcalculated in %f seconds ... \n", manual_inf_norm, manual_elapsed);
 
-//  OUTPUT :: results to stdout & .dat file : matrix size || Time/simple || Time/complex || Time / dgemm
-    fprintf(stdout,"# \t\t|Matrix|  Time/simple  Time/complex  Time/dgemm\n");
-    fprintf(stdout,"# Results: \t%d \t%fs \t%fs \t%fs \n", nx, simple_elapsed, complex_elapsed, dgemm_elapsed);
-    fprintf(fp_timing, "%d \t%fs \t%fs \t%fs \n", nx, simple_elapsed, complex_elapsed, dgemm_elapsed);
+//  OUTPUT :: results to stdout & .dat file : matrix size || infinity norm || Time/manual || infinity norm || Time / dgemm
+    fprintf(stdout,"# \t\t|Matrix|  |Threads|  Time/manual  Inf Norm/manual  Time/dgemm  Inf Norm/dgemm\n");
+    fprintf(stdout,"# Results: \t%d \t%d \t%f \t%f \t%f \t%f \n", nx, nt, manual_elapsed, manual_inf_norm, dgemm_elapsed, dgemm_inf_norm);
+    fprintf(fp_timing, "%d \t%d \t%f \t%f \t%f \t%f \n", nx, nt, manual_elapsed, manual_inf_norm, dgemm_elapsed, dgemm_inf_norm);
    	
 //  CLEANUP & close files
     fprintf(stdout,"# CLEAN-UP ... \n");

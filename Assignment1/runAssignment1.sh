@@ -18,10 +18,12 @@ logDir="logDir"
 logPrefix="pdwan-"
 txtSuffix=".txt"
 DatSuffix=".dat"
-pngSuffix=".png"
 stdLogFile="runAssignment1-${Now}.log"
 compileUsingCblas="false"
 compileUsingAtlas="false"
+buildSimple="false"
+buildBlockedIJK="false"
+buildBlockedKIJ="false"
 initRandom="false"
 initIncrement="false"
 matrixEnabled="false"
@@ -30,7 +32,7 @@ defaultMatrixRange="false"
 let matrixSize=0
 let maxMatrixSize=1000 
 let blockSize=0
-let maxBlockSize=1000 
+let maxBlockSize=100
 
 # ##################################################################################
 
@@ -56,16 +58,19 @@ usage()
     $_ECHO -e "\t-r|--random \tInitialize |A| & |B| with random numbers and |C| with '0' "
     $_ECHO -e "\t-i|--increment \tInitialize |A| & |B| incrementally with <column> value and |C| with '0' "
     $_ECHO -e "\t\t\t'-i|--increment' & '-r|--random' are mutually exclusive \n"
-    $_ECHO -e "\t-m|--matrix <n>\tMatrix dimension, if  odd number +1 added or if  invalid set to [ ${maxMatrixSize} ]"
+    $_ECHO -e "\t-m|--matrix <N>\tMatrix size, if  invalid, (matrix size > max) set to [${maxMatrixSize}]"
+    $_ECHO -e "\t-b|--block <B>\tBlock matrix size, if invalid (matrix % block != 0 or block size > max),  set to [${maxBlockSize}] and matrix size set to [${maxMatrixSize}]."
     $_ECHO -e "\t-v|--values \tUse predefined range of valid values for <nx> and <nb> as follows :"
-    $_ECHO -e "\t\t\t<matrixArray> :\t{ 50, 50, 50, 100, 100, 100, 500, 500, 500, 1000, 1000, 1000 }"
-    $_ECHO -e "\t\t\t'-m|--matrix <n>' and '-v|--values' mutually exclusive.\n"
+    $_ECHO -e "\t\t\t<NXArray> \t( 50 50 50 100 100 100 500 500 500 500 1000 1000 1000 1000 )"
+    $_ECHO -e "\t\t\t<NBArray> \t( 2 5 10 5 10 20 5 10 20 50 5 10 50 100 )"
+    $_ECHO -e "\t\t\t'-m|--matrix <n>' & '-b|--block <b>' are mutually exclusive of '-v|--values'.\n"
     $_ECHO -e "\t-?|-h|--help \tusage \n"
 }
 
 # function : error message and then usage
 error() 
 {
+    echo "error $1"
     err=$1
     case ${err} in
         1)
@@ -233,8 +238,7 @@ if   [ "${defaultMatrixRange}" == "true" ] && ( [ "${matrixEnabled}" == "false" 
     declare -a NBArray=( 2 5 10 5 10 20 5 10 20 50 5 10 50 100 )
     matrixEnabled="false"
     blockEnabled="false"
-else 
-    if  [ "${matrixEnabled}" == "true" ] || [ "${blockEnabled}" == "true" ] ; then
+elif  [ "${matrixEnabled}" == "true" ] || [ "${blockEnabled}" == "true" ] ; then
 #   Validate matrix size initialized
 	    if  [ "${matrixSize}" == "" ] ; then 
 	        error 4 "matrix size"
@@ -243,7 +247,7 @@ else
 	    if  [ "${blockSize}" == "" ]  && [ buildBlockedIJK="true" ]  ; then 
 	        error 4 "block size"
 	    fi 
-	    if  [ "${blockSize}" == "" ]  && [ buildBlockedIJK="true" ]  ; then 
+	    if  [ "${blockSize}" == "" ]  && [ buildBlockedJIK="true" ]  ; then 
 	        error 4 "block size"
 	    fi 
 #   Validate matrix range
@@ -277,7 +281,7 @@ else
     	fi 
 #   Validate Simple IJK & set matrix and block arrays
         if  [ buildSimple="true" ] && [ buildBlockedIJK="false" ]  && [ buildBlockedKIJ="false" ] ; then 
-            if  [ "${matrixEnabled}" == "true" ] || [ "${blockEnabled}" == "true" ] ; then
+            if  [ "${matrixEnabled}" == "true" ] && [ "${blockEnabled}" == "true" ] ; then
                 error 6 "Simple IJK only : <-m> & <-b>"
             fi 
             declare -a NXArray=( $matrixSize )
@@ -317,7 +321,8 @@ if  [ "${buildSimple}" == "true" ]  || [ "${buildAll}" == "true" ] ; then
     algorithmSimple="A1-Sijk-1D" 
     matrixFileSimple="${matrixFileRoot}-${algorithmSimple}"
     dataFileSimple="${dataFileRoot}-${algorithmSimple}"
-    if  [[ ${#NXArray[ * ]} -le 0 ]] ; then 
+    dataFileSimpleTiming="${dataFileSimple}${DatSuffix}" # append to existing file for graphing
+    if  [[ ${#NXArray[*]} -le 0 ]] ; then 
 	    error 5 "matrix size"
     else        
 	    executeOptions=""
@@ -327,25 +332,25 @@ if  [ "${buildSimple}" == "true" ]  || [ "${buildAll}" == "true" ] ; then
 	    if  [ "${compileUsingAtlas}" == "true" ] ; then
 	        compile_dgemm_atlas ${algorithmSimple}
 	    fi 
-	    for (( i = 0 ; i < ${#NXArray[ @ ]} ; i++ )); do
-	        matrixFileSimpleValues="${matrixFileSimple}-$i${txtSuffix}" # different file for each run
-    	    dataFileSimpleTiming="${dataFileSimple}${DatSuffix}" # append to existing file for graphing
+	    for (( i = 0 ; i < ${#NXArray[@]} ; i++ )); do
+	        matrixFileSimpleValues="${matrixFileSimple}-$i${txtSuffix}" # different file for each iteration
 	        init_log_file ${matrixFileSimpleValues} 
 	        init_log_file ${dataFileSimpleTiming}
-	        executeOptions="${algorithmOptions} ${NXArray[ $i ]}  ${threadArray[ $i ]}"
+	        executeOptions="${algorithmOptions} ${NXArray[$i]}  ${threadArray[$i]}"
+            echo " DEBUG : algorithm_execute ./${algorithmSimple} ${executeOptions} ${matrixFileSimpleValues} ${dataFileSimpleTiming}"
 	        algorithm_execute "./${algorithmSimple}" "${executeOptions}" "${matrixFileSimpleValues}" "${dataFileSimpleTiming}"
 	        matrixFileSimpleValues="${matrixFileSimple}"
-	        dataFileSimpleTiming="${dataFileSimple}"
 	    done
     fi 
 fi 
 
 # build Blocked IJK
-if  [ "${buildBlockIJK}" == "true" ]  || [ "${buildAll}" == "true" ] ; then
+if  [ "${buildBlockedIJK}" == "true" ]  || [ "${buildAll}" == "true" ] ; then
     algorithmBlockIJK="A1-Bijk-1D" 
     matrixFileBlockIJK="${matrixFileRoot}-${algorithmBlockIJK}"
     dataFileBlockIJK="${dataFileRoot}-${algorithmBlockIJK}"
-    if  [[ ${#NXArray[ * ]} -le 0 ]] ; then 
+    dataFileBlockIJKTiming="${dataFileBlockIJK}${DatSuffix}" # append to existing file for graphing
+    if  [[ ${#NXArray[*]} -le 0 ]] ; then 
 	    error 5 "matrix size"
     else        
 	    executeOptions=""
@@ -355,25 +360,25 @@ if  [ "${buildBlockIJK}" == "true" ]  || [ "${buildAll}" == "true" ] ; then
 	    if  [ "${compileUsingAtlas}" == "true" ] ; then
 	        compile_dgemm_atlas ${algorithmBlockIJK}
 	    fi 
-	    for (( i = 0 ; i < ${#NXArray[ @ ]} ; i++ )); do
-	        matrixFileBlockIJKValues="${matrixFileBlockIJK}-$i${txtSuffix}" # different file for each run
-    	    dataFileBlockIJKTiming="${dataFileBlockIJK}${DatSuffix}" # append to existing file for graphing
+	    for (( i = 0 ; i < ${#NXArray[@]} ; i++ )); do
+	        matrixFileBlockIJKValues="${matrixFileBlockIJK}-$i${txtSuffix}" # different file for each iteration
 	        init_log_file ${matrixFileBlockIJKValues} 
 	        init_log_file ${dataFileBlockIJKTiming}
-	        executeOptions="${algorithmOptions} ${NXArray[ $i ]}  ${threadArray[ $i ]}"
+	        executeOptions="${algorithmOptions} ${NXArray[$i]}  ${threadArray[$i]}"
+	        echo "DEBUG : algorithm_execute ./${algorithmBlockIJK} ${executeOptions} ${matrixFileBlockIJKValues} ${dataFileBlockIJKTiming}"
 	        algorithm_execute "./${algorithmBlockIJK}" "${executeOptions}" "${matrixFileBlockIJKValues}" "${dataFileBlockIJKTiming}"
 	        matrixFileBlockIJKValues="${matrixFileBlockIJK}"
-	        dataFileBlockIJKTiming="${dataFileBlockIJK}"
 	    done
     fi 
 fi 
 
 # build Blocked KIJ
-if  [ "${buildBlockKIJ}" == "true" ]  || [ "${buildAll}" == "true" ] ; then
+if  [ "${buildBlockedKIJ}" == "true" ]  || [ "${buildAll}" == "true" ] ; then
     algorithmBlockKIJ="A1-Bkij-1D" 
     matrixFileBlockKIJ="${matrixFileRoot}-${algorithmBlockKIJ}"
     dataFileBlockKIJ="${dataFileRoot}-${algorithmBlockKIJ}"
-    if  [[ ${#NXArray[ * ]} -le 0 ]] ; then 
+    dataFileBlockKIJTiming="${dataFileBlockKIJ}${DatSuffix}" # append to existing file for graphing
+    if  [[ ${#NXArray[*]} -le 0 ]] ; then 
 	    error 5 "matrix size"
     else        
 	    executeOptions=""
@@ -383,23 +388,23 @@ if  [ "${buildBlockKIJ}" == "true" ]  || [ "${buildAll}" == "true" ] ; then
 	    if  [ "${compileUsingAtlas}" == "true" ] ; then
 	        compile_dgemm_atlas ${algorithmBlockKIJ}
 	    fi 
-	    for (( i = 0 ; i < ${#NXArray[ @ ]} ; i++ )) ; do
-	        matrixFileBlockKIJValues="${matrixFileBlockKIJ}-$i${txtSuffix}" # different file for each run
-    	    dataFileBlockKIJTiming="${dataFileBlockKIJ}${DatSuffix}" # append to existing file for graphing
+	    for (( i = 0 ; i < ${#NXArray[@]} ; i++ )) ; do
+	        matrixFileBlockKIJValues="${matrixFileBlockKIJ}-$i${txtSuffix}" # different file for each iteration
 	        init_log_file ${matrixFileBlockKIJValues} 
 	        init_log_file ${dataFileBlockKIJTiming}
-	        executeOptions="${algorithmOptions} ${NXArray[ $i ]} ${threadArray[ $i ]}"
+	        executeOptions="${algorithmOptions} ${NXArray[$i]} ${threadArray[$i]}"
+	        echo "DEBUG : algorithm_execute ./${algorithmBlockKIJ} ${executeOptions} ${matrixFileBlockKIJValues} ${dataFileBlockKIJTiming}"
 	        algorithm_execute "./${algorithmBlockKIJ}" "${executeOptions}" "${matrixFileBlockKIJValues}" "${dataFileBlockKIJTiming}"
 	        matrixFileBlockKIJValues="${matrixFileBlockKIJ}"
-	        dataFileBlockKIJTiming="${dataFileBlockKIJ}"
 	    done
     fi 
 fi 
 
 # move log files to <logDir>
-mv -f *.dat ${logDir}
-mv -f *.txt ${logDir}
-mv -f *.log ${logDir}
+mv -f *.dat ${logDir} 2> /dev/null
+mv -f *.txt ${logDir} 2> /dev/null
+mv -f *.log ${logDir} 2> /dev/null
+mv -f *.bup ${logDir} 2> /dev/null
 
 pause
 exit 0

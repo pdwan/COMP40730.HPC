@@ -266,6 +266,7 @@ dataFileRoot="${logPrefix}${Now}-data"
 algorithmName="A3-omp-1D" 
 matrixFileName="${matrixFileRoot}-${algorithmName}"
 dataFileName="${dataFileRoot}-${algorithmName}"
+dataFileNameTiming="${dataFileName}${DatSuffix}" # append to existing file for graphing : retain as spearate as may way to create one per iteration
 if [[ ${#NXArray[*]} -le 0 ]] ; then 
 	error 5 "matrix size"
 else        
@@ -275,14 +276,12 @@ else
 	fi
 	for (( i = 0 ; i < ${#NXArray[@]} ; i++ )); do
 	    matrixFileNameValues="${matrixFileName}-$i${txtSuffix}" # different file for each run
-	    dataFileNameTiming="${dataFileName}${DatSuffix}" # append to existing file for graphing
 	    init_log_file ${matrixFileNameValues} 
 	    init_log_file ${dataFileNameTiming}
 	    executeOptions="${algorithmOptions} ${NXArray[$i]}  ${threadArray[$i]}"
 	    // echo "DEBUG : algorithm_execute  ./${algorithmName} ${executeOptions} ${matrixFileNameValues} ${dataFileNameTiming}"
 	    algorithm_execute "./${algorithmName}" "${executeOptions}" "${matrixFileNameValues}" "${dataFileNameTiming}"
 	    matrixFileNameValues="${matrixFileName}"
-	    dataFileNameTiming="${dataFileName}"
 	done
 fi
 

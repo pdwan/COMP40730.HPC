@@ -1,19 +1,21 @@
 /* 
-* Paula Dwan
-* 13208660 : COMP40730 : Assignment 2
-*
-* Parallel pthreads program computing norm of product of two nxn matrices
-* 1/     Granularity of the product : 
-*           (ii)      One step algorithim. No intermediate resulting matrix
-* 2/     Partitioning Scheme :
-*           (a)      Left matrix is horizonitally partitioned
-* 3/     Matrix norm to be computed :
-*           (b)      Maximum absolute row sum norm (aka infinity-norm)
-*                     calculate max value of sum of each row (or product of same) 
-*                     ||A|| infintity = max SUM | Aij |
-*                     where   max     :==> 0 <= i <=n
-*                                  SUM   :==>  j =0 to n-1      
-*
+* **********************************************************************************
+
+    Paula Dwan
+    13208660 : COMP40730 : Assignment 2
+
+    Parallel pthreads program computing norm of product of two nxn matrices
+    1/     Granularity of the product : 
+             (ii)      One step algorithim. No intermediate resulting matrix
+    2/     Partitioning Scheme :
+             (a)      Left matrix is horizonitally partitioned
+    3/     Matrix norm to be computed :
+             (b)      Maximum absolute row sum norm (aka infinity-norm)
+                       calculate max value of sum of each row (or product of same) 
+                       ||A|| infintity = max SUM | Aij |
+                       where   max     :==> 0 <= i <=n
+                                    SUM   :==>  j =0 to n-1      
+* **********************************************************************************    
 */          
 
 #include <sys/time.h>
@@ -22,6 +24,7 @@
 #include <pthread.h>
 #include <cblas.h>
 #include <math.h>
+#include <string.h>
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
       
@@ -42,49 +45,44 @@ typedef struct
 
 
 void usage () {
-    printf( "USAGE : \t<program name> <i> |<r> <N> <matrix contents file>.txt <timing file>.dat \n");
-    printf ("TO : \tCalculate infinity norm of and populate matrix |C| = |A| x |B| using straight-forward IJK algorithm and cblas  - via bash script. \n");    
-    printf( "where \n");
-    printf("\t1. \t<R>\tinitialize |A| & |B| with _random_ numbers and |C| with '0' \n");
-    printf("\t2. \t<I>\tinitialize |A| & |B| _incrementally_ with <row> value and |C| with '0' \n");
-    printf("\t3. \t<N> \tmax size of each matrix, defaults to 1,000 if invalid or not provided - verified in calling script \n");
-    printf("\t4. \t<matrix contents file>.txt\n\t\tname of .txt file to store values of matrices |A| |B| & |C| \n");
-    printf("\t5. \t<timing .dat file> .dat \n\t\tname of .dat file to contain time to complete for each iteration \n");
-    exit(1);
+    fprintf(stdout,"\nUSAGE : \t<program name> [<-r>|<-i>] [N] [P] <matrix contents file>.txt <timing file>.dat \n");
+    fprintf(stdout,"\nTO : \t\tCalculate |C| = |A| x |B| using pthreads and also calculate infinity norm of |C| \n");    
+    fprintf(stdout,"\nWHERE :");
+    fprintf(stdout,"\t1. \t<-r>\tinitialize |A| & |B| with _random_ numbers and |C| with '0' \n");
+    fprintf(stdout,"\t   \t<-i>\tinitialize |A| & |B| _incrementally_ with <column> value and |C| with '0' \n");
+    fprintf(stdout,"\t2. \t[N] \tmatrix size, if invalid defaults to [${maxMatrixSize}] \n");
+    fprintf(stdout,"\t3. \t[P] \tnumber of threads, i.e.: processors when (i) [P] less than [N] and (ii) [N] mod [P] = 0 \n\t\tIf invaldi, set to [${max}]");
+    fprintf(stdout,"\t4. \t<matrix contents file>.txt\n\t\tname of .txt file to store values of matrices |A| |B| & |C| \n");
+    fprintf(stdout,"\t5. \t<timing .dat file> .dat \n\t\tname of timing data file to containing calculation time for each iteration \n\n");
+    exit(0);
 }
 
-// function to allocate matrix memory for 1D matrix using size of equivalent 2D matrix
-double* create_1Dmatrix (int rc)
+double* allocate_memory_matrix (int rows, int cols)
 {
-     double *local_matrix; 
-
-     local_matrix = malloc(rc * sizeof(double)); 
-     if(!(local_matrix))
-     {
-           printf("ERROR : \tExiting - memory allocation failed for 1D matrix.\n");
-           exit(1);
-     }
-     printf("\tMemory allocation complete for 1D matrix matrix ...\n");
-     return local_matrix;     
+    double* l_matrix;  
+    l_matrix = (double *) malloc(rows*cols*sizeof (double));  
+    if(!(l_matrix))
+    {
+        fprintf(stderr,"ERROR : \texiting - memory allocation failed for matrix.\n");
+        exit(1);
+    }
+    return l_matrix;  
 } 
 
-// function to deallocate matrix memory
-void deallocate_matrix_memory(double *arr)
+void deallocate_matrix_memory(double *matrix1d)
 {
-     free(arr); 
-     printf("\tMemory de-allocation completed for matrix ...\n");
+    free(matrix1d); 
 }
 
-void init_1d_matrix_random(double *matrix1d, int rows, int cols, FILE *fp)
+void print_matrix(double *matrix1d, int rows, int cols, FILE *fp)
 {
-    int ni, mod_rand=10;
+    int ni;
     int count =1;
-    fprintf(fp, "\n# |A| or |B| : \tMatrix initialization using (mod %d)+1 on random number for matrix of size <%d> x <%d> ...\n", mod_rand, rows, cols);
-    for(ni=0; ni<(rows*cols); ni++)
+    for (ni=0; ni<(rows*cols); ni++)
     {
-        matrix1d[ni]= (double) ((rand()%mod_rand) + 1);
         fprintf(fp, "%g\t", matrix1d[ni]); 
-        if (count == rows) {
+        if (count == rows) 
+        {
             fprintf(fp, "\n");
             count =1;
         } else 
@@ -94,50 +92,65 @@ void init_1d_matrix_random(double *matrix1d, int rows, int cols, FILE *fp)
     }
 }
 
-void init_1d_matrix_increment(double *matrix1d, int rows, int cols, FILE *fp)
+void init_matrix_random(double *matrix1d, int rows, int cols)
+{
+    int ni, mod_rand=10;
+    for (ni=0; ni<(rows*cols); ni++)
+    {
+        matrix1d[ni]= (double) ((rand()%mod_rand) + 1);
+    }
+}
+
+void init_matrix_increment(double *matrix1d, int rows, int cols)
 {
     int ni;    
-    int count =1;
-    fprintf(fp, "\n# |A| or |B| : \tMatrix initialization with row value for matrix of size <%d> x <%d> ...\n", rows, cols);
-    for(ni=0; ni<(rows*cols); ni++)
+    for (ni=0; ni<(rows*cols); ni++)
     {
-        matrix1d[ni]= ((rows*cols) % rows);
-        fprintf(fp, "%g\t", matrix1d[ni]); 
-        if (count == rows) {
-            fprintf(fp, "\n");
-            count =1;
-        }else 
-        {
-            count ++;    
-        }
+        matrix1d[ni]= ((ni % rows) + 1);
     }
 }
 
-void init_C_1d_matrix(double *matrix1d, int rows, int cols, FILE *fp)
+void init_matrix_zero(double *matrix1d, int rows, int cols)
 {
     int ni;
-    int count =1;
-    fprintf(fp, "\n# |C| : \tMatrix initialization with value of zero for matrix of size <%d> x <%d> ...\n", rows, cols);
-    for(ni=0; ni<(rows*cols); ni++)
+    for (ni=0; ni<(rows*cols); ni++)
     {
         matrix1d[ni]=  0.0;
-        fprintf(fp, "%g\t", matrix1d[ni]); 
-        if (count == rows) {
-            fprintf(fp, "\n");
-            count =1;
-        }else {
-        count++;
-        }
     }
 }
 
-//  function to calculate infinity norm and provide values for |C|
+int validate_if_file_exists(char * fn)
+{
+    FILE* fp = fopen(fn, "r");
+    if (fp != NULL)
+    {
+        fclose(fp);
+        return 1;   // file exists
+    }
+    return 0;       // file does not exist
+}
+
+void init_matrix_file_contents(FILE *fp) 
+{
+    fprintf(fp, "#  --------------------------------------------------------------------------------------------------\n# \n");
+    fprintf(fp, "# Program :\tA2-pthreads-1D \n# where :\t.dat contains timing data & .txt contains matrix values \n# \n");
+    fprintf(fp, "# Summary of values added to each matrix - retained for later reference and validation \n# \n");
+    fprintf(fp, "#  --------------------------------------------------------------------------------------------------  \n");
+}
+
+void init_timing_file_contents(FILE *fp) 
+{
+    fprintf(fp, "#  --------------------------------------------------------------------------------------------------\n# \n");
+    fprintf(fp, "# Program :\tA2-pthreads-1D \n# where :\t.dat contains timing data & .txt contains matrix values \n");
+    fprintf(fp, "#  --------------------------------------------------------------------------------------------------\n");
+    fprintf(fp, "# |Matrix| \t|Threads| \tTime/manual \tInf Norm/manual \tTime/dgemm \tInf Norm/dgemm \n# \n");
+}
+
+//  function to calculate infinity norm and provide values for |C| : manual
 double multipy_ABC_complex(double *matrix_a, double *matrix_b, double *matrix_c, int rows, int cols, FILE *fp)
 {
     int ni, nj, nk;
-    int count = 1;
-    double max_row = 0.0;
-    fprintf(fp, "\n# |C| : \tMatrix computed values for matrix of size <%d> x <%d> ... using SIMPLE : Blocked IJK\n", rows, cols);
+    
     for (ni=0; ni<rows; ni++)
     {
         for (nj=0; nj<cols; nj++)
@@ -147,20 +160,20 @@ double multipy_ABC_complex(double *matrix_a, double *matrix_b, double *matrix_c,
             {
                 sum+= (matrix_a[(ni*rows)+nk]) * (matrix_b[(nk*rows)+nj]);
             }
-            matrix_c[ni+(nj*cols)] = sum;
-            max_row = (max_row < sum) ? sum : max_row ; 
-            fprintf(fp, "%g\t",matrix_c[ni+(nj*cols)]); 
-            if (count == rows) 
-            {
-                fprintf(fp, "\n");
-                count =1;
-            }else 
-            {
-                count++;
-            }
+            matrix_c[(ni*rows)+nj] = sum;
         }
     }
-    return max_row;
+double manual_row_norm =0.0, manual_inf_norm =0.0;
+    for (ni=0; ni<rows; ni++)
+    {
+        manual_row_norm =0.0;
+        for (nj=0; nj<rows; nj++)
+        {
+            manual_row_norm += matrix_c[(ni*rows) +nj];
+        }
+        manual_inf_norm = ( manual_inf_norm < manual_row_norm ) ? manual_row_norm : manual_inf_norm;
+    }
+    return manual_inf_norm;
 }
 
 //  function to calculate infinity norm and provide values for |C|
@@ -168,13 +181,16 @@ void *norm_summation_calculation(void *args FILE *fp)
 {
      norm_summation_t *norm_summation_data; 
      int i;  
-     printf(fp, "# Calculate infinity norm of <allB> and <allA> using <sliceA> writing to <sliceC>...\n");
+     int ALPHA=1.0;
+     int BETA=0.0;
+     
+     fprintf(fp, "# Calculate infinity norm of |allB| and |allA| using |sliceA| writing to |sliceC|...\n");
      norm_summation_data = args; 
-     cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, norm_summation_data->my_nx, norm_summation_data->my_nx, norm_summation_data->my_nx, 1.0, norm_summation_data->my_sliceA, norm_summation_data->my_nx, norm_summation_data->my_allB, norm_summation_data->my_nx, 0.0, norm_summation_data->my_sliceC, norm_summation_data->my_nx);
-     printf(fp, "# Evaluate sum of local <sliceC> using <mutex>...\n");
+     cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, norm_summation_data->my_nx, norm_summation_data->my_nx, norm_summation_data->my_nx, ALPHA, norm_summation_data->my_sliceA, norm_summation_data->my_nx, norm_summation_data->my_allB, norm_summation_data->my_nx, BETA, norm_summation_data->my_sliceC, norm_summation_data->my_nx);
+     fprintf(fp, "# Evaluate sum of local |sliceC| using <mutex>...\n");
      pthread_mutex_lock(norm_summation_data->mutex);
-     printf(fp, "# ................... > norm_summation_data->my_ns_size = %d \n ", (int)norm_summation_data->my_ns_size);
-     printf(fp, "# value \t\t  max");
+     fprintf(fp, "# ................... > norm_summation_data->my_ns_size = %d \n ", (int)norm_summation_data->my_ns_size);
+     fprintf(fp, "# value \t\t  max");
      int iteration = (int) (norm_summation_data->my_ns_size / norm_summation_data->my_nx);
      int counter = 0;
      for(i=0; i<iteration; i++) 
@@ -191,9 +207,9 @@ void *norm_summation_calculation(void *args FILE *fp)
           {
                norm_summation_data->my_norm_sumC = norm_summation_data->my_norm_summation[i] ;
           }
-          printf(fp, "# %g \t\t %g \n",  (double)norm_summation_data->my_norm_summation[i], norm_summation_data->my_norm_sumC);
+          fprintf(fp, "# %g \t\t %g \n",  (double)norm_summation_data->my_norm_summation[i], norm_summation_data->my_norm_sumC);
      }  
-     printf(fp, "# Max absolute value in local <sliceC> is : %g\n", norm_summation_data->my_norm_sumC);     
+     fprintf(fp, "# Max absolute value in local |sliceC| is : %g\n", norm_summation_data->my_norm_sumC);     
      pthread_mutex_unlock(norm_summation_data->mutex); 
      pthread_exit(NULL); 
 }
@@ -206,10 +222,9 @@ int main ( int argc, char *argv[] )
 //  define variables
     struct timeval tv1, tv2;
     struct timezone tz;
-    const int MAXPTHREADS = 124;
+    const int MAXPTHREADS = 100;
+    const int MAXN = 1000;
     int i = 0;
-    const double ALPHA = 1.0;
-    const double BETA = 1.0;
     int increment_or_random = 5;
     int max_num_args = 6;
     char filename_matrix[50];
@@ -234,71 +249,114 @@ int main ( int argc, char *argv[] )
     }
     int nx = atoi(argv[2]);                                     
     int ny = nx;      
-    int num_threads = atoi(argv[3]);                                     
+    int np = atoi(argv[3]);             
+    if ( (nx % np) != 0)
+    {
+        fprintf(stderr, "\nWARNING : \t<np> %d : number of threads must divide evenly into <nx> %d : matrix size. Using detaults. \n", np, nx);
+        nx=MAXN;
+        np= MAXPTHREADS;        
+    }
+    if (np > nx)
+    {
+        fprintf(stderr, "\nWARNING: \t<np> %d : number of threads must be less <nx> %d : matrix size. Using detaults. \n", np, nx);
+        nx=MAXN;
+        np= MAXPTHREADS;
+    }
+    
+    
+//  matrix file name .txt
     strncpy(filename_matrix, argv[4], 49);
     filename_matrix[50] = '\0';
-    FILE *fp_matrix = fopen( filename_matrix, "wa" );
-    strncpy(filename_timing, argv[5], 49);
-    filename_timing[50] = '\0';
-    FILE *fp_timing = fopen(filename_timing, "wa" );    
-    fprintf(fp_matrix, "RUNNING : \t%s %s %d %d %s %s \n", argv[0],cell_value_type,nx,nb,filename_matrix,filename_timing );
-    fprintf(fp_timing, "RUNNING : \t%s %s %d %d %s %s \n", argv[0],cell_value_type,nx,nb,filename_matrix,filename_timing );
- 
-    printf("\n............................................................................................................................\n");
-    printf("INPUT :\tUse <pthreads> to calculate dot product and Infinity Norm of product of two NxN matrices ...\n");
-    printf("\tPlease enter matrix dimension < maximun of [%d] i.e.: n : ", MAXNMATRIX);
-    int nx = get_value(MAXNMATRIX);
-    int ny = nx;
-    printf("\tPlease enter number of processors (i.e.: number of threads) < maximum of [%d] --> <np>: ", MAXPTHREADS);
-    int np = get_value(MAXPTHREADS);
-    while ( (nx % np) > 0 )
+    FILE *fp_matrix;
+    int file_matrix_exists = validate_if_file_exists(filename_matrix);
+    if ( file_matrix_exists == 0 ) 
+    {   
+        fp_matrix= fopen(filename_matrix, "w" );
+        init_matrix_file_contents(fp_matrix); 
+    } else 
     {
-        printf("ERROR : \tmatrix size = %d must  be an equal multiple of number of processors and < [%d]. Please reenter [np]: ", nx, MAXPTHREADS);
-        np = get_value(MAXPTHREADS);
-    }
+        fp_matrix = fopen(filename_matrix, "a" );
+    } 
+//  data file name .dat
+    strncpy(filename_timing, argv[5], 49);
+    filename_timing[50] = '\0';    
+    FILE *fp_timing; 
+    int file_timing_exists = validate_if_file_exists(filename_timing);
+    if ( file_timing_exists == 0 ) 
+    {   
+        fp_timing= fopen(filename_timing, "w" );
+        init_timing_file_contents(fp_timing); 
+    } else 
+    {
+        fp_timing = fopen(filename_timing, "a" );
+    } 
+    fprintf(fp_matrix, "RUNNING :\t%s %s %d %d %s %s \n", argv[0],cell_value_type,nx,np,filename_matrix,filename_timing );
+    fprintf(stdout, "RUNNING : \t%s %s %d %d %s %s \n", argv[0],cell_value_type,nx,np,filename_matrix,filename_timing );
  
 //  Calculate slice information using number of processors <np> and matrix size <nx>
      int ns_size = (nx*np);
      int ns_no = (nx / np); 
-     printf("\tNo of slices = <matrix rows> x <number of processes> = [%d] x [%d] = [%d] ...\n", nx, np, ns_size);
-     printf("\tSlice size       = <matrix rows> ÷ <number of processes> = [%d] ÷ [%d] = [%d] ...\n", nx, np, ns_no);
+     fprintf(fp_matrix, "\tNo of slices = <matrix rows> x <number of processes> = [%d] x [%d] = [%d] ...\n", nx, np, ns_size);
+     fprintf(fp_matrix, "\tSlice size       = <matrix rows> ÷ <number of processes> = [%d] ÷ [%d] = [%d] ...\n", nx, np, ns_no);
+     fprintf(stdout, "\tNo of slices = <matrix rows> x <number of processes> = [%d] x [%d] = [%d] ...\n", nx, np, ns_size);
+     fprintf(stdout, "\tSlice size       = <matrix rows> ÷ <number of processes> = [%d] ÷ [%d] = [%d] ...\n", nx, np, ns_no);
  
-// Allocate memory for & initialize matrices allA, allB ; create & initialize array C (row totals) 
-     printf("CREATE MATRICES <allA>, <allB>, <allC>, <sliceA> & <sliceC> :\n");
-     double *allA = create_1Dmatrix(nx*ny);
-     double *allB = create_1Dmatrix(nx*ny);
-     double *allC = create_1Dmatrix(nx*ny);
-     double *sliceA = create_1Dmatrix(ns_size);
-     double *sliceC = create_1Dmatrix(ns_size);
+// Allocate memory for matrices allA, allB allC, sliceA and sliceC
+     fprintf(stdout, "CREATE MATRICES |allA|, |allB|, |allC|, |sliceA| & |sliceC| ... \n");
+     double *allA = allocate_memory_matrix(nx, ny);
+     double *allB = allocate_memory_matrix(nx, ny);
+     double *allC = allocate_memory_matrix(nx, ny);
+     double *sliceA = allocate_memory_matrix(ns_size, ns_size);
+     double *sliceC = allocate_memory_matrix(ns_size, ns_size);
  
  //  Initialize matrices A & B & C
-    fprintf(fp_matrix, "INITIALIZE MATRICES <allA>, <allB>, <allC>, <sliceA>  & <sliceC> :\n");
+    fprintf(stdout, "INITIALIZE MATRICES |allA|, |allB|, |allC|, |sliceA|  & |sliceC| ... \n");
+    fprintf(fp_matrix, "Initialize : matrix [%d] x [%d] |allA| ... \n", nx, ny);
+    fprintf(fp_matrix, "Initialize : matrix [%d] x [%d] |allB| ... \n", nx, ny);
     if (increment_or_random == 0) {
-        init_1d_matrix_random(allA, nx, ny, fp_matrix);
-        init_1d_matrix_random(allB, nx, ny, fp_matrix);
+        fprintf(fp_matrix, "Initialize : matrix [%d] x [%d] |allA| using <column> values ... \n", nx, ny);
+        init_matrix_random(allA, nx, ny);
+        print_matrix(allA, nx, ny,fp_matrix);
+        fprintf(fp_matrix, "Initialize : matrix [%d] x [%d] |allB| using <column> values ... \n", nx, ny);
+        init_matrix_random(allB, nx, ny);
+        print_matrix(allB, nx, ny,fp_matrix);
     } else if (increment_or_random == 1) 
     {
-        init_1d_matrix_increment(allA, nx, ny, fp_matrix);
-        init_1d_matrix_increment(allB, nx, ny, fp_matrix);
+        fprintf(fp_matrix, "Initialize : matrix [%d] x [%d] |allA| using random numbers 1 to 10 ... \n", nx, ny);
+        init_matrix_increment(allA, nx, ny);
+        print_matrix(allA, nx, ny,fp_matrix);
+        fprintf(fp_matrix, "Initialize : matrix [%d] x [%d] |allB|  using random numbers 1 to 10 ... \n", nx, ny);
+        init_matrix_increment(allB, nx, ny);
+        print_matrix(allB, nx, ny,fp_matrix);
     }
-    init_C_1d_matrix(allC, nx, ny, fp_matrix);
-    init_C_1d_matrix(sliceA, nx, ny, fp_matrix);
-    init_C_1d_matrix(sliceC, nx, ny, fp_matrix);
+    fprintf(fp_matrix, "Initialize : matrix [%d] x [%d] |sliceA| with Zero ... \n", ns_size, ns_size);
+    init_matrix_zero(sliceA, 1, ns_size);
+    fprintf(fp_matrix, "Initialize : matrix [%d] x [%d] <sliceB>  with Zero ... \n", ns_size, ns_size);
+    init_matrix_zero(sliceC, 1, ns_size);
+    fprintf(fp_matrix, "Initialize : matrix [%d] x [%d] |allC|  with Zero ... \n", nx, ny);
+    init_matrix_zero(allC, nx, ny);
      
-// Calculate program execution time taken : start
-     gettimeofday(&tv1, &tz);
+//  MANUAL execution : calculate |allC| and infinity norm for resulting |C|
+    fprintf(stdout,"# RESULTS : complex manual calculation ... \n");
+    gettimeofday(&tv1, &tz);
+    double complex_inf_norm = multipy_ABC_complex(allA, allB, allC, nx, ny, fp_matrix);
+    gettimeofday(&tv2, &tz);
+    double complex_elapsed = (double) (tv2.tv_sec - tv1.tv_sec) + (double) (tv2.tv_usec - tv1.tv_usec) * 1.e-6;
+    fprintf(fp_matrix, "# |C| : <%d> x <%d> matrix computed values : MANUAL complex ... \n", nx, ny);
+    print_matrix(allC, nx, ny, fp_matrix);
+    fprintf(fp_matrix, "# |C| : matrix calculated in %f seconds and has infinity norm of %g  ... \n", complex_elapsed, complex_inf_norm);
 
-// Commence pthread calculation
-     printf("RESULTS :\n");
-     
-     pthread_t *working_thread malloc(np * (sizeof(pthread_t)) );  
-     pthread_mutex_t *mutex_dot_product = malloc(sizeof(pthread_mutex_t)); 
-     norm_summation_t *thread_norm_summation_data = malloc(np * (sizeof(norm_summation_t))); 
-     double norm_summation_matrix = malloc( * (sizeof(double)));
-     void *status; 
-     
+// PTHREAD execution : Commence pthread calculation
+    fprintf(stdout, "RESULTS : pthread computation ... \n");
+    fprintf(fp_matrix, "# Initialize matrix <%d> x <%d> |C|, redone for pthread computation .. \n", nx, ny);
+    init_matrix_zero(allC, nx, ny);
+    print_matrix(allC, nx, ny, fp_matrix);       
+    pthread_t *working_thread malloc(np * (sizeof(pthread_t)) );  
+    pthread_mutex_t *mutex_dot_product = malloc(sizeof(pthread_mutex_t)); 
+    norm_summation_t *thread_norm_summation_data = malloc(np * (sizeof(norm_summation_t))); 
+    double norm_summation_matrix = malloc( * (sizeof(double)));
+    void *status; 
     pthread_mutex_init(mutex_dot_product, NULL); 
-
     for(i=0; i<np; i++) 
     { 
         printf("\tCreate working thread[%d] and send to norm_summation_calculation function ...\n", i);
@@ -332,25 +390,27 @@ int main ( int argc, char *argv[] )
       
 // program execution time taken : end
      gettimeofday(&tv2, &tz);
-     double elapsed = (double) (tv2.tv_sec-tv1.tv_sec) + (double) (tv2.tv_usec-tv1.tv_usec) * 1.e-6;
+     double pthread_elapsed = (double) (tv2.tv_sec-tv1.tv_sec) + (double) (tv2.tv_usec-tv1.tv_usec) * 1.e-6;
 
-// output results, continued
-     printf("      Time taken to complete calculations : %g seconds.\n", elapsed);
+//  OUTPUT :: results to stdout & .dat file : matrix size || no of processors ||infinity norm || Time/manual || infinity norm || Time / dgemm
+    fprintf(stdout,"# \t\t|Matrix|  |Threads|  Time/manual  Inf Norm/manual  Time/pthreads  Inf Norm/pthreads\n");
+    fprintf(stdout,"# Results: \t%d \t%d \t%fs \t%g \t%fs \t%g \n", nx, np, complex_elapsed, complex_inf_norm, pthread_elapsed, pthread_inf_norm);
+    fprintf(fp_timing, "%d \t%d \t%fs \t%g \t%fs \t%g \n", nx, np, complex_elapsed, complex_inf_norm, pthread_elapsed, pthread_inf_norm);
 
-// De-allocate memory for matrices allA, allB & C
-     printf("CLEAN-UP :\n");
-     deallocate_matrix_memory(allA);
-     deallocate_matrix_memory(allB);
-     deallocate_matrix_memory(sliceA);
-     deallocate_matrix_memory(sliceC);
+//  CLEANUP & close files
+    fprintf(stdout,"# CLEAN-UP ... \n");
+    deallocate_matrix_memory(allA);
+    deallocate_matrix_memory(allB);
+    deallocate_matrix_memory(allC);    
+    deallocate_matrix_memory(sliceA);
+    deallocate_matrix_memory(sliceC);
      free(working_thread);
      free(thread_norm_summation_data);
      pthread_mutex_destroy(mutex_dot_product);
      free(mutex_dot_product);
+    fclose(fp_matrix);
+    fclose(fp_timing);
 
-     printf("\n............................................................................................................................\n");
-  
-// finish
   return 0;
 }
 

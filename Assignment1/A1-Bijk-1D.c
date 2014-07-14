@@ -145,6 +145,7 @@ void multipy_ABC_cblas(double *matrix_a, double *matrix_b, double *matrix_c, int
     int lm = block, ln = block; 
     int la_offset = rows, lb_offset = cols, lc_offset = rows;
     int i, j, k;
+    /*
     for (i = 0; i < la_offset ; i += block)
     {
         for (j = 0; j < cols; j += block)
@@ -155,6 +156,19 @@ void multipy_ABC_cblas(double *matrix_a, double *matrix_b, double *matrix_c, int
             }
         }
     }
+    */
+    
+    for (i = 0; i < la_offset ; i += block)
+    {
+        for (j = 0; j < cols; j += block)
+        {
+            for (k = 0; k < lb_offset ; k += block)
+            {
+                cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, lm, ln, ln, alpha, matrix_a+i*la_offset+k, la_offset, matrix_b+j+k*lb_offset, lb_offset, beta, matrix_c+i*lc_offset+j, lc_offset);
+            }
+        }
+    }
+    
 // cblas_dgemm( CblasRowMajor, CblasNoTrans, CblasNoTrans, lm, ln, ln, alpha, matrix_a, la_offset, matrix_b, lb_offset, beta, matrix_c, lc_offset);   
 }
 

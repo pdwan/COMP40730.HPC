@@ -351,8 +351,8 @@ int main ( int argc, char *argv[] )
     fprintf(fp_matrix, "# Initialize matrix <%d> x <%d> |C|, redone for pthread computation .. \n", nx, ny);
     init_matrix_zero(allC, nx*ny);
     print_matrix(allC, nx*ny, fp_matrix);       
-    pthread_t *working_thread = malloc(np * (sizeof(pthread_t) ));
-    pthread_mutex_t *mutex_dot_product = malloc(nx * (sizeof(pthread_mutex_t))); 
+    pthread_t *working_thread = malloc(np * sizeof(pthread_t) );
+    pthread_mutex_t *mutex_dot_product = malloc(nx * sizeof(pthread_mutex_t)); 
     norm_summation_t *thread_norm_summation_data = malloc(np * (sizeof(norm_summation_t))); 
     double norm_summation_matrix = malloc( nx * (sizeof(double)));
     void *status; 

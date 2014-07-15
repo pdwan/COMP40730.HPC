@@ -37,7 +37,7 @@ void usage ()
     fprintf(stdout,"\nWHERE :");
     fprintf(stdout,"\t1. \t<-r>\tinitialize |A| & |B| with _random_ numbers and |C| with '0' \n");
     fprintf(stdout,"\t   \t<-i>\tinitialize |A| & |B| _incrementally_ with <column> value and |C| with '0' \n");
-    fprintf(stdout,"\t2. \t[N] \tmax size of each matrix, if invalid defaults to 1,000 \n");
+    fprintf(stdout,"\t2. \t[N] \tmax size of each matrix, if invalid (greater than max), then defaults to [${MAXN}].\n");
     fprintf(stdout,"\t3. \t<matrix contents file>.txt\n\t\tname of .txt file to store values of matrices |A| |B| & |C| \n");
     fprintf(stdout,"\t4. \t<data timingfile>.dat \n\t\tname of .dat file to contain time to complete for each iteration \n\n");
     exit(0);
@@ -50,7 +50,7 @@ double* allocate_memory_matrix (int rows, int cols)
     if(!(l_matrix))
     {
         fprintf(stderr,"ERROR : \texiting - memory allocation failed for matrix.\n");
-        exit(1);
+        usage();
     }
     return l_matrix;  
 } 
@@ -111,17 +111,17 @@ int validate_if_file_exists(char * fn)
     if ( fp !=  NULL )
     {
         fclose(fp);
-        return 1;
+        return 1;       // exists
     }
-    return 0;
+    return 0;          // does not exist
 }
 
 void init_matrix_file_contents(FILE *fp) 
 {
     fprintf(fp, "#  --------------------------------------------------------------------------------------------------\n# \n");
-    fprintf(fp, "# Program :\tA1-Sijk-1D\n# where :\t.dat contains timing data & .txt contains matrix values \n# \n");
+    fprintf(fp, "# Program :\tA1-Sijk-1D\n# where :\t.dat contains timing data & .txt contains matrix values \n");
     fprintf(fp, "# Summary of values added to each matrix - retained for later reference and validation \n# \n");
-    fprintf(fp, "#  --------------------------------------------------------------------------------------------------  \n");
+    fprintf(fp, "#  --------------------------------------------------------------------------------------------------  \n# \n");
 }
 
 void init_timing_file_contents(FILE *fp) 
@@ -130,7 +130,7 @@ void init_timing_file_contents(FILE *fp)
     fprintf(fp, "# Program :\tA1-Sijk-1D\n# where :\t.dat contains timing data & .txt contains matrix values \n");
     fprintf(fp, "# Data values from each run using different matrix and block size. \n# \n");
     fprintf(fp, "#  --------------------------------------------------------------------------------------------------\n# \n");
-    fprintf(fp, "# |Matrix| \tTime/simple \tTime/complex \tTime/dgemm \n# \n");
+    fprintf(fp, "# |Matrix|   Time/simple  Time/complex  Time/dgemm \n# \n");
 }
 
 void multipy_ABC_cblas(double *matrix_a, double *matrix_b, double *matrix_c, int rows, int cols, double alpha, double beta)
@@ -200,7 +200,7 @@ int main ( int argc, char *argv[] )
     int file_matrix_exists = validate_if_file_exists(filename_matrix);
     if ( file_matrix_exists == 0 ) 
     {   
-        fp_matrix= fopen(filename_matrix, "w" );
+        fp_matrix= fopen(filename_matrix, "wa" );
         init_matrix_file_contents(fp_matrix); 
     } else 
     {
@@ -213,14 +213,14 @@ int main ( int argc, char *argv[] )
     int file_timing_exists = validate_if_file_exists(filename_timing);
     if ( file_timing_exists == 0 ) 
     {   
-        fp_timing= fopen(filename_timing, "w" );
+        fp_timing= fopen(filename_timing, "wa" );
         init_timing_file_contents(fp_timing); 
     } else 
     {
         fp_timing = fopen(filename_timing, "a" );
     } 
-    fprintf(fp_matrix, "# \n# RUNNING : \t%s %.2s %d \n", argv[0], init_type, nx);
-    fprintf(stdout, "# RUNNING : \t%s %.2s %d \n", argv[0], init_type, nx);
+    fprintf(fp_matrix, "# \n# RUNNING : \t%s %.2s %d \n\n", argv[0], init_type, nx);
+    fprintf(stdout, "# \n# RUNNING : \t%s %.2s %d \n\n", argv[0], init_type, nx);
 
 //  CREATE & INITIALIZE :: matrices A & B & C and output results to matrix file for reference
     fprintf(stdout,"# CREATE MATRICES ... \n");
@@ -315,5 +315,6 @@ int main ( int argc, char *argv[] )
     deallocate_matrix_memory(C);    
     fclose(fp_matrix);
     fclose(fp_timing);
+    
     return 0;
 }

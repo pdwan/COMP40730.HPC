@@ -70,7 +70,7 @@ usage()
 # function : error message and then usage
 error() 
 {
-    echo "error $1"
+    echo "error $1 : $2"
     err=$1
     case ${err} in
         1)
@@ -280,7 +280,8 @@ elif  [ "${matrixEnabled}" == "true" ] || [ "${blockEnabled}" == "true" ] ; then
 	        let matrixSize=$maxMatrixSize
     	fi 
 #   Validate Simple IJK & set matrix and block arrays
-        if  [ buildSimple="true" ] && [ buildBlockedIJK="false" ]  && [ buildBlockedKIJ="false" ] ; then 
+
+        if  [ "${buildSimple}"="true" ] && [ "${buildBlockedIJK}"="false" ]  && [ "${buildBlockedKIJ}"="false" ] ; then 
             if  [ "${matrixEnabled}" == "true" ] && [ "${blockEnabled}" == "true" ] ; then
                 error 6 "Simple IJK only : <-m> & <-b>"
             fi 

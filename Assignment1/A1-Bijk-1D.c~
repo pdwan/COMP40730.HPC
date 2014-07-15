@@ -4,7 +4,7 @@
     Paula Dwan
     13208660 : COMP40730 : Assignment 1
 
-    BLOCKED KIJ IMPLEMENTATION
+    BLOCKED IJK IMPLEMENTATION
 
     Write C programs implementing the following three algorithms of multiplication of two n×n 
     dense matrices:
@@ -37,7 +37,7 @@
 void usage () 
 {
     fprintf(stdout,"\nUSAGE : \t<program name> [<-r>|<-i>] [N] <matrix contents file>.txt <data timing file>.dat \n");
-    fprintf(stdout,"\nTO : \t\tCalculate |C| = |A| x |B| using algorithm : Blocked KIJ using square bxb block \n");    
+    fprintf(stdout,"\nTO : \t\tCalculate |C| = |A| x |B| using algorithm : Blocked IJK using square bxb block \n");    
     fprintf(stdout,"\nWHERE :");
     fprintf(stdout,"\t1. \t<-r>\tinitialize |A| & |B| with _random_ numbers and |C| with '0' \n");
     fprintf(stdout,"\t   \t<-i>\tinitialize |A| & |B| _incrementally_ with <column> value and |C| with '0' \n");
@@ -124,7 +124,7 @@ int validate_if_file_exists(char * fn)
 void init_matrix_file_contents(FILE *fp) 
 {
     fprintf(fp, "#  -------------------------------------------------------------------------------------------------... \n# \n");
-    fprintf(fp, "# Program :\tA1-Bkij-1D\n# where :\t.dat contains timing data & .txt contains matrix values \n# \n");
+    fprintf(fp, "# Program :\tA1-Bijk-1D\n# where :\t.dat contains timing data & .txt contains matrix values \n# \n");
     fprintf(fp, "# Summary of values added to each matrix - retained for later reference and validation \n# \n");
     fprintf(fp, "#  --------------------------------------------------------------------------------------------------  \n");
 }
@@ -132,7 +132,7 @@ void init_matrix_file_contents(FILE *fp)
 void init_timing_file_contents(FILE *fp) 
 {
     fprintf(fp, "#  -------------------------------------------------------------------------------------------------... \n# \n");
-    fprintf(fp, "# Program :\tA1-Bkij-1D\n# where :\t.dat contains timing data & .txt contains matrix values \n");
+    fprintf(fp, "# Program :\tA1-Bijk-1D\n# where :\t.dat contains timing data & .txt contains matrix values \n");
     fprintf(fp, "#  -------------------------------------------------------------------------------------------------... \n");
     fprintf(fp, "# |Matrix| \t|Block| \tTime/manual \tTime/dgemm \n# \n");
 }
@@ -145,18 +145,17 @@ void multipy_ABC_cblas(double *matrix_a, double *matrix_b, double *matrix_c, int
     int lm = block, ln = block; 
     int la_offset = rows, lb_offset = cols, lc_offset = rows;
     int i, j, k;
-    for (k = 0; k < lc_offset ; k += block)
+    for (i = 0; i < la_offset ; i += block)
     {
-        for (i = 0; i < la_offset; i += block)
+        for (j = 0; j < cols; j += block)
         {
-            for (j = 0; j < lb_offset; j += block)
+            for (k = 0; k < lb_offset ; k += block)
             {
                 cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, lm, ln, ln, alpha, matrix_a+i*la_offset+k, la_offset, matrix_b+j+k*lb_offset, lb_offset, beta, matrix_c+i*lc_offset+j, lc_offset);
             }
         }
     }
 }
-
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // start of main
@@ -169,13 +168,13 @@ int main ( int argc, char *argv[] )
     struct timezone tz;
     const double ALPHA = 1.0;
     const double BETA = 1.0;
+    const int MAXN = 1000;
+    const int MAXB=100;
     int increment_or_random = 5;
     int max_num_args = 6;
     char filename_matrix[50];
     char filename_timing[50];
-    int MAXN = 1000;
-    int MAXB=100;
-    int ni, nj, nk;
+    int ni, nj, nk, bi, bj, bk;
     double manual_elapsed=0.0, dgemm_elapsed=0.0;
           
 //  CLI PARAMETERS :: validate and initialize
@@ -215,7 +214,7 @@ int main ( int argc, char *argv[] )
         nb = MAXB;        
     } else if (nb > nx)
     {
-        fprintf(stderr, "ERROR : \t<nb> %d : Block size must be less <nx> %d : matrix size. \n", nb, nx);
+        fprintf(stderr, "ERROR : \t<nb> %d : block size must be less <nx> %d : matrix size. \n", nb, nx);
         usage();
     } else if ( (nx % nb) != 0 )
     {
@@ -223,7 +222,6 @@ int main ( int argc, char *argv[] )
         nx = MAXN;
         nb = MAXB;
     }    
-    fprintf(stdout, "nx = %d  and nb =%d. \n",nx, nb );
 //  matrix file name .txt
     strncpy(filename_matrix, argv[4], 49);
     filename_matrix[50] = '\0';
@@ -274,33 +272,45 @@ int main ( int argc, char *argv[] )
     fprintf(fp_matrix, "# Initialize matrix <%d> x <%d> |B| ... \n", nx, ny);
     print_matrix(B, nx, ny, fp_matrix);
 
+
 //  CALCULATION :: |C| using manual computation
     fprintf(stdout,"# RESULTS : manual calculation ... \n");
-    fprintf(fp_matrix, "# Initialize matrix <%d> x <%d> |C|, for MANUAL copmutation .. \n", nx, ny);
+    fprintf(fp_matrix, "# Initialize matrix <%d> x <%d> |C|  for MANUAL computation .. \n", nx, ny);
     init_matrix_zero(C, nx, ny);
     print_matrix(C, nx, ny, fp_matrix);       
     gettimeofday(&tv1, &tz);
-    for (nk=0; nk<(nx/nb); nk++)
+//  bi, bj and bj : step between submatrices
+//  ni, nj and nk : matrix multiplication on matrices
+    for (bi=0; bi<nx; bi+=nb) 
     {
-        for (ni=0; ni<(nx/nb); ni++)
+        for (bj=0; bj<nx; bj+=nb) 
         {
-            double combine_a = (A[(ni*nb)+nk]);
-            for (nj=0; nj<(ny/nb); nj++)
+            for (bk=0; bk<nx; bk+=nb) 
             {
-            C[(ni*nb)+nj] += combine_a * (B[(nk*nb)+nj]);
-            fprintf (stdout, "DEBUG : C[%d] += A[%d] * B[%d] : %g += %g * %g \n", (ni*nb)+nj, (ni*nb)+nk ,(nk*nb)+nj, C[(ni*nb)+nj],  A[(ni*nb)+nk], B[(nk*nb)+nj] ) ;
+                for (ni=bi; ni<( (1/2)*((bi + nb) +nx - abs((bi + nb)-nx)) ); ni++ ) 
+                {
+                    for (nj=bj; nj<( (1/2)*((bj + nb) +nx - abs((bj + nb)-nx)) ); nj++ ) 
+                    {
+                        double sum = 0.0;
+                        for (nk=bk; nk<( (1/2)*((bk + nb) +nx - abs((bk + nb)-nx)) )  ;nk++) 
+                        {
+                            sum += A[ni+nk] * B[nk +nj];
+                        }
+                        C[ni+nj] = sum;
+                    }
+                }
             }
-        }
+        }    
     }
     gettimeofday(&tv2, &tz);
     manual_elapsed = (double) (tv2.tv_sec - tv1.tv_sec) + (double) (tv2.tv_usec - tv1.tv_usec) * 1.e-6;
     fprintf(fp_matrix, "# |C| : <%d> x <%d> matrix computed values : MANUAL computation ... \n", nx, ny);
-    fprintf(fp_matrix, "# |C| : matrix calculated in %f seconds ... \n", manual_elapsed);
     print_matrix(C, nx, ny, fp_matrix);
+    fprintf(fp_matrix, "# |C| : matrix calculated in %f seconds ... \n", manual_elapsed);
 
 //  CALCULATION :: |C| using DGEMM
     fprintf(stdout,"# RESULTS : BLAS/ATLAS calculation ... \n");
-    fprintf(fp_matrix, "# Initialize matrix <%d> x <%d> |C|, for CBLAS/ATLAS ... \n", nx, ny);
+    fprintf(fp_matrix, "# Initialize matrix <%d> x <%d> |C| for  CBLAS/ATLAS ... \n", nx, ny);
     init_matrix_zero(C, nx, ny);
     print_matrix(C, nx, ny, fp_matrix);    
     gettimeofday(&tv1, &tz);
@@ -308,15 +318,15 @@ int main ( int argc, char *argv[] )
     gettimeofday(&tv2, &tz);
     dgemm_elapsed = (double) (tv2.tv_sec-tv1.tv_sec) + (double) (tv2.tv_usec-tv1.tv_usec) * 1.e-6;
     fprintf(fp_matrix, "# |C| : <%d> x <%d> matrix computed values using CBLAS/ATLAS ... \n", nx, ny);
-    fprintf(fp_matrix, "# |C| : calculated in %f seconds... \n",  dgemm_elapsed);
     print_matrix(C, nx, ny, fp_matrix);
+    fprintf(fp_matrix, "# |C| : calculated in %f seconds... \n",  dgemm_elapsed);
 
 //  OUTPUT :: results to stdout & .dat file : matrix size || Time/manual || Time / dgemm
-    fprintf(stdout,"# \t\t|Matrix|   |Block|   Time/manual   Time/dgemm\n");
+    fprintf(stdout,"# \t\t|Matrix|  |Block| Time/manual  Time/dgemm\n");
     fprintf(stdout,"# Results: \t%d \t%d \t%f \t%f \n", nx, nb, manual_elapsed, dgemm_elapsed);
-    fprintf(fp_timing, "%d \t%d \t%f \t%f \n", nx, nb, manual_elapsed, dgemm_elapsed);
+    fprintf(fp_timing, "%d %d \t%f \t%f  \n", nx, nb, manual_elapsed, dgemm_elapsed);
    	
-//  CLEANUP :: deallocate memory & close files
+//  CLEANUP & close files
     fprintf(stdout,"# CLEAN-UP ... \n");
     deallocate_matrix_memory(A);
     deallocate_matrix_memory(B);

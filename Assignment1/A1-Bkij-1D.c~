@@ -223,7 +223,7 @@ int main ( int argc, char *argv[] )
         nx = MAXN;
         nb = MAXB;
     }    
-    fprintf(stdout, "nx = %d  and nb =%d. \n",nx, nb );
+    echo ("nx = %d  and nb =%d. \n",nx, nb );
 //  matrix file name .txt
     strncpy(filename_matrix, argv[4], 49);
     filename_matrix[50] = '\0';

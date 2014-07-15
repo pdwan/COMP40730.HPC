@@ -123,18 +123,18 @@ int validate_if_file_exists(char * fn)
 
 void init_matrix_file_contents(FILE *fp) 
 {
-    fprintf(fp, "#  -------------------------------------------------------------------------------------------------... \n# \n");
+    fprintf(fp, "#  ------------------------------------------------------------------------------------------------- \n# \n");
     fprintf(fp, "# Program :\tA1-Bijk-1D\n# where :\t.dat contains timing data & .txt contains matrix values \n# \n");
     fprintf(fp, "# Summary of values added to each matrix - retained for later reference and validation \n# \n");
-    fprintf(fp, "#  --------------------------------------------------------------------------------------------------  \n");
+    fprintf(fp, "#  -------------------------------------------------------------------------------------------------- \n");
 }
 
 void init_timing_file_contents(FILE *fp) 
 {
-    fprintf(fp, "#  -------------------------------------------------------------------------------------------------... \n# \n");
-    fprintf(fp, "# Program :\tA1-Bijk-1D\n# where :\t.dat contains timing data & .txt contains matrix values \n");
-    fprintf(fp, "#  -------------------------------------------------------------------------------------------------... \n");
-    fprintf(fp, "# |Matrix| \t|Block| \tTime/manual \tTime/dgemm \n# \n");
+    fprintf(fp, "#  -------------------------------------------------------------------------------------------------\n# \n");
+    fprintf(fp, "# Program :\tA1-Bijk-1D\n# where :\t.dat contains timing data & .txt contains matrix values. \n# \n");
+    fprintf(fp, "#  ------------------------------------------------------------------------------------------------- \n");
+    fprintf(fp, "# |Matrix| \t|Block| \tTime/straight-forward \tTime/blocked \tTime/dgemm \n# \n");
 }
 
 void multipy_ABC_cblas(double *matrix_a, double *matrix_b, double *matrix_c, int rows, int cols, int block, double alpha, double beta)
@@ -175,7 +175,7 @@ int main ( int argc, char *argv[] )
     char filename_matrix[50];
     char filename_timing[50];
     int ni, nj, nk, bi, bj, bk;
-    double manual_elapsed=0.0, dgemm_elapsed=0.0;
+    double simple_elapsed=0.0, complex_elapsed=0.0, dgemm_elapsed=0.0;
           
 //  CLI PARAMETERS :: validate and initialize
     if ( argc != max_num_args ) 
@@ -248,8 +248,8 @@ int main ( int argc, char *argv[] )
     {
         fp_timing = fopen(filename_timing, "a" );
     } 
-    fprintf(fp_matrix, "# RUNNING : \t%s %.2s %d %d \n", argv[0], init_type, nx, nb);
-    fprintf(stdout, "# RUNNING : \t%s %.2s %d %d \n", argv[0], init_type, nx, nb);
+    fprintf(fp_matrix, "# \n# RUNNING : \t%s %.2s %d %d \n", argv[0], init_type, nx, nb);
+    fprintf(stdout, "\n# RUNNING : \t%s %.2s %d %d \n", argv[0], init_type, nx, nb);
 
 //  CREATE & INITIALIZE :: matrices A & B & C and output results to matrix file for reference
     fprintf(stdout,"# CREATE MATRICES ... \n");
@@ -272,60 +272,78 @@ int main ( int argc, char *argv[] )
     fprintf(fp_matrix, "# Initialize matrix <%d> x <%d> |B| ... \n", nx, ny);
     print_matrix(B, nx, ny, fp_matrix);
 
+//  CALCULATION :: |C| using Straight-forward IJK manual computation
+    fprintf(stdout,"# RESULTS : straightforward IJK manual computation ... \n");
+    fprintf(fp_matrix, "# Initialize matrix <%d> x <%d> |C|  for Straight-forward IJK manual computation .. \n", nx, ny);
+    gettimeofday(&tv1, &tz);
+    for (ni=0; ni<nx; ni++)
+    {
+        for (nj=0; nj<ny; nj++)
+        {
+            for (nk=0; nk<nx; nk++)
+            {
+                C[(ni*nx)+nj] += (A[(ni*nx)+nk]) * (B[(nk*nx)+nj]);
+            }
+        }
+    }
+    gettimeofday(&tv2, &tz);
+    simple_elapsed = (double) (tv2.tv_sec - tv1.tv_sec) + (double) (tv2.tv_usec - tv1.tv_usec) * 1.e-6;
+    fprintf(fp_matrix, "# |C| : <%d> x <%d> matrix computed values : MANUAL straightforward IJK ... \n", nx, ny);
+    print_matrix(C, nx, ny, fp_matrix);
+    fprintf(fp_matrix, "# |C| : matrix calculated in %f seconds ... \n", simple_elapsed);
 
-//  CALCULATION :: |C| using manual computation
-    fprintf(stdout,"# RESULTS : manual calculation ... \n");
-    fprintf(fp_matrix, "# Initialize matrix <%d> x <%d> |C|  for MANUAL computation .. \n", nx, ny);
+
+//  CALCULATION :: |C| using Blocked IJK manual computation
+    fprintf(stdout,"# RESULTS : blocked IJK manual calculation ... \n");
+    fprintf(fp_matrix, "# Initialize matrix <%d> x <%d> |C|  for Blocked IJK manual computation .. \n", nx, ny);
     init_matrix_zero(C, nx, ny);
     print_matrix(C, nx, ny, fp_matrix);       
     gettimeofday(&tv1, &tz);
 //  bi, bj and bj : step between submatrices
 //  ni, nj and nk : matrix multiplication on matrices
-    for (bi=0; bi<nx; bi+=nb) 
+    for(bi = 0; bi < nx; bi += nb) 
     {
-        for (bj=0; bj<nx; bj+=nb) 
-        {
-            for (bk=0; bk<nx; bk+=nb) 
+      for(bj = 0; bj < nx; bj += nb) 
+      {
+         for(bk = 0; bk < nx; bk += nb) 
+         {
+            for(ni = 0; ni < nb; ni++) 
             {
-                for (ni=bi; ni<( (1/2)*((bi + nb) +nx - abs((bi + nb)-nx)) ); ni++ ) 
-                {
-                    for (nj=bj; nj<( (1/2)*((bj + nb) +nx - abs((bj + nb)-nx)) ); nj++ ) 
-                    {
-                        double sum = 0.0;
-                        for (nk=bk; nk<( (1/2)*((bk + nb) +nx - abs((bk + nb)-nx)) )  ;nk++) 
-                        {
-                            sum += A[ni+nk] * B[nk +nj];
-                        fprintf(stdout, "DEBUG : C [ni+nj] += A[ni+nk] * B[nk +nj] : C [ni+nj] += A[ni+nk] * B[nk +nj] : %g += %g * %g \n", ni+nj, ni+nk, nk +nj, sum, A[ni+nk], B[nk +nj] );
-                        }
-                        C[ni+nj] = sum;
-                    }
-                }
+               for(nj = 0; nj < nb; nj++) 
+               {
+                  for(nk = 0; nk < nb; nk++) 
+                  {
+                        C[ (bi + ni) * nx + bj + nj] += A[ (bi + ni) * nx + bk + nk] * B[ (bk + nk) * nx + bj + nj];
+                        // fprintf(stdout, "DEBUG : |C|  += |A| * |B| : C[%d] +=A[%d] * C[%d] : %g += %g * %g \n",(bi+ni)*nx +bj+nj, (bi+ni)*nx +bk+nk,  (bk+nk) *nx +bj+nj, C[ (bi+ni)*nx +bj+nj],  A[ (bi+ni)*nx +bk+nk], B[ (bk+nk) *nx +bj+nj] );
+                  }
+               }
             }
-        }    
-    }
+         }
+      }
+   }
     gettimeofday(&tv2, &tz);
-    manual_elapsed = (double) (tv2.tv_sec - tv1.tv_sec) + (double) (tv2.tv_usec - tv1.tv_usec) * 1.e-6;
-    fprintf(fp_matrix, "# |C| : <%d> x <%d> matrix computed values : MANUAL computation ... \n", nx, ny);
+    complex_elapsed = (double) (tv2.tv_sec - tv1.tv_sec) + (double) (tv2.tv_usec - tv1.tv_usec) * 1.e-6;
+    fprintf(fp_matrix, "# |C| : <%d> x <%d> matrix computed values : blocked IJK computation ... \n", nx, ny);
     print_matrix(C, nx, ny, fp_matrix);
-    fprintf(fp_matrix, "# |C| : matrix calculated in %f seconds ... \n", manual_elapsed);
+    fprintf(fp_matrix, "# |C| : matrix calculated in %f seconds ... \n", complex_elapsed);
 
 //  CALCULATION :: |C| using DGEMM
-    fprintf(stdout,"# RESULTS : BLAS/ATLAS calculation ... \n");
-    fprintf(fp_matrix, "# Initialize matrix <%d> x <%d> |C| for  CBLAS/ATLAS ... \n", nx, ny);
+    fprintf(stdout,"# RESULTS : BLAS/ATLAS computation ... \n");
+    fprintf(fp_matrix, "# Initialize matrix <%d> x <%d> |C| for  CBLAS/ATLAS KIJ computation... \n", nx, ny);
     init_matrix_zero(C, nx, ny);
     print_matrix(C, nx, ny, fp_matrix);    
     gettimeofday(&tv1, &tz);
     multipy_ABC_cblas(A, B, C, nx, ny, nb, ALPHA, BETA);
     gettimeofday(&tv2, &tz);
     dgemm_elapsed = (double) (tv2.tv_sec-tv1.tv_sec) + (double) (tv2.tv_usec-tv1.tv_usec) * 1.e-6;
-    fprintf(fp_matrix, "# |C| : <%d> x <%d> matrix computed values using CBLAS/ATLAS ... \n", nx, ny);
+    fprintf(fp_matrix, "# |C| : <%d> x <%d> matrix computed values using CBLAS/ATLAS KIJ computation... \n", nx, ny);
     print_matrix(C, nx, ny, fp_matrix);
     fprintf(fp_matrix, "# |C| : calculated in %f seconds... \n",  dgemm_elapsed);
 
 //  OUTPUT :: results to stdout & .dat file : matrix size || Time/manual || Time / dgemm
-    fprintf(stdout,"# \t\t|Matrix|  |Block| Time/manual  Time/dgemm\n");
-    fprintf(stdout,"# Results: \t%d \t%d \t%f \t%f \n", nx, nb, manual_elapsed, dgemm_elapsed);
-    fprintf(fp_timing, "%d %d \t%f \t%f  \n", nx, nb, manual_elapsed, dgemm_elapsed);
+    fprintf(stdout,"# \t\t|Matrix|  |Block| Time/straight-forward Time/blocked  Time/dgemm\n");
+    fprintf(stdout,"# Results: \t%d \t%d \t%f \t%f  \t%f \n", nx, nb, simple_elapsed, complex_elapsed, dgemm_elapsed);
+    fprintf(fp_timing, "%d %d \t%f \t%f  \t%f  \n", nx, nb, simple_elapsed, complex_elapsed, dgemm_elapsed);
    	
 //  CLEANUP & close files
     fprintf(stdout,"# CLEAN-UP ... \n");

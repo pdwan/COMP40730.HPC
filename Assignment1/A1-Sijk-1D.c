@@ -220,7 +220,7 @@ int main ( int argc, char *argv[] )
         fp_timing = fopen(filename_timing, "a" );
     } 
     fprintf(fp_matrix, "# \n# RUNNING : \t%s %.2s %d \n\n", argv[0], init_type, nx);
-    fprintf(stdout, "# \n# RUNNING : \t%s %.2s %d \n\n", argv[0], init_type, nx);
+    fprintf(stdout, "\n# RUNNING : \t%s %.2s %d \n\n", argv[0], init_type, nx);
 
 //  CREATE & INITIALIZE :: matrices A & B & C and output results to matrix file for reference
     fprintf(stdout,"# CREATE MATRICES ... \n");
@@ -248,7 +248,7 @@ int main ( int argc, char *argv[] )
     print_matrix(C, nx, ny, fp_matrix);
 
 //  CALCULATION :: |C| using manual simple
-    fprintf(stdout,"# RESULTS : simple manual calculation ... \n");
+    fprintf(stdout,"# RESULTS : simple manual for Straight-forward IJK calculation ... \n");
     gettimeofday(&tv1, &tz);
     for (ni=0; ni<nx; ni++)
     {
@@ -262,13 +262,13 @@ int main ( int argc, char *argv[] )
     }
     gettimeofday(&tv2, &tz);
     simple_elapsed = (double) (tv2.tv_sec - tv1.tv_sec) + (double) (tv2.tv_usec - tv1.tv_usec) * 1.e-6;
-    fprintf(fp_matrix, "# |C| : <%d> x <%d> matrix computed values : MANUAL simple ... \n", nx, ny);
+    fprintf(fp_matrix, "# |C| : <%d> x <%d> matrix computed values for simple manual Straightforward IJK  ... \n", nx, ny);
     print_matrix(C, nx, ny, fp_matrix);
     fprintf(fp_matrix, "# |C| : matrix calculated in %f seconds ... \n", simple_elapsed);
 
 //  CALCULATION :: |C| using manual complex
-    fprintf(stdout,"# RESULTS : complex manual calculation ... \n");
-    fprintf(fp_matrix, "# Initialize matrix <%d> x <%d> |C|, redone for MANUAL complex .. \n", nx, ny);
+    fprintf(stdout,"# RESULTS : complex manual calculation for complex Straight-forward IJK ... \n");
+    fprintf(fp_matrix, "# Initialize matrix <%d> x <%d> |C|, redone for complex manual Straight-forward IJK .. \n", nx, ny);
     init_matrix_zero(C, nx, ny);
     print_matrix(C, nx, ny, fp_matrix);       
     gettimeofday(&tv1, &tz);
@@ -286,12 +286,12 @@ int main ( int argc, char *argv[] )
     }
     gettimeofday(&tv2, &tz);
     complex_elapsed = (double) (tv2.tv_sec - tv1.tv_sec) + (double) (tv2.tv_usec - tv1.tv_usec) * 1.e-6;
-    fprintf(fp_matrix, "# |C| : <%d> x <%d> matrix computed values : MANUAL complex ... \n", nx, ny);
+    fprintf(fp_matrix, "# |C| : <%d> x <%d> matrix computed values for manual complex Straight-forward IJK ... \n", nx, ny);
     print_matrix(C, nx, ny, fp_matrix);
     fprintf(fp_matrix, "# |C| : matrix calculated in %f seconds ... \n", complex_elapsed);
 
 //  CALCULATION :: |C| using DGEMM
-    fprintf(stdout,"# RESULTS : BLAS/ATLAS calculation -\n");
+    fprintf(stdout,"# RESULTS : BLAS/ATLAS calculation for Straight-forward IJK -\n");
     fprintf(fp_matrix, "# Initialize matrix <%d> x <%d> |C|, redone for CBLAS/ATLAS ... \n", nx, ny);
     init_matrix_zero(C, nx, ny);
     print_matrix(C, nx, ny, fp_matrix);    
@@ -299,7 +299,7 @@ int main ( int argc, char *argv[] )
     multipy_ABC_cblas(A, B, C, nx, ny, ALPHA, BETA);
     gettimeofday(&tv2, &tz);
     dgemm_elapsed = (double) (tv2.tv_sec-tv1.tv_sec) + (double) (tv2.tv_usec-tv1.tv_usec) * 1.e-6;
-    fprintf(fp_matrix, "\n# |C| : <%d> x <%d> matrix computed values using CBLAS/ATLAS ... \n", nx, ny);
+    fprintf(fp_matrix, "\n# |C| : <%d> x <%d> matrix computed values using CBLAS/ATLAS to calulate Straight-forward IJK ... \n", nx, ny);
     print_matrix(C, nx, ny, fp_matrix);
     fprintf(fp_matrix, "# |C| : calculated in %f seconds... \n",  dgemm_elapsed);
 

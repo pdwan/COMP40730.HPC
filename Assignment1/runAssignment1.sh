@@ -15,7 +15,6 @@ _ECHO="echo"
 _BASENAME="basename"
 Now=$(date +"%Y%m%d.%H%M%S")
 logDir="logDir"
-logPrefix="pdwan-"
 txtSuffix=".txt"
 DatSuffix=".dat"
 stdLogFile="runAssignment1-${Now}.log"
@@ -55,14 +54,15 @@ usage()
     $_ECHO -e "\t-3|--bkij \tCalculate data for only the algorithm \n\t\t\tBlocked KIJ algorithm using square bxb blocks :\tA1-Bkij-1D.c  \n"
     $_ECHO -e "\t-d1|--atlas\tCompile .c source files using dgemm atlas"
     $_ECHO -e "\t-d2|--cblas\tCompile .c source files using dgemm cblas"
+    $_ECHO -e "\t\t\t'-d1|--atlas' and '-d2|--cblas ' are mutually exclusive."
     $_ECHO -e "\t-r|--random \tInitialize |A| & |B| with random numbers and |C| with '0' "
     $_ECHO -e "\t-i|--increment \tInitialize |A| & |B| incrementally with <column> value and |C| with '0' "
     $_ECHO -e "\t\t\t'-i|--increment' & '-r|--random' are mutually exclusive \n"
     $_ECHO -e "\t-m|--matrix <N>\tMatrix size, if  invalid, (matrix size > max) set to [${maxMatrixSize}]"
-    $_ECHO -e "\t-b|--block <B>\tBlock matrix size, if invalid (matrix % block != 0 or block size > max),  set to [${maxBlockSize}] and matrix size set to [${maxMatrixSize}]."
+    $_ECHO -e "\t-b|--block <B>\tBlock matrix size, if invalid (matrix % block != 0 or block size > max), \n\t\t\tset to [${maxBlockSize}] and matrix size set to [${maxMatrixSize}]."
     $_ECHO -e "\t-v|--values \tUse predefined range of valid values for <nx> and <nb> as follows :"
-    $_ECHO -e "\t\t\t<NXArray> \t( 50 50 50 100 100 100 500 500 500 500 1000 1000 1000 1000 )"
-    $_ECHO -e "\t\t\t<NBArray> \t( 2 5 10 5 10 20 5 10 20 50 5 10 50 100 )"
+    $_ECHO -e "\t\t\t<NXArray> \t( 50 50 50 100 100 100 500 500 500 500 1000 1000 1000 1000 ) : can be reset if needed"
+    $_ECHO -e "\t\t\t<NBArray> \t( 2 5 10 5 10 20 5 10 20 50 5 10 50 100 ) : can be reset if needed"
     $_ECHO -e "\t\t\t'-m|--matrix <n>' & '-b|--block <b>' are mutually exclusive of '-v|--values'.\n"
     $_ECHO -e "\t-?|-h|--help \tusage \n"
 }
@@ -70,7 +70,6 @@ usage()
 # function : error message and then usage
 error() 
 {
-    echo "error $1 : $2"
     err=$1
     case ${err} in
         1)
@@ -109,8 +108,8 @@ error()
 compile_dgemm_atlas()
 {
     localProgramToCompile=$1
-    $_ECHO -e "CBLAS :\t\tCompiling ${localProgramToCompile} using atlast \n"  >> ${stdLogFile}
-    gcc -o ${localProgramToCompile} ${localProgramToCompile}.c -I/home/cs/khasanov/libs/ATLAS/include/ -L/home/cs/khasanov/libs/ATLAS/lib/Linux_UNKNOWNSSE2_4/ -lcblas -latlas -lm -O3
+    $_ECHO -e "CBLAS :\t\tCompiling ${localProgramToCompile} using Atlas \n"  >> ${stdLogFile}
+    gcc -o ${localProgramToCompile}-atlas ${localProgramToCompile}.c -I/home/cs/khasanov/libs/ATLAS/include/ -L/home/cs/khasanov/libs/ATLAS/lib/Linux_UNKNOWNSSE2_4/ -lcblas -latlas -lm -O3
 }
 
 # function : build applying dgemm cblas
@@ -118,7 +117,7 @@ compile_dgemm_cblas()
 {
     localProgramToCompile=$1
     $_ECHO -e "CBLAS :\t\tCompiling ${localProgramToCompile} using cblas \n"  >> ${stdLogFile}
-    gcc -Wall -I/home/cs/khasanov/libs/CBLAS/src ${localProgramToCompile}.c -o ${localProgramToCompile}  /home/cs/khasanov/libs/cblas_LINUX.a  /usr/lib/libblas.a -lgfortran -fopenmp
+    gcc -Wall -I/home/cs/khasanov/libs/CBLAS/src ${localProgramToCompile}.c -o ${localProgramToCompile}-cblas  /home/cs/khasanov/libs/cblas_LINUX.a  /usr/lib/libblas.a -lgfortran -fopenmp
 }
 
 # function : create directory, if  it does not exist & validate creation
@@ -234,62 +233,59 @@ if  [ "${defaultMatrixRange}" == "true" ] && ( [ "${matrixEnabled}" == "true" ] 
     error 6 "<-b>, <-m> & <-v>"
 fi 
 if   [ "${defaultMatrixRange}" == "true" ] && ( [ "${matrixEnabled}" == "false" ] || [ "${blockEnabled}" == "false" ] ) ; then 
+    # declare -a NXArray=( 50 50 50 50 50 50 100 100 100 100 100 100 )
+    # declare -a NBArray=( 10 10 10 10 10 10 20 20 20 20 20 20 )
     declare -a NXArray=( 50 50 50 100 100 100 500 500 500 500 1000 1000 1000 1000 )
     declare -a NBArray=( 2 5 10 5 10 20 5 10 20 50 5 10 50 100 )
     matrixEnabled="false"
     blockEnabled="false"
 elif  [ "${matrixEnabled}" == "true" ] || [ "${blockEnabled}" == "true" ] ; then
 #   Validate matrix size initialized
-	    if  [ "${matrixSize}" == "" ] ; then 
-	        error 4 "matrix size"
-    	fi 
+    if  [ "${matrixSize}" == "" ] ; then 
+	    error 4 "matrix size"
+    fi 
 #   Validate block size initialized if  applicable
-	    if  [ "${blockSize}" == "" ]  && [ buildBlockedIJK="true" ]  ; then 
-	        error 4 "block size"
-	    fi 
-	    if  [ "${blockSize}" == "" ]  && [ buildBlockedJIK="true" ]  ; then 
-	        error 4 "block size"
-	    fi 
+	 if  [ "${blockSize}" == "" ]  && [ buildBlockedIJK="true" ]  ; then 
+	    error 4 "block size"
+    fi  
+    if  [ "${blockSize}" == "" ]  && [ buildBlockedJIK="true" ]  ; then 
+	    error 4 "block size"
+    fi 
 #   Validate matrix range
-	    if  [ ${matrixSize} -le 0 ] || [ ${matrixSize} -gt ${maxMatrixSize} ] ; then
-	        $_ECHO -e "WARNING :\t$($_BASENAME $0): Invalid matrix size <nx>, now set to default of : $maxMatrixSize"  >> ${stdLogFile}
-	        let matrixSize=$maxMatrixSize
-	        matrixEnabled="true"
-	    fi         
+    if  [ ${matrixSize} -le 0 ] || [ ${matrixSize} -gt ${maxMatrixSize} ] ; then
+	    $_ECHO -e "WARNING :\t$($_BASENAME $0): Invalid matrix size <nx>, now set to default of : $maxMatrixSize"  >> ${stdLogFile}
+	    let matrixSize=$maxMatrixSize
+	    matrixEnabled="true"
+    fi         
 #   Validate block range
-        if  [ ${blockSize} -le 0 ] || [ ${blockSize} -gt ${maxBlockSize} ] ; then
-    	    $_ECHO -e "WARNING :\t$($_BASENAME $0): Invalid block size <nb>, now set to default of : $maxBlockSize"  >> ${stdLogFile}
-    	    let blockSize=$maxBlockSize
-    	    blockEnabled="true"
-    	fi 
+     if  [ ${blockSize} -le 0 ] || [ ${blockSize} -gt ${maxBlockSize} ] ; then
+        $_ECHO -e "WARNING :\t$($_BASENAME $0): Invalid block size <nb>, now set to default of : $maxBlockSize"  >> ${stdLogFile}
+        let blockSize=$maxBlockSize
+        blockEnabled="true"
+    fi 
 #   ensure both are enabled if  one is unless Simple only
-	    if  [ "${matrixEnabled}" == "false" ] ; then 
-	        $_ECHO -e "WARNING :\t$($_BASENAME $0): matrix size <nx> is now enabled and set to default of : $maxMatrixSize"  >> ${stdLogFile}
-	        let matrixSize=$maxMatrixSize
-	        matrixEnabled="true"
-    	fi 
-	    if  [ "${blockEnabled}" == "false" ] && ( [ "${buildBlockedIJK}"="true" ] || [ "${buildBlockedKIJ}"="true" ] ) ; then 
-	        $_ECHO -e "WARNING :\t$($_BASENAME $0): block size <nb> is now enabled and set to default of : $maxBlockSize"  >> ${stdLogFile}
-	        let blockSize=$maxBlockSize
-	        blockEnabled="true"
-	    fi 
+	if  [ "${matrixEnabled}" == "false" ] ; then 
+	    $_ECHO -e "WARNING :\t$($_BASENAME $0): matrix size <nx> is now enabled and set to default of : $maxMatrixSize"  >> ${stdLogFile}
+	    let matrixSize=$maxMatrixSize
+	    matrixEnabled="true"
+    fi 
+    if  [ "${blockEnabled}" == "false" ] && ( [ "${buildBlockedIJK}"="true" ] || [ "${buildBlockedKIJ}"="true" ] ) ; then 
+	    $_ECHO -e "WARNING :\t$($_BASENAME $0): block size <nb> is now enabled and set to default of : $maxBlockSize"  >> ${stdLogFile}
+	    let blockSize=$maxBlockSize
+        blockEnabled="true"
+    fi 
 #   Validate matrix / block remainder
-        if  [ $(( ${matrixSize} % ${blockSize} )) -ne 0 ]; then
-	        $_ECHO -e "WARNING :\t$($_BASENAME $0): block size needs to be an even multiple of matrix size. Using defaults."  >> ${stdLogFile}
-	        let blockSize=$maxBlockSize
-	        let matrixSize=$maxMatrixSize
-    	fi 
+    if  [ $(( ${matrixSize} % ${blockSize} )) -ne 0 ]; then
+	    $_ECHO -e "WARNING :\t$($_BASENAME $0): block size needs to be an even multiple of matrix size. Using defaults."  >> ${stdLogFile}
+        let blockSize=$maxBlockSize
+	    let matrixSize=$maxMatrixSize
+    fi 
 #   Validate Simple IJK & set matrix and block arrays
-
-        if  [ "${buildSimple}"="true" ] && [ "${buildBlockedIJK}"="false" ]  && [ "${buildBlockedKIJ}"="false" ] ; then 
-            if  [ "${matrixEnabled}" == "true" ] && [ "${blockEnabled}" == "true" ] ; then
-                error 6 "Simple IJK only : <-m> & <-b>"
-            fi 
-            declare -a NXArray=( $matrixSize )
-        else 
-            declare -a NXArray=( $matrixSize )
-	        declare -a NBArray=( $blockSize )
-        fi 
+    if   [ "${blockEnabled}" ==  "true" ] && [ "${buildSimple}"  ==  "true" ] && [ "${buildBlockedIJK}"  ==  "false" ]  && [ "${buildBlockedKIJ}"  == "false" ]  ; then 
+        error 6 "Simple IJK only : <-m> & <-b>"
+    fi 
+    declare -a NXArray=( $matrixSize )
+    declare -a NBArray=( $blockSize )
 fi 
 
 # validate atlas and cblas - mutually exclusive
@@ -314,8 +310,8 @@ fi
 init_dir ${logDir}
 init_log_file ${stdLogFile}
 
-matrixFileRoot="${logPrefix}${Now}-values"
-dataFileRoot="${logPrefix}${Now}-data"
+matrixFileRoot="Values-${Now}"
+dataFileRoot="Data-${Now}"
 
 # build Simple IJK
 if  [ "${buildSimple}" == "true" ]  || [ "${buildAll}" == "true" ] ; then
@@ -327,18 +323,22 @@ if  [ "${buildSimple}" == "true" ]  || [ "${buildAll}" == "true" ] ; then
 	    error 5 "matrix size"
     else        
 	    executeOptions=""
+        if  [ "${compileUsingCblas}" == "false" ] && [ "${compileUsingAtlas}" == "false" ] ; then
+	        algorithmSimple="${algorithmSimple}-cblas" # default
+	    fi 	        
         if  [ "${compileUsingCblas}" == "true" ] ; then
 	        compile_dgemm_cblas ${algorithmSimple}
+	        algorithmSimple="$algorithmSimple-cblas"
 	    fi 
 	    if  [ "${compileUsingAtlas}" == "true" ] ; then
 	        compile_dgemm_atlas ${algorithmSimple}
+	        algorithmSimple="${algorithmSimple}-atlas"
 	    fi 
 	    for (( i = 0 ; i < ${#NXArray[@]} ; i++ )); do
 	        matrixFileSimpleValues="${matrixFileSimple}-$i${txtSuffix}" # different file for each iteration
 	        init_log_file ${matrixFileSimpleValues} 
 	        init_log_file ${dataFileSimpleTiming}
-	        executeOptions="${algorithmOptions} ${NXArray[$i]}  ${threadArray[$i]}"
-            echo " DEBUG : algorithm_execute ./${algorithmSimple} ${executeOptions} ${matrixFileSimpleValues} ${dataFileSimpleTiming}"
+	        executeOptions="${algorithmOptions} ${NXArray[$i]}"
 	        algorithm_execute "./${algorithmSimple}" "${executeOptions}" "${matrixFileSimpleValues}" "${dataFileSimpleTiming}"
 	        matrixFileSimpleValues="${matrixFileSimple}"
 	    done
@@ -355,18 +355,23 @@ if  [ "${buildBlockedIJK}" == "true" ]  || [ "${buildAll}" == "true" ] ; then
 	    error 5 "matrix size"
     else        
 	    executeOptions=""
+        if  [ "${compileUsingCblas}" == "false" ] || [ "${compileUsingAtlas}" == "false" ] ; then
+	        algorithmBlockIJK="${algorithmBlockIJK}-cblas" # default
+	    fi 	        
+
         if  [ "${compileUsingCblas}" == "true" ] ; then
-	        compile_dgemm_cblas ${algorithmBlockIJK}
+	        compile_dgemm_cblas ${algorithmSimple}
+	        algorithmBlockIJK="${algorithmBlockIJK}-cblas"
 	    fi 
 	    if  [ "${compileUsingAtlas}" == "true" ] ; then
-	        compile_dgemm_atlas ${algorithmBlockIJK}
+	        compile_dgemm_atlas ${algorithmSimple}
+	        algorithmBlockIJK="${algorithmBlockIJK}-atlas"
 	    fi 
 	    for (( i = 0 ; i < ${#NXArray[@]} ; i++ )); do
 	        matrixFileBlockIJKValues="${matrixFileBlockIJK}-$i${txtSuffix}" # different file for each iteration
 	        init_log_file ${matrixFileBlockIJKValues} 
 	        init_log_file ${dataFileBlockIJKTiming}
-	        executeOptions="${algorithmOptions} ${NXArray[$i]}  ${threadArray[$i]}"
-	        echo "DEBUG : algorithm_execute ./${algorithmBlockIJK} ${executeOptions} ${matrixFileBlockIJKValues} ${dataFileBlockIJKTiming}"
+	        executeOptions="${algorithmOptions} ${NXArray[$i]} ${NBArray[$i]}"
 	        algorithm_execute "./${algorithmBlockIJK}" "${executeOptions}" "${matrixFileBlockIJKValues}" "${dataFileBlockIJKTiming}"
 	        matrixFileBlockIJKValues="${matrixFileBlockIJK}"
 	    done
@@ -383,18 +388,22 @@ if  [ "${buildBlockedKIJ}" == "true" ]  || [ "${buildAll}" == "true" ] ; then
 	    error 5 "matrix size"
     else        
 	    executeOptions=""
+        if  [ "${compileUsingCblas}" == "false" ] || [ "${compileUsingAtlas}" == "false" ] ; then
+	        algorithmBlockKIJ="${algorithmBlockKIJ}-cblas" # default
+	    fi 	        
         if  [ "${compileUsingCblas}" == "true" ] ; then
-	        compile_dgemm_cblas ${algorithmBlockKIJ}
+	        compile_dgemm_cblas ${algorithmSimple}
+	        algorithmBlockKIJ="${algorithmBlockKIJ}-cblas"
 	    fi 
 	    if  [ "${compileUsingAtlas}" == "true" ] ; then
-	        compile_dgemm_atlas ${algorithmBlockKIJ}
+	        compile_dgemm_atlas ${algorithmSimple}
+	        algorithmBlockKIJ="${algorithmBlockKIJ}-atlas"
 	    fi 
 	    for (( i = 0 ; i < ${#NXArray[@]} ; i++ )) ; do
 	        matrixFileBlockKIJValues="${matrixFileBlockKIJ}-$i${txtSuffix}" # different file for each iteration
 	        init_log_file ${matrixFileBlockKIJValues} 
 	        init_log_file ${dataFileBlockKIJTiming}
-	        executeOptions="${algorithmOptions} ${NXArray[$i]} ${threadArray[$i]}"
-	        echo "DEBUG : algorithm_execute ./${algorithmBlockKIJ} ${executeOptions} ${matrixFileBlockKIJValues} ${dataFileBlockKIJTiming}"
+	        executeOptions="${algorithmOptions} ${NXArray[$i]} ${NBArray[$i]}"
 	        algorithm_execute "./${algorithmBlockKIJ}" "${executeOptions}" "${matrixFileBlockKIJValues}" "${dataFileBlockKIJTiming}"
 	        matrixFileBlockKIJValues="${matrixFileBlockKIJ}"
 	    done

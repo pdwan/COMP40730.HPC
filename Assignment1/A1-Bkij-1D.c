@@ -134,7 +134,7 @@ void init_timing_file_contents(FILE *fp)
     fprintf(fp, "#  -------------------------------------------------------------------------------------------------... \n# \n");
     fprintf(fp, "# Program :\tA1-Bkij-1D\n# where :\t.dat contains timing data & .txt contains matrix values \n");
     fprintf(fp, "#  -------------------------------------------------------------------------------------------------... \n");
-    fprintf(fp, "# |Matrix| \t|Block| \tTime/manual \tTime/dgemm \n# \n");
+    fprintf(fp, "# |Matrix| \t|Block| \tTime/straight-forward \tTime/blocked \tTime/dgemm \n# \n");
 }
 
 void multipy_ABC_cblas(double *matrix_a, double *matrix_b, double *matrix_c, int rows, int cols, int block, double alpha, double beta)
@@ -175,8 +175,8 @@ int main ( int argc, char *argv[] )
     char filename_timing[50];
     int MAXN = 1000;
     int MAXB=100;
-    int ni, nj, nk;
-    double manual_elapsed=0.0, dgemm_elapsed=0.0;
+    int ni, nj, nk, bi, bj, bk;
+    double simple_elapsed=0.0, complex_elapsed=0.0, dgemm_elapsed=0.0;
           
 //  CLI PARAMETERS :: validate and initialize
     if ( argc != max_num_args ) 
@@ -250,8 +250,8 @@ int main ( int argc, char *argv[] )
     {
         fp_timing = fopen(filename_timing, "a" );
     } 
-    fprintf(fp_matrix, "# RUNNING : \t%s %.2s %d %d \n", argv[0], init_type, nx, nb);
-    fprintf(stdout, "# RUNNING : \t%s %.2s %d %d \n", argv[0], init_type, nx, nb);
+    fprintf(fp_matrix, "# \n# RUNNING : \t%s %.2s %d %d \n", argv[0], init_type, nx, nb);
+    fprintf(stdout, "\n# RUNNING : \t%s %.2s %d %d \n", argv[0], init_type, nx, nb);
 
 //  CREATE & INITIALIZE :: matrices A & B & C and output results to matrix file for reference
     fprintf(stdout,"# CREATE MATRICES ... \n");
@@ -274,47 +274,76 @@ int main ( int argc, char *argv[] )
     fprintf(fp_matrix, "# Initialize matrix <%d> x <%d> |B| ... \n", nx, ny);
     print_matrix(B, nx, ny, fp_matrix);
 
-//  CALCULATION :: |C| using manual computation
-    fprintf(stdout,"# RESULTS : manual calculation ... \n");
-    fprintf(fp_matrix, "# Initialize matrix <%d> x <%d> |C|, for MANUAL copmutation .. \n", nx, ny);
-    init_matrix_zero(C, nx, ny);
-    print_matrix(C, nx, ny, fp_matrix);       
+//  CALCULATION :: |C| using Straight-forward KIJ manual computation
+    fprintf(stdout,"# RESULTS : straightforward KIJ manual computation ... \n");
+    fprintf(fp_matrix, "# Initialize matrix <%d> x <%d> |C|  for Straight-forward KIJ manual computation .. \n", nx, ny);
     gettimeofday(&tv1, &tz);
-    for (nk=0; nk<(nx/nb); nk++)
+    for (nk=0; nk<nx; nk++)
     {
-        for (ni=0; ni<(nx/nb); ni++)
+        for (ni=0; ni<ny; ni++)
         {
-            double combine_a = (A[(ni*nb)+nk]);
-            for (nj=0; nj<(ny/nb); nj++)
+            for (nj=0; nj<nx; nj++)
             {
-            C[(ni*nb)+nj] += combine_a * (B[(nk*nb)+nj]);
-            fprintf (stdout, "DEBUG : C[%d] += A[%d] * B[%d] : %g += %g * %g \n", (ni*nb)+nj, (ni*nb)+nk ,(nk*nb)+nj, C[(ni*nb)+nj],  A[(ni*nb)+nk], B[(nk*nb)+nj] ) ;
+                C[(nk*nx)+ni] += (A[(nk*nx)+nj]) * (B[(nj*nx)+ni]);
             }
         }
     }
     gettimeofday(&tv2, &tz);
-    manual_elapsed = (double) (tv2.tv_sec - tv1.tv_sec) + (double) (tv2.tv_usec - tv1.tv_usec) * 1.e-6;
+    simple_elapsed = (double) (tv2.tv_sec - tv1.tv_sec) + (double) (tv2.tv_usec - tv1.tv_usec) * 1.e-6;
+    fprintf(fp_matrix, "# |C| : <%d> x <%d> matrix computed values : MANUAL straightforward KIJ ... \n", nx, ny);
+    print_matrix(C, nx, ny, fp_matrix);
+    fprintf(fp_matrix, "# |C| : matrix calculated in %f seconds ... \n", simple_elapsed);
+
+
+//  CALCULATION :: |C| using blocked KIJ manual computation
+    fprintf(stdout,"# RESULTS : manual computation ... \n");
+    fprintf(fp_matrix, "# Initialize matrix <%d> x <%d> |C|, for blocked J+KIJ computation .. \n", nx, ny);
+    init_matrix_zero(C, nx, ny);
+    print_matrix(C, nx, ny, fp_matrix);       
+    gettimeofday(&tv1, &tz);
+    for(bk = 0; bk < nx; bk += nb) 
+    {
+      for(bi = 0; bi < nx; bi += nb) 
+      {
+         for(bj = 0; bj < nx; bj += nb) 
+         {
+            for(nk = 0; nk < nb; nk++) 
+            {
+               for(ni = 0; ni < nb; ni++) 
+               {
+                  for(nj = 0; nj < nb; nj++) 
+                  {
+                        C[ (bk + nk) * nx + bi + ni] += A[ (bk + nk) * nx + bi + nj] * B[ (bi + nj) * nx + bi + ni];
+                        // fprintf(stdout, "DEBUG : |C|  += |A| * |B| : C[%d] +=A[%d] * C[%d] : %g += %g * %g \n",(bk+nk)*nx +bi+ni, (bk+nk)*nx +bi+nj,  (bi+nj) *nx +bi+ni, C[ (bk+nk)*nx +bi+ni],  A[ (bk+nk)*nx +bi+nj], B[ (bi+nj) *nx +bi+ni] );
+                  }
+               }
+            }
+         }
+      }
+   }
+    gettimeofday(&tv2, &tz);
+    complex_elapsed = (double) (tv2.tv_sec - tv1.tv_sec) + (double) (tv2.tv_usec - tv1.tv_usec) * 1.e-6;
     fprintf(fp_matrix, "# |C| : <%d> x <%d> matrix computed values : MANUAL computation ... \n", nx, ny);
-    fprintf(fp_matrix, "# |C| : matrix calculated in %f seconds ... \n", manual_elapsed);
+    fprintf(fp_matrix, "# |C| : matrix calculated in %f seconds ... \n", complex_elapsed);
     print_matrix(C, nx, ny, fp_matrix);
 
 //  CALCULATION :: |C| using DGEMM
-    fprintf(stdout,"# RESULTS : BLAS/ATLAS calculation ... \n");
-    fprintf(fp_matrix, "# Initialize matrix <%d> x <%d> |C|, for CBLAS/ATLAS ... \n", nx, ny);
+    fprintf(stdout,"# RESULTS : BLAS/ATLAS KIJ computation ... \n");
+    fprintf(fp_matrix, "# Initialize matrix <%d> x <%d> |C|, for CBLAS/ATLAS KIJ computation ... \n", nx, ny);
     init_matrix_zero(C, nx, ny);
     print_matrix(C, nx, ny, fp_matrix);    
     gettimeofday(&tv1, &tz);
     multipy_ABC_cblas(A, B, C, nx, ny, nb, ALPHA, BETA);
     gettimeofday(&tv2, &tz);
     dgemm_elapsed = (double) (tv2.tv_sec-tv1.tv_sec) + (double) (tv2.tv_usec-tv1.tv_usec) * 1.e-6;
-    fprintf(fp_matrix, "# |C| : <%d> x <%d> matrix computed values using CBLAS/ATLAS ... \n", nx, ny);
+    fprintf(fp_matrix, "# |C| : <%d> x <%d> matrix computed values using CBLAS/ATLAS KIJ computation ... \n", nx, ny);
     fprintf(fp_matrix, "# |C| : calculated in %f seconds... \n",  dgemm_elapsed);
     print_matrix(C, nx, ny, fp_matrix);
 
 //  OUTPUT :: results to stdout & .dat file : matrix size || Time/manual || Time / dgemm
-    fprintf(stdout,"# \t\t|Matrix|   |Block|   Time/manual   Time/dgemm\n");
-    fprintf(stdout,"# Results: \t%d \t%d \t%f \t%f \n", nx, nb, manual_elapsed, dgemm_elapsed);
-    fprintf(fp_timing, "%d \t%d \t%f \t%f \n", nx, nb, manual_elapsed, dgemm_elapsed);
+    fprintf(stdout,"# \t\t|Matrix|   |Block|   Time/straight-forward   Time/blocked   Time/dgemm\n");
+    fprintf(stdout,"# Results: \t%d \t%d \t%f \t%f \t%f \n", nx, nb, simple_elapsed, complex_elapsed, dgemm_elapsed);
+    fprintf(fp_timing, "%d \t%d \t%f \t%f \t%f \n", nx, nb, simple_elapsed, complex_elapsed, dgemm_elapsed);
    	
 //  CLEANUP :: deallocate memory & close files
     fprintf(stdout,"# CLEAN-UP ... \n");

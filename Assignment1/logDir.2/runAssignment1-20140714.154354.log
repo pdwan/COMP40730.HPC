@@ -1,0 +1,16 @@
+# LOG :	runAssignment1-20140714.154354.log 
+	Created on 20140714.154354 by pdwan.
+RUNNING :	./A1-Sijk-1D -i 50   pdwan-20140714.154354-values-A1-Sijk-1D-0.txt pdwan-20140714.154354-data-A1-Sijk-1D.dat
+RUNNING :	./A1-Sijk-1D -i 50   pdwan-20140714.154354-values-A1-Sijk-1D-1.txt pdwan-20140714.154354-data-A1-Sijk-1D.dat
+RUNNING :	./A1-Sijk-1D -i 50   pdwan-20140714.154354-values-A1-Sijk-1D-2.txt pdwan-20140714.154354-data-A1-Sijk-1D.dat
+RUNNING :	./A1-Sijk-1D -i 100   pdwan-20140714.154354-values-A1-Sijk-1D-3.txt pdwan-20140714.154354-data-A1-Sijk-1D.dat
+RUNNING :	./A1-Sijk-1D -i 100   pdwan-20140714.154354-values-A1-Sijk-1D-4.txt pdwan-20140714.154354-data-A1-Sijk-1D.dat
+RUNNING :	./A1-Sijk-1D -i 100   pdwan-20140714.154354-values-A1-Sijk-1D-5.txt pdwan-20140714.154354-data-A1-Sijk-1D.dat
+RUNNING :	./A1-Sijk-1D -i 500   pdwan-20140714.154354-values-A1-Sijk-1D-6.txt pdwan-20140714.154354-data-A1-Sijk-1D.dat
+RUNNING :	./A1-Sijk-1D -i 500   pdwan-20140714.154354-values-A1-Sijk-1D-7.txt pdwan-20140714.154354-data-A1-Sijk-1D.dat
+RUNNING :	./A1-Sijk-1D -i 500   pdwan-20140714.154354-values-A1-Sijk-1D-8.txt pdwan-20140714.154354-data-A1-Sijk-1D.dat
+RUNNING :	./A1-Sijk-1D -i 500   pdwan-20140714.154354-values-A1-Sijk-1D-9.txt pdwan-20140714.154354-data-A1-Sijk-1D.dat
+RUNNING :	./A1-Sijk-1D -i 1000   pdwan-20140714.154354-values-A1-Sijk-1D-10.txt pdwan-20140714.154354-data-A1-Sijk-1D.dat
+RUNNING :	./A1-Sijk-1D -i 1000   pdwan-20140714.154354-values-A1-Sijk-1D-11.txt pdwan-20140714.154354-data-A1-Sijk-1D.dat
+RUNNING :	./A1-Sijk-1D -i 1000   pdwan-20140714.154354-values-A1-Sijk-1D-12.txt pdwan-20140714.154354-data-A1-Sijk-1D.dat
+RUNNING :	./A1-Sijk-1D -i 1000   pdwan-20140714.154354-values-A1-Sijk-1D-13.txt pdwan-20140714.154354-data-A1-Sijk-1D.dat

@@ -1,0 +1,52 @@
+#  --------------------------------------------------------------------------------------------------
+# 
+# Program :	A1-Bijk-1D
+# where :	.dat contains timing data & .txt contains matrix values 
+# 
+# Summary of values added to each matrix - retained for later reference and validation 
+# 
+#  --------------------------------------------------------------------------------------------------  
+# RUNNING : 	./A1-Bijk-1D-cblas -i 4 2 
+# Initialize matrix <4> x <4> |A| ... 
+1	2	3	4	
+1	2	3	4	
+1	2	3	4	
+1	2	3	4	
+# Initialize matrix <4> x <4> |B| ... 
+1	2	3	4	
+1	2	3	4	
+1	2	3	4	
+1	2	3	4	
+# Initialize matrix <4> x <4> |C| ... 
+0	0	0	0	
+0	0	0	0	
+0	0	0	0	
+0	0	0	0	
+# |C| : <4> x <4> matrix computed values : MANUAL simple ... 
+7	10	15	22	
+0	0	0	0	
+0	0	0	0	
+0	0	0	0	
+# |C| : matrix calculated in 0.000066 seconds ... 
+# Initialize matrix <4> x <4> |C|, redone for MANUAL complex .. 
+0	0	0	0	
+0	0	0	0	
+0	0	0	0	
+0	0	0	0	
+# |C| : <4> x <4> matrix computed values : MANUAL complex ... 
+0	0	0	0	
+0	0	0	0	
+0	0	0	0	
+0	0	0	0	
+# |C| : matrix calculated in 0.000001 seconds ... 
+# Initialize matrix <4> x <4> |C|, redone for CBLAS/ATLAS ... 
+0	0	0	0	
+0	0	0	0	
+0	0	0	0	
+0	0	0	0	
+# |C| : <4> x <4> matrix computed values using CBLAS/ATLAS ... 
+10	20	30	40	
+10	20	30	40	
+10	20	30	40	
+10	20	30	40	
+# |C| : calculated in 0.000005 seconds... 

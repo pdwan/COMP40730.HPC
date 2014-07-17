@@ -6,7 +6,7 @@
 # AUTHOR : Paula Dwan (paula.dwan@ericsson.com | paula.dwan@gmail.com)
 # GIT : https://github.com/pdwan/COMP40730.HPC.git
 # DUE DATE : 30-June-2014 (extended to : 13-July-2014)
-# ASSIGNMENT : 2
+# ASSIGNMENT : 1
 #
 # ##################################################################################
 
@@ -15,20 +15,19 @@ _ECHO="echo"
 _BASENAME="basename"
 Now=$(date +"%Y%m%d.%H%M%S")
 logDir="logDir"
-logPrefix="pdwan-"
 txtSuffix=".txt"
 DatSuffix=".dat"
-pngSuffix=".png"
-stdLogFile="runAssignment3-${Now}.log"
+stdLogFile="runAssignment2-${Now}.log"
 compileUsingCblas="false"
+compileUsingAtlas="false"
 initRandom="false"
 initIncrement="false"
 matrixEnabled="false"
 threadEnabled="false"
 defaultMatrixRange="false"
 let matrixSize=0
-let threadSize=0
 let maxMatrixSize=1000 
+let threadSize=0
 let maxThreadSize=100
 
 # ##################################################################################
@@ -51,7 +50,7 @@ usage()
     $_ECHO -e "\t\t\t'-i|--increment' & '-r|--random' are mutually exclusive \n"
     $_ECHO -e "\t-m|--matrix <n>\tMatrix dimension, if odd number +1 added or if invalid set to [ ${maxMatrixSize} ], thread count set to [ ${maxThreadSize} ] "
     $_ECHO -e "\t-t|--thread <t>\tnumber of threads, if invalid set to  [ ${maxThreadSize} ]  and matrix size set to [ ${maxMatrixSize} ]"
-    $_ECHO -e "\t-v|--values \tUse predefined range of valid values for <nx> and <nb> as follows :"
+    $_ECHO -e "\t-v|--values \tUse predefined range of valid values for <nx> and <np> as follows :"
     $_ECHO -e "\t\t\t<matrixArray> :\t{ 50, 50, 50, 100, 100, 100, 500, 500, 500, 1000, 1000, 1000 } \n\t\t\t<threadArray> :\t{ 10, 10, 10, 10, 10, 10, 20, 20, 20, 20, 20, 20 }"
     $_ECHO -e "\t\t\t'-m|--matrix <n>' | -t|--thread <t>' and '-v|--values' mutually exclusive.\n"
     $_ECHO -e "\t-?|-h|--help \tusage \n"
@@ -94,35 +93,43 @@ error()
     exit ${err}
 }
 
+# function : build applying dgemm atlas
+compile_dgemm_atlas()
+{
+    localProgramToCompile=$1
+    $_ECHO -e "CBLAS :\t\tCompiling ${localProgramToCompile} using Atlas \n"  >> ${stdLogFile}
+     gcc -o ${localProgramToCompile}-atlas ${localProgramToCompile}.c -I/home/cs/khasanov/libs/ATLAS/include/ -L/home/cs/khasanov/libs/ATLAS/lib/Linux_UNKNOWNSSE2_4/ -lcblas -latlas -lm -O3 
+}
+
 # function : build applying dgemm cblas
 compile_dgemm_cblas()
 {
     localProgramToCompile=$1
     $_ECHO -e "CBLAS :\t\tCompiling ${localProgramToCompile} using cblas \n"  >> ${stdLogFile}
-    gcc -Wall -I/home/cs/khasanov/libs/CBLAS/src ${localProgramToCompile}.c -o ${localProgramToCompile}  /home/cs/khasanov/libs/cblas_LINUX.a  /usr/lib/libblas.a -lgfortran -fopenmp
+    gcc -Wall -I/home/cs/khasanov/libs/CBLAS/src ${localProgramToCompile}.c -o ${localProgramToCompile}-cblas /home/cs/khasanov/libs/cblas_LINUX.a  /usr/lib/libblas.a -lgfortran -fopenmp
 }
 
-# function : create directory, if it does not exist & validate creation
+# function : create directory, if  it does not exist & validate creation
 init_dir() 
 {
     creationDir=$1
-    if [ ! -d ${creationDir} ] || [ ! -e ${creationDir} ] ; then 
+    if  [ ! -d ${creationDir} ] || [ ! -e ${creationDir} ] ; then 
         mkdir ${creationDir}        
         $_ECHO -e "WARNING :\tCreating $creationDir"  >> ${stdLogFile}
-        if [[ $? -ne 0 ]] ; then 
+        if  [[ $? -ne 0 ]] ; then 
             error 2 $creationDir
-        fi
-    fi  
+        fi 
+    fi   
 }
 
 # function : create log files (.txt : matrix values, .dat : timing data for each computation & .log : stderr, stdout) to store values for data for each alogrithim computation
 init_log_file() 
 {
     localLogFile=$1
-    if  [ -e ${localLogFile} ]  ; then
+    if   [ -e ${localLogFile} ]  ; then
         $_ECHO -e "WARNING :\tFile backup : ${localLogFile} to ${localLogFile}.bup" >> ${localLogFile}
         mv "${localLogFile}" "${localLogFile}.bup"
-    fi
+    fi 
     $_ECHO -e "# LOG :\t${localLogFile} \n\tCreated on ${Now} by ${USER}." >> ${localLogFile}
 }
 
@@ -133,6 +140,7 @@ algorithm_execute()
     localOptions="$2"
     localFileMatrix="$3"
     localFileTime="$4"
+    $_ECHO -e "Finished :\t${localCmd} ${localOptions} ${localFileMatrix} ${localFileTime}"
     $_ECHO -e "RUNNING :\t${localCmd} ${localOptions} ${localFileMatrix} ${localFileTime}"  >> ${stdLogFile}
     ${localCmd} ${localOptions} ${localFileMatrix} ${localFileTime}
 }
@@ -142,12 +150,15 @@ algorithm_execute()
 #clear
 
 # Process parameters
-if [[ $# -eq 0 ]]; then
+if  [[ $# -eq 0 ]] ; then
     usage 
     exit
 else 
     while [ "$1" != "" ]; do
-        case ${1} in
+        case ${1} in                  
+		    "-d1" | "--atlas")
+                compileUsingAtlas="true"
+                ;;
 		    "-d2" | "--cblas")
 				compileUsingCblas="true"
                 ;;
@@ -165,22 +176,22 @@ else
                 ;;                    
             "-m" | "--matrix")
                 matrixEnabled="true"
-                if [[ $2 =~ "^[0-9]+$" ]] ; then 
+                if  [[ $2 =~ "^[ 0-9 ]+$" ]] ; then 
                     let matrixSize=$2 
                 else
                     error 5 "${1} ${2}"
-                fi 
+                fi  
                 shift 
                 ;;
             "-t" | "--thread")
                 threadEnabled="true"
-                if [[ $2 =~ "^[0-9]+$" ]] ; then 
+                if  [[ $2 =~ "^[ 0-9 ]+$" ]] ; then 
                     let threadSize=$2 
                 else
                     error 5 "${1} ${2}"
-                fi 
+                fi  
                 shift 
-                ;;
+                ;;                
             "-?" | "-h" | "--help")
                 usage
                 exit
@@ -191,98 +202,115 @@ else
         esac
         shift
     done
-fi
+fi 
 
-# process and validate parameter values for matrix sizes, if applicable
-if [ "${defaultMatrixRange}" == "true" ] && [ "${matrixEnabled}" == "true" ] ; then 
-    error 6 "<-m> & <-v>"
-fi
-if [ "${defaultMatrixRange}" == "true" ] && [ "${threadEnabled}" == "true" ] ; then 
-    error 6 "<-t> & <-v>"
-fi
-if  [ "${defaultMatrixRange}" == "true" ] && [ "${matrixEnabled}" == "false" ]  && [ "${threadEnabled}" == "false" ] ; then 
-    declare -a NXArray=( 50 50 50 100 100 100 200 200 300 300 300 )
-  	declare -a threadArray=( 10 10 10 10 10 10 20 20 20 20 20 20  )
+#   process and validate parameter values for matrix and thread sizes, if  applicable
+if  [ "${defaultMatrixRange}" == "true" ] && ( [ "${matrixEnabled}" == "true" ] || [ "${threadEnabled}" == "true" ] ) ; then 
+    error 6 "{<-m> <-t> } and <-v>"
+fi 
+if   [ "${defaultMatrixRange}" == "true" ] && ( [ "${matrixEnabled}" == "false" ] || [ "${threadEnabled}" == "false" ] ) ; then 
+#   Matrix & Thread size - range 1
+    declare -a NXArray=( 50 50 50 50 50 50 100 100 100 100 100 100 )
+    declare -a NPArray=( 10 10 10 10 10 10 20 20 20 20 20 20 )
+#   Matrix & Thread size - range 2
+#   declare -a NXArray=( 50 50 50 100 100 100 500 500 500 500 1000 1000 1000 1000 )
+#   declare -a NPArray=( 2 5 10 5 10 20 5 10 20 50 5 10 50 100 )
     matrixEnabled="false"
     threadEnabled="false"
-else
-    if [ "${matrixEnabled}" == "true" ] || [ "${threadEnabled}" == "true" ]  ; then
-		if [ "${matrixSize}" == "" ] ; then 
-		    error 4 "matrix size"
-		fi
-		if [ "${threadSize}" == "" ] ; then 
-		    error 4 "thread size"
-		fi
-		if [ ${matrixSize} -le 0 ] || [ ${matrixSize} -gt ${maxMatrixSize} ] ; then
-		    $_ECHO -e "WARNING :\t$($_BASENAME $0): matrix size <nx> is invalid, default values used for matrixSize : $maxMatrixSize and threadSize :$maxThreadSize  "  >> ${stdLogFile}
-	        let matrixSize=$maxMatrixSize        
-	        let threadSize=$maxThreadSize        
-	        matrixEnabled="true"
-            threadEnabled="true"
-	    fi       
-		if [ ${threadSize} -le 0 ] || [ ${threadSize} -gt ${maxThreadSize} ] ; then
-		    $_ECHO -e "WARNING :\t$($_BASENAME $0): thread size <nt> is invalid, default values used for matrixSize : $maxMatrixSize and threadSize :$maxThreadSize  "  >> ${stdLogFile}
-	        let matrixSize=$maxMatrixSize        
-	        let threadSize=$maxThreadSize        
-	        matrixEnabled="true"
-            threadEnabled="true"
-	    fi       
-        if [[ $(expr ${matrixSize} % 2 ) -eq 0 ]] ; then 
-                let matrixSize=$matrixSize 
-            else 
-                let matrixSize=$(( matrixSize++ )) 
-        fi  
-        if [[ ! ( $(expr ${matrixSize}  % ${threadSize} ) -eq 0 ) ]] ; then 
-		    $_ECHO -e "WARNING :\t$($_BASENAME $0): matrix size is not multiple of thread size, default values used for matrixSize : $maxMatrixSize and threadSize :$maxThreadSize  "  >> ${stdLogFile}
-	        let matrixSize=$maxMatrixSize        
-	        let threadSize=$maxThreadSize        
-	        matrixEnabled="true"
-            threadEnabled="true"
-        fi
-		declare -a NXArray=( ${matrixSize} )
-		declare -a threadArray=( ${threadSize} )
-    fi
-fi
+elif  [ "${matrixEnabled}" == "true" ] || [ "${threadEnabled}" == "true" ] ; then
+#   Validate matrix size initialized
+    if  [ "${matrixSize}" == "" ] ; then 
+	    error 4 "matrix size"
+    fi 
+#   Validate thread size initialized
+	 if  [ "${threadSize}" == "" ] ; then 
+	    error 4 "thread size"
+    fi  
+#   Validate matrix range
+    if  [ ${matrixSize} -le 0 ] || [ ${matrixSize} -gt ${maxMatrixSize} ] ; then
+	    $_ECHO -e "WARNING :\t$($_BASENAME $0): Invalid matrix size <nx>, now set to default of : $maxMatrixSize"  >> ${stdLogFile}
+	    let matrixSize=$maxMatrixSize
+	    matrixEnabled="true"
+    fi         
+#   Validate thread range
+     if  [ ${threadSize} -le 0 ] || [ ${threadSize} -gt ${maxThreadSize} ] ; then
+        $_ECHO -e "WARNING :\t$($_BASENAME $0): Invalid thread size <np>, now set to default of : $maxThreadSize"  >> ${stdLogFile}
+        let threadSize=$maxThreadSize
+        threadEnabled="true"
+    fi 
+#   ensure both are enabled
+	if  [ "${matrixEnabled}" == "false" ] ; then 
+	    $_ECHO -e "WARNING :\t$($_BASENAME $0): matrix size <nx> is now enabled and set to default of : $maxMatrixSize"  >> ${stdLogFile}
+	    let matrixSize=$maxMatrixSize
+	    matrixEnabled="true"
+    fi 
+    if  [ "${threadEnabled}" == "false" ] ; then 
+	    $_ECHO -e "WARNING :\t$($_BASENAME $0): thread size <np> is now enabled and set to default of : $maxThreadSize"  >> ${stdLogFile}
+	    let threadSize=$maxThreadSize
+        threadEnabled="true"
+    fi 
+#   Validate matrix / thread remainder
+    if  [ $(( ${matrixSize} % ${threadSize} )) -ne 0 ]; then
+	    $_ECHO -e "WARNING :\t$($_BASENAME $0): thread size needs to be an even multiple of matrix size. Using defaults."  >> ${stdLogFile}
+        let threadSize=$maxThreadSize
+	    let matrixSize=$maxMatrixSize
+    fi 
+    declare -a NXArray=( $matrixSize )
+    declare -a NPArray=( $threadSize )
+fi 
+
+# validate atlas and cblas - mutually exclusive
+if  [ "${compileUsingAtlas}" == "true" ] && [ "${compileUsingCblas}" == "true" ] ; then 
+        error 7 "Atlas & cBlas"
+fi 
 
 # build up commands to run
 algorithmOptions=""
-if [ "${initRandom}" == "true" ] && [ "${initIncrement}" == "false" ] ; then 
+if  [ "${initRandom}" == "true" ] && [ "${initIncrement}" == "false" ] ; then 
     algorithmOptions="-r"
-fi
-if [ "${initRandom}" == "false" ] && [ "${initIncrement}" == "true" ] ; then 
+fi 
+if  [ "${initRandom}" == "false" ] && [ "${initIncrement}" == "true" ] ; then 
     algorithmOptions="-i"
-fi
-if [ "${initRandom}" == "true" ] && [ "${initIncrement}" == "true" ] ; then 
+fi 
+if  [ "${initRandom}" == "true" ] && [ "${initIncrement}" == "true" ] ; then 
     error 6 "<-i> & <-r>" 
-fi
+fi 
 
 # execute algorithms
-
 init_dir ${logDir}
 init_log_file ${stdLogFile}
+matrixFileRoot="Values-${Now}"
+dataFileRoot="Data-${Now}"
 
-matrixFileRoot="${logPrefix}${Now}-values"
-dataFileRoot="${logPrefix}${Now}-data"
-algorithmName="A2-pthreads-1D" 
-matrixFileName="${matrixFileRoot}-${algorithmName}"
-dataFileName="${dataFileRoot}-${algorithmName}"
-dataFileNameTiming="${dataFileName}${DatSuffix}" # append to existing file for graphing : retain as spearate as may way to create one per iteration
-if [[ ${#NXArray[*]} -le 0 ]] ; then 
-	error 5 "matrix size"
+algorithmPthreads="A1-Sijk-1D" 
+matrixFilePthreads="${matrixFileRoot}-${algorithmPthreads}"
+dataFilePthreads="${dataFileRoot}-${algorithmPthreads}"
+dataFilePthreadsTiming="${dataFilePthreads}${DatSuffix}" # append to existing file for graphing
+if  [[ ${#NXArray[*]} -le 0 ]] ; then 
+    error 5 "matrix size"
 else        
-	executeOptions=""
-	if [ "${compileUsingCblas}" == "true" ] ; then
-	    compile_dgemm_cblas ${algorithmName}
-	fi
-	for (( i = 0 ; i < ${#NXArray[@]} ; i++ )); do
-	    matrixFileNameValues="${matrixFileName}-$i${txtSuffix}" # different file for each run
-	    init_log_file ${matrixFileNameValues} 
-	    init_log_file ${dataFileNameTiming}
-	    executeOptions="${algorithmOptions} ${NXArray[$i]}  ${threadArray[$i]}"
-	    // echo "DEBUG : algorithm_execute  ./${algorithmName} ${executeOptions} ${matrixFileNameValues} ${dataFileNameTiming}"
-	    algorithm_execute "./${algorithmName}" "${executeOptions}" "${matrixFileNameValues}" "${dataFileNameTiming}"
-	done
-fi
+    executeOptions=""
+    if  [ "${compileUsingCblas}" == "false" ] ; then 
+        if [ "${compileUsingAtlas}" == "false" ] ; then
+	        algorithmPthreads="${algorithmPthreads}-cblas" # default
+        fi 	        
+    fi
+    if  [ "${compileUsingCblas}" == "true" ] ; then
+	    compile_dgemm_cblas ${algorithmPthreads}
+	    algorithmPthreads="$algorithmPthreads-cblas"
+    fi 
+    if  [ "${compileUsingAtlas}" == "true" ] ; then
+	    compile_dgemm_atlas ${algorithmPthreads}
+	    algorithmPthreads="${algorithmPthreads}-atlas"
+    fi 
+    for (( i = 0 ; i < ${#NXArray[@]} ; i++ )); do
+	    matrixFilePthreadsValues="${matrixFilePthreads}-$i${txtSuffix}" # different file for each iteration
+        init_log_file ${matrixFilePthreadsValues} 
+	    executeOptions="${algorithmOptions} ${NXArray[$i]}"
+	    algorithm_execute "./${algorithmPthreads}" "${executeOptions}" "${matrixFilePthreadsValues}" "${dataFilePthreadsTiming}"
+	    matrixFilePthreadsValues="${matrixFilePthreads}"
+    done
+fi 
 
 # move log files to <logDir>
 mv -f *.dat ${logDir} 2> /dev/null

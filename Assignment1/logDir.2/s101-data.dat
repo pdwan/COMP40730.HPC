@@ -1,0 +1,12 @@
+#  --------------------------------------------------------------------------------------------------
+# 
+# Program :	A1-Sijk-1D
+# where :	.dat contains timing data & .txt contains matrix values 
+# Data values from each run using different matrix and block size. 
+# 
+#  --------------------------------------------------------------------------------------------------
+# 
+# |Matrix|   Time/simple  Time/complex  Time/dgemm 
+# 
+10 	0.000038 	0.000011 	0.000008 
+10 	0.000024 	0.000011 	0.000007 

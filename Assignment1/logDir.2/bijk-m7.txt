@@ -1,0 +1,188 @@
+#  --------------------------------------------------------------------------------------------------
+# 
+# Program :	A1-Bijk-1D
+# where :	.dat contains timing data & .txt contains matrix values 
+# 
+# Summary of values added to each matrix - retained for later reference and validation 
+# 
+#  --------------------------------------------------------------------------------------------------  
+# RUNNING : 	./A1-Bijk-1D-cblas -i 6 2 
+# Initialize matrix <6> x <6> |A| ... 
+1	2	3	4	5	6	
+1	2	3	4	5	6	
+1	2	3	4	5	6	
+1	2	3	4	5	6	
+1	2	3	4	5	6	
+1	2	3	4	5	6	
+# Initialize matrix <6> x <6> |B| ... 
+1	2	3	4	5	6	
+1	2	3	4	5	6	
+1	2	3	4	5	6	
+1	2	3	4	5	6	
+1	2	3	4	5	6	
+1	2	3	4	5	6	
+# Initialize matrix <6> x <6> |C| ... 
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+# |C| : <6> x <6> matrix computed values : MANUAL simple ... 
+6	12	18	0	0	0	
+6	12	18	0	0	0	
+6	12	18	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+# |C| : matrix calculated in 0.000323 seconds ... 
+# Initialize matrix <6> x <6> |C|, redone for MANUAL complex .. 
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+# |C| : <6> x <6> matrix computed values : MANUAL complex ... 
+6	12	18	0	0	0	
+6	12	18	0	0	0	
+6	12	18	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+# |C| : matrix calculated in 0.000003 seconds ... 
+# Initialize matrix <6> x <6> |C|, redone for CBLAS/ATLAS ... 
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+# |C| : <6> x <6> matrix computed values using CBLAS/ATLAS ... 
+3	6	0	0	0	0	
+3	6	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+# |C| : calculated in 0.000004 seconds... 
+# RUNNING : 	./A1-Bijk-1D-cblas -i 6 2 
+# Initialize matrix <6> x <6> |A| ... 
+1	2	3	4	5	6	
+1	2	3	4	5	6	
+1	2	3	4	5	6	
+1	2	3	4	5	6	
+1	2	3	4	5	6	
+1	2	3	4	5	6	
+# Initialize matrix <6> x <6> |B| ... 
+1	2	3	4	5	6	
+1	2	3	4	5	6	
+1	2	3	4	5	6	
+1	2	3	4	5	6	
+1	2	3	4	5	6	
+1	2	3	4	5	6	
+# Initialize matrix <6> x <6> |C| ... 
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+# |C| : <6> x <6> matrix computed values : MANUAL simple ... 
+6	12	18	0	0	0	
+6	12	18	0	0	0	
+6	12	18	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+# |C| : matrix calculated in 0.000336 seconds ... 
+# Initialize matrix <6> x <6> |C|, redone for MANUAL complex .. 
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+# |C| : <6> x <6> matrix computed values : MANUAL complex ... 
+6	12	18	0	0	0	
+6	12	18	0	0	0	
+6	12	18	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+# |C| : matrix calculated in 0.000002 seconds ... 
+# Initialize matrix <6> x <6> |C|, redone for CBLAS/ATLAS ... 
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+# |C| : <6> x <6> matrix computed values using CBLAS/ATLAS ... 
+3	6	0	0	0	0	
+3	6	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+# |C| : calculated in 0.000005 seconds... 
+# RUNNING : 	./A1-Bijk-1D-cblas -i 6 2 
+# Initialize matrix <6> x <6> |A| ... 
+1	2	3	4	5	6	
+1	2	3	4	5	6	
+1	2	3	4	5	6	
+1	2	3	4	5	6	
+1	2	3	4	5	6	
+1	2	3	4	5	6	
+# Initialize matrix <6> x <6> |B| ... 
+1	2	3	4	5	6	
+1	2	3	4	5	6	
+1	2	3	4	5	6	
+1	2	3	4	5	6	
+1	2	3	4	5	6	
+1	2	3	4	5	6	
+# Initialize matrix <6> x <6> |C| ... 
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+# |C| : <6> x <6> matrix computed values : MANUAL simple ... 
+6	12	18	0	0	0	
+6	12	18	0	0	0	
+6	12	18	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+# |C| : matrix calculated in 0.001898 seconds ... 
+# Initialize matrix <6> x <6> |C|, redone for MANUAL complex .. 
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+# |C| : <6> x <6> matrix computed values : MANUAL complex ... 
+6	12	18	0	0	0	
+6	12	18	0	0	0	
+6	12	18	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+# |C| : matrix calculated in 0.000002 seconds ... 
+# Initialize matrix <6> x <6> |C|, redone for CBLAS/ATLAS ... 
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+# |C| : <6> x <6> matrix computed values using CBLAS/ATLAS ... 
+3	6	0	0	0	0	
+3	6	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+0	0	0	0	0	0	
+# |C| : calculated in 0.000003 seconds... 

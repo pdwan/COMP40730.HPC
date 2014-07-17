@@ -1,0 +1,11 @@
+#  --------------------------------------------------------------------------------------------------
+# 
+# Program :	A1-Sijk-1D
+# where :	.dat contains timing data & .txt contains matrix values 
+#  --------------------------------------------------------------------------------------------------
+# |Matrix| 	Time/simple 	Time/complex 	Time/dgemm 
+# 
+# RUNNING : 	./A1-Sijk-1D-cblas -i 10 
+10 	0.000023s 	0.000012s 	0.000006s 
+# RUNNING : 	./A1-Sijk-1D-cblas -i 10 
+10 	0.000023s 	0.000028s 	0.000006s 

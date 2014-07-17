@@ -1,11 +1,10 @@
-#!/bin/bash 
 
 # ##################################################################################
 # 
 # DESC : Script to multiply two nxn matrices using three algorithms.
 # AUTHOR : Paula Dwan (paula.dwan@ericsson.com | paula.dwan@gmail.com)
 # GIT : https://github.com/pdwan/COMP40730.HPC.git
-# DUE DATE : 30-June-2014 (extended to : 13-July-2014)
+# DUE DATE : 30-June-2014 (extended to : July-2014)
 # ASSIGNMENT : 4
 #
 # ##################################################################################
@@ -18,18 +17,15 @@ logDir="logDir"
 logPrefix="pdwan-"
 txtSuffix=".txt"
 DatSuffix=".dat"
-pngSuffix=".png"
 stdLogFile="runAssignment3-${Now}.log"
 compileUsingCblas="false"
+compileUsingAtlas="false"
 initRandom="false"
 initIncrement="false"
 matrixEnabled="false"
-threadEnabled="false"
 defaultMatrixRange="false"
 let matrixSize=0
-let threadSize=0
 let maxMatrixSize=1000 
-let maxThreadSize=100
 
 # ##################################################################################
 
@@ -42,18 +38,19 @@ pause () {
 # function : usage instructions
 usage() 
 {
-    $_ECHO -e "\nUSAGE :\t./$($_BASENAME $0) \ \n\t -d2|--cblas -r|--random -i|--increment -m|--matrix <n> -t|--thread <t> -v|--values -?|-h|--help \n"
+    $_ECHO -e "\nUSAGE :\t./$($_BASENAME $0) \ \n\t-d1|--atlas -d2|--cblas -r|--random -i|--increment -m|--matrix <n> -v|--values -?|-h|--help \n"
     $_ECHO -e "TO :\tCalculate |C| = |A| x |B| and then infintiy norm using mpi \n" 
-    $_ECHO -e "LOGS :\tCreated in current dir and moved to <${logDir}> : \n\t<file>.txt : \tmatrix values for matrices |A| |B| & |C|, \n\t<file>.dat :\ttiming data for each computation \n\t<file>.log : \tsummary of stdout. \n"
-    $_ECHO -e "WHERE :\t-d2|--cblas\tCompile .c source files using dgemm cblas & openmp"
+    $_ECHO -e "LOGS :\tCreated in current dir and moved to [ ${logDir} ] : \n\t<file>.txt : \tmatrix values for matrices |A| |B| & |C| \n\t<file>.dat :\ttiming data for each computation \n\t<file>.log : \tsummary of stdout. \n"
+    $_ECHO -e "WHERE :\t-d1|--atlas\tCompile .c source files using dgemm atlas"
+    $_ECHO -e "\t-d2|--cblas\tCompile .c source files using dgemm cblas\n"
     $_ECHO -e "\t-r|--random \tInitialize |A| & |B| with random numbers and |C| with '0' "
     $_ECHO -e "\t-i|--increment \tInitialize |A| & |B| incrementally with <column> value and |C| with '0' "
     $_ECHO -e "\t\t\t'-i|--increment' & '-r|--random' are mutually exclusive \n"
-    $_ECHO -e "\t-m|--matrix <n>\tMatrix dimension, if odd number +1 added or if invalid set to [ ${maxMatrixSize} ], thread count set to [ ${maxThreadSize} ] "
-    $_ECHO -e "\t-t|--thread <t>\tnumber of threads, if invalid set to  [ ${maxThreadSize} ]  and matrix size set to [ ${maxMatrixSize} ]"
-    $_ECHO -e "\t-v|--values \tUse predefined range of valid values for <nx> and <nb> as follows :"
-    $_ECHO -e "\t\t\t<matrixArray> :\t{ 50, 50, 50, 100, 100, 100, 500, 500, 500, 1000, 1000, 1000 } \n\t\t\t<threadArray> :\t{ 10, 10, 10, 10, 10, 10, 20, 20, 20, 20, 20, 20 }"
-    $_ECHO -e "\t\t\t'-m|--matrix <n>' | -t|--thread <t>' and '-v|--values' mutually exclusive.\n"
+    $_ECHO -e "\t-m|--matrix <n>\tMatrix dimension, if odd number +1 added or if invalid set to [ ${maxMatrixSize} ]."
+    $_ECHO -e "\t-v|--values \tUse predefined range of valid values for <nx> as follows :"
+    $_ECHO -e "\t\t\t<matrixArray> (range 1) :\t{ 50, 50, 50, 100, 100, 100, 500, 500, 500, 1000, 1000, 1000 }"
+    $_ECHO -e "\t\t\t<matrixArray> (range 2) :\t{ 50 50 50 50 50 50 100 100 100 100 100 100 }"
+    $_ECHO -e "\t\t\t'-m|--matrix <n>' is mutually exclusive of  '-v|--values'.\n"
     $_ECHO -e "\t-?|-h|--help \tusage \n"
 }
 
@@ -95,11 +92,19 @@ error()
 }
 
 # function : build applying dgemm cblas
+compile_dgemm_atlas()
+{
+    localProgramToCompile=$1
+    $_ECHO -e "ATLAS :\t\tCompiling ${localProgramToCompile}-atlas using atlas \n"  >> ${stdLogFile}
+    mpicc -o ${localProgramToCompile}-atlas ${localProgramToCompile}.c -I/home/cs/khasanov/libs/ATLAS/include/ -L/home/cs/khasanov/libs/ATLAS/lib/Linux_UNKNOWNSSE2_4/ -lcblas -latlas -lm -O3 
+}
+
+# function : build applying dgemm cblas
 compile_dgemm_cblas()
 {
     localProgramToCompile=$1
     $_ECHO -e "CBLAS :\t\tCompiling ${localProgramToCompile} using cblas \n"  >> ${stdLogFile}
-    gcc -Wall -I/home/cs/khasanov/libs/CBLAS/src ${localProgramToCompile}.c -o ${localProgramToCompile}  /home/cs/khasanov/libs/cblas_LINUX.a  /usr/lib/libblas.a -lgfortran -fopenmp
+    mpicc -I/home/cs/khasanov/libs/CBLAS/src ${localProgramToCompile}.c -o ${localProgramToCompile}-cblas  /home/cs/khasanov/libs/cblas_LINUX.a  /usr/lib/libblas.a -lgfortran
 }
 
 # function : create directory, if it does not exist & validate creation
@@ -123,7 +128,6 @@ init_log_file()
         $_ECHO -e "WARNING :\tFile backup : ${localLogFile} to ${localLogFile}.bup" >> ${localLogFile}
         mv "${localLogFile}" "${localLogFile}.bup"
     fi
-    $_ECHO -e "# LOG :\t${localLogFile} \n\tCreated on ${Now} by ${USER}." >> ${localLogFile}
 }
 
 # function : execute each algorithm in turn wih specified parameters / options
@@ -148,6 +152,9 @@ if [[ $# -eq 0 ]]; then
 else 
     while [ "$1" != "" ]; do
         case ${1} in
+		    "-d1" | "--atlas")
+				compileUsingAtlas="true"
+                ;;
 		    "-d2" | "--cblas")
 				compileUsingCblas="true"
                 ;;
@@ -172,15 +179,6 @@ else
                 fi 
                 shift 
                 ;;
-            "-t" | "--thread")
-                threadEnabled="true"
-                if [[ $2 =~ "^[0-9]+$" ]] ; then 
-                    let threadSize=$2 
-                else
-                    error 5 "${1} ${2}"
-                fi 
-                shift 
-                ;;
             "-?" | "-h" | "--help")
                 usage
                 exit
@@ -197,52 +195,35 @@ fi
 if [ "${defaultMatrixRange}" == "true" ] && [ "${matrixEnabled}" == "true" ] ; then 
     error 6 "<-m> & <-v>"
 fi
-if [ "${defaultMatrixRange}" == "true" ] && [ "${threadEnabled}" == "true" ] ; then 
-    error 6 "<-t> & <-v>"
-fi
-if  [ "${defaultMatrixRange}" == "true" ] && [ "${matrixEnabled}" == "false" ]  && [ "${threadEnabled}" == "false" ] ; then 
-    declare -a NXArray=( 50 50 50 100 100 100 200 200 300 300 300 )
-  	declare -a threadArray=( 10 10 10 10 10 10 20 20 20 20 20 20  )
+if  [ "${defaultMatrixRange}" == "true" ] && [ "${matrixEnabled}" == "false" ]  ; then
+#   Matrix - range 1
+     declare -a NXArray=( 50 50 50 50 50 50 100 100 100 100 100 100 )
+#   Matrix size - range 2
+#    declare -a NXArray=( 50 50 50 100 100 100 500 500 500 500 1000 1000 1000 1000 )
     matrixEnabled="false"
-    threadEnabled="false"
 else
-    if [ "${matrixEnabled}" == "true" ] || [ "${threadEnabled}" == "true" ]  ; then
+    if [ "${matrixEnabled}" == "true" ] ; then
 		if [ "${matrixSize}" == "" ] ; then 
 		    error 4 "matrix size"
 		fi
-		if [ "${threadSize}" == "" ] ; then 
-		    error 4 "thread size"
-		fi
 		if [ ${matrixSize} -le 0 ] || [ ${matrixSize} -gt ${maxMatrixSize} ] ; then
-		    $_ECHO -e "WARNING :\t$($_BASENAME $0): matrix size <nx> is invalid, default values used for matrixSize : $maxMatrixSize and threadSize :$maxThreadSize  "  >> ${stdLogFile}
+		    $_ECHO -e "WARNING :\t$($_BASENAME $0): matrix size <nx> is invalid, default values used for matrixSize : $maxMatrixSize" >> ${stdLogFile}
 	        let matrixSize=$maxMatrixSize        
-	        let threadSize=$maxThreadSize        
 	        matrixEnabled="true"
-            threadEnabled="true"
-	    fi       
-		if [ ${threadSize} -le 0 ] || [ ${threadSize} -gt ${maxThreadSize} ] ; then
-		    $_ECHO -e "WARNING :\t$($_BASENAME $0): thread size <nt> is invalid, default values used for matrixSize : $maxMatrixSize and threadSize :$maxThreadSize  "  >> ${stdLogFile}
-	        let matrixSize=$maxMatrixSize        
-	        let threadSize=$maxThreadSize        
-	        matrixEnabled="true"
-            threadEnabled="true"
 	    fi       
         if [[ $(expr ${matrixSize} % 2 ) -eq 0 ]] ; then 
                 let matrixSize=$matrixSize 
             else 
                 let matrixSize=$(( matrixSize++ )) 
         fi  
-        if [[ ! ( $(expr ${matrixSize}  % ${threadSize} ) -eq 0 ) ]] ; then 
-		    $_ECHO -e "WARNING :\t$($_BASENAME $0): matrix size is not multiple of thread size, default values used for matrixSize : $maxMatrixSize and threadSize :$maxThreadSize  "  >> ${stdLogFile}
-	        let matrixSize=$maxMatrixSize        
-	        let threadSize=$maxThreadSize        
-	        matrixEnabled="true"
-            threadEnabled="true"
-        fi
 		declare -a NXArray=( ${matrixSize} )
-		declare -a threadArray=( ${threadSize} )
     fi
 fi
+
+# validate atlas and cblas - mutually exclusive
+if  [ "${compileUsingAtlas}" == "true" ] && [ "${compileUsingCblas}" == "true" ] ; then 
+        error 6 "-d1 | --atlas & -d2|--cblas"
+fi 
 
 # build up commands to run
 algorithmOptions=""
@@ -263,24 +244,36 @@ init_log_file ${stdLogFile}
 
 matrixFileRoot="${logPrefix}${Now}-values"
 dataFileRoot="${logPrefix}${Now}-data"
-algorithmName="A4-mpi-1D" 
-matrixFileName="${matrixFileRoot}-${algorithmName}"
-dataFileName="${dataFileRoot}-${algorithmName}"
-dataFileNameTiming="${dataFileName}${DatSuffix}" # append to existing file for graphing : retain as spearate as may way to create one per iteration
+algorithmMPI="A4-mpi-1D" 
+matrixFileMPI="${matrixFileRoot}-${algorithmMPI}"
+dataFileMPI="${dataFileRoot}-${algorithmMPI}"
+dataFileMPITiming="${dataFileMPI}${DatSuffix}" # append to existing file for graphing : retain as spearate as may way to create one per iteration
+init_log_file ${dataFileMPITiming}
+
 if [[ ${#NXArray[*]} -le 0 ]] ; then 
 	error 5 "matrix size"
 else        
 	executeOptions=""
-	if [ "${compileUsingCblas}" == "true" ] ; then
-	    compile_dgemm_cblas ${algorithmName}
-	fi
+    if  [ "${compileUsingCblas}" == "false" ] ; then 
+        if [ "${compileUsingAtlas}" == "false" ] ; then
+	        algorithmMPI="${algorithmMPI}-cblas" # default
+        fi 	        
+    fi
+    if  [ "${compileUsingCblas}" == "true" ] ; then
+	    compile_dgemm_cblas ${algorithmMPI}
+	    algorithmMPI="$algorithmMPI-cblas"
+    fi 
+    if  [ "${compileUsingAtlas}" == "true" ] ; then
+	    compile_dgemm_atlas ${algorithmMPI}
+	    algorithmMPI="${algorithmMPI}-atlas"
+    fi 
+	
 	for (( i = 0 ; i < ${#NXArray[@]} ; i++ )); do
-	    matrixFileNameValues="${matrixFileName}-$i${txtSuffix}" # different file for each run
-	    init_log_file ${matrixFileNameValues} 
-	    init_log_file ${dataFileNameTiming}
-	    executeOptions="${algorithmOptions} ${NXArray[$i]}  ${threadArray[$i]}"
-	    // echo "DEBUG : algorithm_execute  ./${algorithmName} ${executeOptions} ${matrixFileNameValues} ${dataFileNameTiming}"
-	    algorithm_execute "./${algorithmName}" "${executeOptions}" "${matrixFileNameValues}" "${dataFileNameTiming}"
+	    matrixFileMPIValues="${matrixFileMPI}-$i${txtSuffix}" # different file for each run
+	    init_log_file ${matrixFileMPIValues} 
+	    executeOptions="${algorithmOptions} ${NXArray[$i]} "
+	    # echo "DEBUG : algorithm_execute  ./${algorithmMPI} ${executeOptions} ${matrixFileMPIValues} ${dataFileMPITiming}"
+	    algorithm_execute "./${algorithmMPI}" "${executeOptions}" "${matrixFileMPIValues}" "${dataFileMPITiming}"
 	done
 fi
 

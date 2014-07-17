@@ -182,7 +182,7 @@ int main ( int argc, char *argv[] )
         fprintf(stderr, "\nERROR : \t'invalid entry : %s for '-i' or '-r'", init_type);        
         usage();
     }
-    //  matrix size
+//  matrix size
     int nx = atoi(argv[2]);                                     
     if ( nx > MAXN )
     {

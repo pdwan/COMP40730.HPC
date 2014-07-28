@@ -1,0 +1,14 @@
+MPI :		Compiling A4-mpi-solo 
+
+RUNNING :	mpirun -np  --hostfile 5 hostfile A4-mpi-solo -i 50  pd-20140728.020619-values-A4-mpi-solo-0.txt pd-20140728.020619-data-A4-mpi-solo.dat
+RUNNING :	mpirun -np  --hostfile 5 hostfile A4-mpi-solo -i 50  pd-20140728.020619-values-A4-mpi-solo-1.txt pd-20140728.020619-data-A4-mpi-solo.dat
+RUNNING :	mpirun -np  --hostfile 5 hostfile A4-mpi-solo -i 50  pd-20140728.020619-values-A4-mpi-solo-2.txt pd-20140728.020619-data-A4-mpi-solo.dat
+RUNNING :	mpirun -np  --hostfile 5 hostfile A4-mpi-solo -i 50  pd-20140728.020619-values-A4-mpi-solo-3.txt pd-20140728.020619-data-A4-mpi-solo.dat
+RUNNING :	mpirun -np  --hostfile 5 hostfile A4-mpi-solo -i 50  pd-20140728.020619-values-A4-mpi-solo-4.txt pd-20140728.020619-data-A4-mpi-solo.dat
+RUNNING :	mpirun -np  --hostfile 5 hostfile A4-mpi-solo -i 50  pd-20140728.020619-values-A4-mpi-solo-5.txt pd-20140728.020619-data-A4-mpi-solo.dat
+RUNNING :	mpirun -np  --hostfile 5 hostfile A4-mpi-solo -i 100  pd-20140728.020619-values-A4-mpi-solo-6.txt pd-20140728.020619-data-A4-mpi-solo.dat
+RUNNING :	mpirun -np  --hostfile 5 hostfile A4-mpi-solo -i 100  pd-20140728.020619-values-A4-mpi-solo-7.txt pd-20140728.020619-data-A4-mpi-solo.dat
+RUNNING :	mpirun -np  --hostfile 5 hostfile A4-mpi-solo -i 100  pd-20140728.020619-values-A4-mpi-solo-8.txt pd-20140728.020619-data-A4-mpi-solo.dat
+RUNNING :	mpirun -np  --hostfile 5 hostfile A4-mpi-solo -i 100  pd-20140728.020619-values-A4-mpi-solo-9.txt pd-20140728.020619-data-A4-mpi-solo.dat
+RUNNING :	mpirun -np  --hostfile 5 hostfile A4-mpi-solo -i 100  pd-20140728.020619-values-A4-mpi-solo-10.txt pd-20140728.020619-data-A4-mpi-solo.dat
+RUNNING :	mpirun -np  --hostfile 5 hostfile A4-mpi-solo -i 100  pd-20140728.020619-values-A4-mpi-solo-11.txt pd-20140728.020619-data-A4-mpi-solo.dat

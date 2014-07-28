@@ -1,0 +1,14 @@
+CBLAS :		Compiling A4-mpi-manual using cblas 
+
+RUNNING :	./A4-mpi-manual-cblas -r 50  pd-20140727.234421-values-A4-mpi-manual-0.txt pd-20140727.234421-data-A4-mpi-manual.dat
+RUNNING :	./A4-mpi-manual-cblas -r 50  pd-20140727.234421-values-A4-mpi-manual-1.txt pd-20140727.234421-data-A4-mpi-manual.dat
+RUNNING :	./A4-mpi-manual-cblas -r 50  pd-20140727.234421-values-A4-mpi-manual-2.txt pd-20140727.234421-data-A4-mpi-manual.dat
+RUNNING :	./A4-mpi-manual-cblas -r 50  pd-20140727.234421-values-A4-mpi-manual-3.txt pd-20140727.234421-data-A4-mpi-manual.dat
+RUNNING :	./A4-mpi-manual-cblas -r 50  pd-20140727.234421-values-A4-mpi-manual-4.txt pd-20140727.234421-data-A4-mpi-manual.dat
+RUNNING :	./A4-mpi-manual-cblas -r 50  pd-20140727.234421-values-A4-mpi-manual-5.txt pd-20140727.234421-data-A4-mpi-manual.dat
+RUNNING :	./A4-mpi-manual-cblas -r 100  pd-20140727.234421-values-A4-mpi-manual-6.txt pd-20140727.234421-data-A4-mpi-manual.dat
+RUNNING :	./A4-mpi-manual-cblas -r 100  pd-20140727.234421-values-A4-mpi-manual-7.txt pd-20140727.234421-data-A4-mpi-manual.dat
+RUNNING :	./A4-mpi-manual-cblas -r 100  pd-20140727.234421-values-A4-mpi-manual-8.txt pd-20140727.234421-data-A4-mpi-manual.dat
+RUNNING :	./A4-mpi-manual-cblas -r 100  pd-20140727.234421-values-A4-mpi-manual-9.txt pd-20140727.234421-data-A4-mpi-manual.dat
+RUNNING :	./A4-mpi-manual-cblas -r 100  pd-20140727.234421-values-A4-mpi-manual-10.txt pd-20140727.234421-data-A4-mpi-manual.dat
+RUNNING :	./A4-mpi-manual-cblas -r 100  pd-20140727.234421-values-A4-mpi-manual-11.txt pd-20140727.234421-data-A4-mpi-manual.dat

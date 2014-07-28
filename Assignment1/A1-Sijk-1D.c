@@ -249,7 +249,8 @@ int main ( int argc, char *argv[] )
     fprintf(stdout,"# RESULTS : simple manual for simple manual Straightforward IJK ... \n");
     fprintf(fp_matrix, "# Initialize matrix <%d> x <%d> |C| for simple manual Straightforward IJK ... \n", nx, ny);
     init_matrix_zero(C, nx, ny);
-    print_matrix(C, nx, ny, fp_matrix);    gettimeofday(&tv1, &tz);
+    print_matrix(C, nx, ny, fp_matrix);
+    gettimeofday(&tv1, &tz);
     for (ni=0; ni<nx; ni++)
     {
         for (nj=0; nj<ny; nj++)

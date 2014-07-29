@@ -43,7 +43,7 @@ void usage ()
     fprintf(stdout," \t \t<-i> \tinitialize |A| & |B| _incrementally_ with <column> value and |C| with '0' \n");
     fprintf(stdout," \t2. \t[N] \tmax size of each matrix, if invalid defaults to 1,000 \n");
     fprintf(stdout," \t3. \t<matrix contents file>.txt\n \t \tname of .txt file to store values of matrices |A| |B| & |C| \n");
-    fprintf(stdout," \t4. \t<timing .dat file> .dat \n \t \tname of .dat file to contain time to complete each iteration \n \n");
+    fprintf(stdout," \t4. \t<timing .dat file> .dat \n \t \tname of .dat file to contain time to complete for each iteration \n \n");
     fprintf(stdout,"\tMANUAL \tStraight-forward IJK & DGEMM computations only \n");
     fprintf(stdout,"\tSOLO \tStraight-forward IJK & pThreads computations only \n \n");
     exit(0);

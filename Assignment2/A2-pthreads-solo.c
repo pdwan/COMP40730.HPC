@@ -57,8 +57,9 @@ void usage ()
     fprintf(stdout,"\nWHERE :\t1. \t<-r> \tinitialize |A| & |B| with _random_ numbers and |C| with '0' \n");
     fprintf(stdout," \t \t<-i> \tinitialize |A| & |B| _incrementally_ with <column> value and |C| with '0' \n");
     fprintf(stdout," \t2. \t[N] \tmax size of each matrix, if invalid defaults to 1,000 \n");
-    fprintf(stdout," \t3. \t<matrix contents file>.txt\n \t \tname of .txt file to store values of matrices |A| |B| & |C| \n");
-    fprintf(stdout," \t4. \t<timing .dat file> .dat \n \t \tname of .dat file to contain time to complete for each iteration \n \n");
+    fprintf(stdout," \t3. \t[T] \tnumber of threads applicable, if invalid defaults to 1,00 \n");
+    fprintf(stdout," \t4. \t<matrix contents file>.txt\n \t \tname of .txt file to store values of matrices |A| |B| & |C| \n");
+    fprintf(stdout," \t5. \t<timing .dat file> .dat \n \t \tname of .dat file to contain time to complete for each iteration \n \n");
     fprintf(stdout,"\tMANUAL \tStraight-forward IJK & DGEMM computations only \n");
     fprintf(stdout,"\tSOLO \tStraight-forward IJK & pThreads computations only \n \n");
     exit(0);
@@ -66,13 +67,13 @@ void usage ()
 
 int validate_if_file_exists(char * fn)
 {
-    FILE *fp = fopen(fn, "r") ; 
+    FILE *fp = fopen(fn, "r"); 
     if (fp !=  NULL)
     {
-        fclose(fp) ; 
-        return 1 ;       // file exists
+        fclose(fp); 
+        return 1;       // file exists
     }
-    return 0 ;           // files does not exist
+    return 0;           // files does not exist
 }
 
 double* allocate_memory_matrix (int rows, int cols)
@@ -152,37 +153,37 @@ void initialize_data_file_contents (FILE *fp)
     fprintf(fp, "# --------------------------------------------------------------------------------------------------\n# \n");
     fprintf(fp, "# Program :\tA2-pthreads-solo \n# where :\t.dat contains timing data & .txt contains matrix values \n# \n");
     fprintf(fp, "# --------------------------------------------------------------------------------------------------\n# \n");
-    fprintf(fp, "# |Matrix| \tTime/manual \tInf Norm/manual \tTime/dgemm \tInf Norm/dgemm \n# \n");
+    fprintf(fp, "# |Matrix| \t|Threads| \tTime/manual \tInf Norm/manual \tTime/pThreads \tInf Norm/pThreads \n# \n");
 }
 
 //  manual calculation
 double multipy_abc_manual(double *matrix_A, double *matrix_B, double *matrix_C, int rows, int cols)
 {
-    int ni, nj, nk ; 
+    int ni, nj, nk; 
     
-    for (ni=0 ; ni<rows ; ni++)
+    for (ni=0; ni<rows; ni++)
     {
-        for (nj=0 ; nj<cols ; nj++)
+        for (nj=0; nj<cols; nj++)
         {
-            double sum = 0.0 ; 
-            for (nk=0 ; nk<rows ; nk++)
+            double sum = 0.0; 
+            for (nk=0; nk<rows; nk++)
             {
-                sum+= (matrix_A[(ni*rows)+nk]) * (matrix_B[(nk*rows)+nj]) ; 
+                sum+= (matrix_A[(ni*rows)+nk]) * (matrix_B[(nk*rows)+nj]); 
             }
-            matrix_C[(ni*rows)+nj] = sum ; 
+            matrix_C[(ni*rows)+nj] = sum; 
         }
     }
-double row_norm =0.0, inf_norm =0.0 ; 
-    for (ni=0 ; ni<rows ; ni++)
+double row_norm =0.0, inf_norm =0.0; 
+    for (ni=0; ni<rows; ni++)
     {
-        row_norm =0.0 ; 
-        for (nj=0 ; nj<rows ; nj++)
+        row_norm =0.0; 
+        for (nj=0; nj<rows; nj++)
         {
-            row_norm += matrix_C[(ni*rows) +nj] ; 
+            row_norm += matrix_C[(ni*rows) +nj]; 
         }
-        inf_norm = (inf_norm < row_norm) ? row_norm : inf_norm ; 
+        inf_norm = (inf_norm < row_norm) ? row_norm : inf_norm; 
     }
-    return inf_norm ; 
+    return inf_norm; 
 }
 
 // pthreads calculation
@@ -202,7 +203,7 @@ void *pthread_matrix_slice_multiply(void *arg)
         double row_sum=0.;
         for (nj = 0; nj < nx; nj++)
         {
-            row_sum += *(slice->sliceC + nj * nx + ni);
+            row_sum += *(slice->sliceC + (ni*nx) + nj);
         }
         if  (row_sum > slice_norm)
         {
@@ -218,14 +219,14 @@ void *pthread_matrix_slice_multiply(void *arg)
     pthread_exit(NULL);
 }
 
-nt main (int argc, char *argv[])
+int main (int argc, char *argv[])
 {
 
 //  define variables
     struct timeval tv1, tv2;
     struct timezone tz;
     int increment_or_random = 0;    // increment enabled by default
-    int max_num_args = 5;
+    int max_num_args = 6;
     char filename_matrix[60];
     char filename_timing[60];
     int MAXN = 1000;
@@ -311,11 +312,11 @@ nt main (int argc, char *argv[])
     fprintf(stdout, "\n# RUNNING :\t%s %.2s %d %d \n", argv[0], init_type, nx, nt);
 
 //  CREATE & INITIALIZE :: matrices allA & allB & allC and output results to matrix file for reference
-    fprintf(stdout, "# ALLOCATE :\tmatrices |allA|, |allB| ... \n") ; 
-    fprintf(fp_matrix, "\n# ALLOCATE :\tmatrices |allA|, |allB| ... \n") ; 
-    double *allA = allocate_memory_matrix(nx, ny);
-    double *allB = allocate_memory_matrix(nx, ny);
-    double *allC = allocate_memory_matrix(nx, ny);
+    fprintf(stdout, "# ALLOCATE :\tmatrices |allA|, |allB| ... \n"); 
+    fprintf(fp_matrix, "\n# ALLOCATE :\tmatrices |allA|, |allB| ... \n"); 
+    allA = allocate_memory_matrix(nx, ny);
+    allB = allocate_memory_matrix(nx, ny);
+    allC = allocate_memory_matrix(nx, ny);
     fprintf(stdout,"# INITIALIZE :\t|allA| & |allB| ... \n");
     fprintf(fp_matrix, "# INITIALIZE :\t|allA| & |allB| ... \n");
     if (increment_or_random == 1) 
@@ -338,26 +339,26 @@ nt main (int argc, char *argv[])
     
 //  MANUAL execution : calculate |allC| and infinity norm for resulting |allC|
     fprintf(stdout,"# INITIALIZE :\t<%d> x <%d> matrix |allC| for Straight-forward IJK manual computation ... \n", nx, ny);
-    fprintf(fp_matrix, "# INITIALIZE :\t<%d> x <%d> matrix |allC| for Straight-forward IJK manual computation ... \n", nx, ny) ; 
-    initialize_matrix_zero(allC, nx, ny) ; 
-    print_matrix(allC, nx, ny, fp_matrix) ; 
-    gettimeofday(&tv1, &tz) ; 
-    double manual_norm = multipy_abc_manual(allA, allB, allC, nx, ny) ; 
-    gettimeofday(&tv2, &tz) ; 
-    double manual_elapsed = (double) (tv2.tv_sec - tv1.tv_sec) + (double) (tv2.tv_usec - tv1.tv_usec) * 1.e-6 ; 
-    fprintf(fp_matrix, "# RESULTS :\tmanual Straight-forward IJK calculation ... \n") ; 
-    fprintf(fp_matrix, "# \t\tComputed Matrix [%d] x [%d] |allC| ... \n", nx, ny) ; 
-    print_matrix(allC, nx, ny, fp_matrix) ;     
-    fprintf(fp_matrix, "# \t\tMatrix |allC| calculated in [%f] seconds and has infinity norm of [%.1f] ... \n", manual_elapsed, manual_norm) ; 
-    fprintf(stdout, "# RESULTS :\tmanual Straight-forward IJK calculation ... \n") ; 
-    fprintf(stdout, "# \t\tMatrix |allC| calculated in [%f] seconds and has infinity norm of [%.1f] ... \n", manual_elapsed, manual_norm) ; 
+    fprintf(fp_matrix, "# INITIALIZE :\t<%d> x <%d> matrix |allC| for Straight-forward IJK manual computation ... \n", nx, ny); 
+    initialize_matrix_zero(allC, nx, ny); 
+    print_matrix(allC, nx, ny, fp_matrix); 
+    gettimeofday(&tv1, &tz); 
+    double manual_norm = multipy_abc_manual(allA, allB, allC, nx, ny); 
+    gettimeofday(&tv2, &tz); 
+    double manual_elapsed = (double) (tv2.tv_sec - tv1.tv_sec) + (double) (tv2.tv_usec - tv1.tv_usec) * 1.e-6; 
+    fprintf(fp_matrix, "# RESULTS :\tmanual Straight-forward IJK calculation ... \n"); 
+    fprintf(fp_matrix, "# \t\tComputed Matrix [%d] x [%d] |allC| ... \n", nx, ny); 
+    print_matrix(allC, nx, ny, fp_matrix);     
+    fprintf(fp_matrix, "# \t\tMatrix |allC| calculated in [%f] seconds and has infinity norm of [%.1f] ... \n", manual_elapsed, manual_norm); 
+    fprintf(stdout, "# RESULTS :\tmanual Straight-forward IJK calculation ... \n"); 
+    fprintf(stdout, "# \t\tMatrix |allC| calculated in [%f] seconds and has infinity norm of [%.1f] ... \n", manual_elapsed, manual_norm); 
 
 
 //  PTHREADS execution : calculate |allC| and infinity norm for resulting |allC|    
-    fprintf(stdout,"# INITIALIZE :\t|allC| for BLAS/ATLAS computation ... \n");
-    fprintf(fp_matrix, "# INITIALIZE :\t<%d> x <%d> matrix |allC| for BLAS/ATLAS computation ... \n", nx, ny) ; 
-    initialize_matrix_zero(allC, nx, ny) ; 
-    print_matrix(allC, nx, ny, fp_matrix) ; 
+    fprintf(stdout,"# INITIALIZE :\t|allC| for pThreads computation ... \n");
+    fprintf(fp_matrix, "# INITIALIZE :\t<%d> x <%d> matrix |allC| pThreads computation ... \n", nx, ny); 
+    initialize_matrix_zero(allC, nx, ny); 
+    print_matrix(allC, nx, ny, fp_matrix); 
     gettimeofday(&tv1, &tz);
     working_thread = malloc(nt * sizeof(pthread_t));
     slice = malloc(nt * sizeof(matrix_slice));
@@ -377,21 +378,26 @@ nt main (int argc, char *argv[])
     }
     gettimeofday(&tv2, &tz);
     double pthread_elapsed = (double) (tv2.tv_sec-tv1.tv_sec) + (double) (tv2.tv_usec-tv1.tv_usec) * 1.e-6;
-    printf("elapsed time: %f \n", pthread_elapsed);   
-    printf("row sum norm is %f \n", pthread_norm);  
 
-//  OUTPUT :: results to stdout & .dat file : |Matrix| ||inf norm/manual || Time/manual || infinity norm || Time / dgemm
-    fprintf(stdout,"# SUMMARY :\t|Matrix|  \tTime/manual \tInf Norm/manual \tTime/dgemm \tInf Norm/dgemm \n");
-    fprintf(stdout,"# \t\t%d \t\t%f \t%.1f \t\t%f \t%.1f \n", nx, manual_elapsed, manual_norm, dgemm_elapsed, dgemm_norm);
-    fprintf(fp_timing, "%d \t%f \t%.1f \t%f \t%.1f \n", nx, manual_elapsed, manual_norm, dgemm_elapsed, dgemm_norm);
+    fprintf(fp_matrix, "# RESULTS :\tpThreads computation ... \n"); 
+    fprintf(fp_matrix, "# \t\tComputed Matrix [%d] x [%d] |allC| ... \n", nx, ny); 
+    print_matrix(allC, nx, ny, fp_matrix);     
+    fprintf(fp_matrix, "# \t\tMatrix |allC| calculated in [%f] seconds and has infinity norm of [%.1f] ... \n", pthread_elapsed, pthread_norm); 
+    fprintf(stdout, "# RESULTS :\tpThreads computation ... \n"); 
+    fprintf(stdout, "# \t\tMatrix |allC| calculated in [%f] seconds and has infinity norm of [%.1f] ... \n", pthread_elapsed, pthread_norm); 
+    
+//  OUTPUT :: results to stdout & .dat file
+    fprintf(stdout,"# SUMMARY :\t|Matrix| \t|Threads| \tTime/manual \tInf Norm/manual \tTime/pThreads \tInf Norm/pThreads \n");
+    fprintf(stdout,"# \t\t%d \t\t%d \t\t%f \t%.1f \t\t%f \t%.1f \n", nx, nt, manual_elapsed, manual_norm, pthread_elapsed, pthread_norm);
+    fprintf(fp_timing, "%d \t%d \t%f \t%.1f \t%f \t%.1f \n", nx, nt, manual_elapsed, manual_norm, pthread_elapsed, pthread_norm);
    	
 //  CLEANUP & close files
     fprintf(stdout,"# CLEAN-UP ... \n");
     deallocate_matrix_memory(allA);
     deallocate_matrix_memory(allB);
     deallocate_matrix_memory(allC);    
-    deallocate_matrix_memory(working_thread);
-    deallocate_matrix_memory(slice);
+    free(working_thread);
+    free(slice);
     fclose(fp_matrix);
     fclose(fp_timing);
     return 0;

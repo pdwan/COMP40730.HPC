@@ -24,7 +24,7 @@ buildSolo="false"
 initRandom="false"
 initIncrement="false"
 matrixEnabled="false"
-defaultMatrixRange="false"
+defaultValuesRange="false"
 let matrixSize=0
 let maxMatrixSize=1000 
 let threadSize=0
@@ -107,8 +107,7 @@ compile_pthreads()
 {
     localProgramToCompile=$1
     $_ECHO -e "pThreads :\t\tCompiling ${localProgramToCompile} \n"  >> ${stdLogFile}  
-    gcc -Wall -o ${localProgramToCompile}-atlas ${localProgramToCompile}.c -pthread
-    mpicc -Wall ${localProgramToCompile}.c -o ${localProgramToCompile}
+    cc -Wall -I/home/cs/khasanov/libs/CBLAS/src -o ${localProgramToCompile} ${localProgramToCompile}.c  /home/cs/khasanov/libs/cblas_LINUX.a  /usr/lib/libblas.a -lgfortran -pthread
 }
 
 # function : build applying dgemm cblas
@@ -159,7 +158,7 @@ algorithm_execute()
     localFileTime="$4"
     $_ECHO -e "RUNNING :\t${localCmd} ${localOptions} ${localFileMatrix} ${localFileTime}"  >> ${stdLogFile}
     # $_ECHO -e "DEBUG : RUNNING :\t${localCmd} ${localOptions} ${localFileMatrix} ${localFileTime}"
-    ${localCmd} ${localOptions} ${localFileMatrix} ${localFileTime}
+    ./${localCmd} ${localOptions} ${localFileMatrix} ${localFileTime}
 }
 
 # ##################################################################################
@@ -195,7 +194,7 @@ else
                 initIncrement="true"
                 ;;
             "-v" | "--values")
-                defaultMatrixRange="true"
+                defaultValuesRange="true"
                 ;;                    
             "-m" | "--matrix")
                 matrixEnabled="true"
@@ -228,10 +227,10 @@ else
 fi
 
 # process and validate parameter values for matrix sizes, if applicable
-if [ "${defaultMatrixRange}" == "true" ] && ( [ "${matrixEnabled}" == "true" ] || [ "${threadEnabled}" == "true" ]  ); then 
+if [ "${defaultValuesRange}" == "true" ] && ( [ "${matrixEnabled}" == "true" ] || [ "${threadEnabled}" == "true" ]  ) ; then 
     error 6 "<-m> & <-t> and <-v>"
 fi
-if  [ "${defaultMatrixRange}" == "true" ] && [ "${matrixEnabled}" == "false" ]  ; then
+if  [ "${defaultValuesRange}" == "true" ] &&  ( [ "${matrixEnabled}" == "false" ] || [ "${threadEnabled}" == "false" ]  ); then
 #   Matrix & pThreads - range 1
     declare -a NXArray=( 50 50 50 50 50 50 100 100 100 100 100 100 )
     declare -a NPArray=( 2 2 2 5 5 5 10 10 10 20 20 20 )
@@ -364,7 +363,7 @@ if  [ "${buildSolo}" == "true" ]  ; then
     	executeOptions=""
         if  [ "${compileUsingCblas}" == "false" ] ; then 
             if [ "${compileUsingAtlas}" == "false" ] ; then
-    	        compile_pthreads ${algorithmSolo}
+#    	        compile_pthreads ${algorithmSolo}
     	        algorithmSolo="${algorithmSolo}" # default
             fi 	        
         fi
@@ -375,9 +374,9 @@ if  [ "${buildSolo}" == "true" ]  ; then
     	for (( i = 0 ; i < ${#NXArray[@]} ; i++ )); do
     	    matrixFileSoloValues="${matrixFileSolo}-$i${txtSuffix}" # different file for each run
     	    init_log_file ${matrixFileSoloValues} 
-    	    executeOptions="${algorithmOptions} ${NXArray[$i]} "
-    	    # echo "DEBUG : algorithm_execute_pthreads  ./${algorithmSolo} ${executeOptions} ${matrixFileSoloValues} ${dataFileSoloTiming}"
-    	    algorithm_execute_pthreads "${algorithmSolo}" "${executeOptions}" "${matrixFileSoloValues}" "${dataFileSoloTiming}" "${valueNP}"
+    	    executeOptions="${algorithmOptions} ${NXArray[$i]} ${NPArray[$i]} "
+    	    # echo "DEBUG : algorithm_execute  ./${algorithmSolo} ${executeOptions} ${matrixFileSoloValues} ${dataFileSoloTiming}"
+    	    algorithm_execute "${algorithmSolo}" "${executeOptions}" "${matrixFileSoloValues}" "${dataFileSoloTiming}" "${valueNP}"
     	done
     fi
 fi 

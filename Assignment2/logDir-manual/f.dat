@@ -1,0 +1,10 @@
+# --------------------------------------------------------------------------------------------------
+# 
+# Program :	A2-pthreads-solo 
+# where :	.dat contains timing data & .txt contains matrix values 
+# 
+# --------------------------------------------------------------------------------------------------
+# 
+# |Matrix| 	|Threads| 	Time/manual 	Inf Norm/manual 	Time/pThreads 	Inf Norm/pThreads 
+# 
+10 	2 	0.000014 	3025.0 	0.000532 	3025.0 

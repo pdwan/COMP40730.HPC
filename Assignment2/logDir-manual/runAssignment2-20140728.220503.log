@@ -1,0 +1,14 @@
+CBLAS :		Compiling A2-pthreads-manual using cblas 
+
+RUNNING :	./A2-pthreads-manual-cblas -i 50  20140728.220503-values-A2-pthreads-manual-0.txt 20140728.220503-data-A2-pthreads-manual.dat
+RUNNING :	./A2-pthreads-manual-cblas -i 50  20140728.220503-values-A2-pthreads-manual-1.txt 20140728.220503-data-A2-pthreads-manual.dat
+RUNNING :	./A2-pthreads-manual-cblas -i 50  20140728.220503-values-A2-pthreads-manual-2.txt 20140728.220503-data-A2-pthreads-manual.dat
+RUNNING :	./A2-pthreads-manual-cblas -i 50  20140728.220503-values-A2-pthreads-manual-3.txt 20140728.220503-data-A2-pthreads-manual.dat
+RUNNING :	./A2-pthreads-manual-cblas -i 50  20140728.220503-values-A2-pthreads-manual-4.txt 20140728.220503-data-A2-pthreads-manual.dat
+RUNNING :	./A2-pthreads-manual-cblas -i 50  20140728.220503-values-A2-pthreads-manual-5.txt 20140728.220503-data-A2-pthreads-manual.dat
+RUNNING :	./A2-pthreads-manual-cblas -i 100  20140728.220503-values-A2-pthreads-manual-6.txt 20140728.220503-data-A2-pthreads-manual.dat
+RUNNING :	./A2-pthreads-manual-cblas -i 100  20140728.220503-values-A2-pthreads-manual-7.txt 20140728.220503-data-A2-pthreads-manual.dat
+RUNNING :	./A2-pthreads-manual-cblas -i 100  20140728.220503-values-A2-pthreads-manual-8.txt 20140728.220503-data-A2-pthreads-manual.dat
+RUNNING :	./A2-pthreads-manual-cblas -i 100  20140728.220503-values-A2-pthreads-manual-9.txt 20140728.220503-data-A2-pthreads-manual.dat
+RUNNING :	./A2-pthreads-manual-cblas -i 100  20140728.220503-values-A2-pthreads-manual-10.txt 20140728.220503-data-A2-pthreads-manual.dat
+RUNNING :	./A2-pthreads-manual-cblas -i 100  20140728.220503-values-A2-pthreads-manual-11.txt 20140728.220503-data-A2-pthreads-manual.dat

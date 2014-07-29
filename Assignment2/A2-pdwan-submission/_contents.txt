@@ -1,0 +1,26 @@
+# manual implementation .c source and compiled files 
+.. / A2-pdwan-submission / A2-pthreads-manual.c
+.. / A2-pdwan-submission / A2-pthreads-manual-atlas
+.. / A2-pdwan-submission / A2-pthreads-manual-cblas
+
+# pthreads implementation .c source and compiled file 
+.. / A2-pdwan-submission / A2-pthreads-solo.c
+.. / A2-pdwan-submission / A2-pthreads-solo
+
+# script to run either multiple or single times 
+.. / A2-pdwan-submission / runAssignment2.sh
+
+# GNUplot scripts for sample results : see report for graphs
+.. / A2-pdwan-submission / GraphPlot / *.gp
+
+# selection of log files for <matrix contents>.txt and <time taken>.dat files
+# also .dat files used for graphs
+.. / A2-pdwan-submission / logDir / *.dat 
+.. / A2-pdwan-submission / logDir / *.txt # samples only - too many otherwise
+
+# copies of data used in report - included for reference
+.. / A2-pdwan-submission / Reference / *.pdf
+
+# report on assignment
+.. / A2-pdwan-submission / Report / COMP40730.HPC-Assignment2-pdwan.pdf
+
